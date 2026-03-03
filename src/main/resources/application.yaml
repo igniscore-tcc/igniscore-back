@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: igniscore
+
+  datasource:
+    url: jdbc:postgresql://ep-shy-math-acsn16g6-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require
+    username: neondb_owner
+    password: npg_U6WsYuqMV5Sb
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
