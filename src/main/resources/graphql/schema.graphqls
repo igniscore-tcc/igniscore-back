@@ -8,8 +8,17 @@ type Company {
     phone: String!
 }
 
+type User {
+    id: ID
+    name: String!
+    email: String!
+    role: String
+    company: Company
+}
+
 type Query {
     companies: [Company!]!
+    users: [User!]!
 }
 
 type Mutation {
@@ -21,4 +30,10 @@ type Mutation {
         email: String!,
         phone: String!
     ): Company!
+
+    createUser(
+        name: String!,
+        email: String!,
+        password: String!
+    ): User!
 }

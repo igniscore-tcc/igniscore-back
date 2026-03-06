@@ -4,6 +4,7 @@ import com.igniscore.api.model.User;
 import com.igniscore.api.service.UserService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class UserController {
         this.service = service;
     }
 
+    @QueryMapping
     public List<User> users(){
         return service.findAll();
     }
