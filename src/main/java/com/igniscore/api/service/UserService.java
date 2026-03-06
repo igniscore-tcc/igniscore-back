@@ -23,6 +23,7 @@ public class UserService {
         user.setName(name);
         user.setEmail(email);
         user.setPassword(password);
+        user.setRole("employee");
 
         return repository.save(user);
     }
