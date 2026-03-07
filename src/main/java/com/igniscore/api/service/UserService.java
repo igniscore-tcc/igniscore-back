@@ -18,11 +18,13 @@ public class UserService {
         return repository.findAll();
     }
 
-    public User create(String name, String email, String password ) {
+    public User create(String name, String email, String password) {
         User user = new User();
         user.setName(name);
         user.setEmail(email);
+
         user.setPassword(password);
+
         user.setRole("employee");
 
         return repository.save(user);
