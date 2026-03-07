@@ -48,6 +48,12 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Spring security -->
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
 		<!-- Testes -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

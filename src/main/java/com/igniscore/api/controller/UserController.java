@@ -19,14 +19,14 @@ public class UserController {
     }
 
     @QueryMapping
-    public List<User> users(){
+    public List<User> users() {
         return service.findAll();
     }
 
     @MutationMapping
     public User createUser(@Argument String name,
-                           @Argument String email,
-                           @Argument String password) {
+            @Argument String email,
+            @Argument String password) {
         return service.create(name, email, password);
     }
 
