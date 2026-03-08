@@ -19,4 +19,4 @@ spring:
 api:
   security:
     token:
-      secret: ${JWT_SECRET:my-secret-key}
+      secret: ${JWT_SECRET:Z9f#7vL!q2Xw@8sP6m^G3dR0bT&yH1uJ$kE4nV*oC5aQzW%rF}
