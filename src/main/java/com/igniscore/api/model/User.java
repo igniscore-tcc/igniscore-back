@@ -32,8 +32,9 @@ public class User implements UserDetails {
     @Column(name = "role_user", nullable = false)
     private UserRole role;
 
-    @Column(name = "fk_id_company")
-    private Integer company;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_id_company")
+    private Company company;
 
     public Integer getId() { return id; }
     public String getName() { return name; }
@@ -44,13 +45,13 @@ public class User implements UserDetails {
     @NullMarked
     public String getUsername() { return email; }
     public UserRole getRole() { return role; }
-    public Integer getCompany() { return company; }
+    public Company getCompany() { return company; }
 
     public void setName(String name) { this.name = name; }
     public void setEmail(String email) { this.email = email; }
     public void setPassword(String password) { this.password = password; }
     public void setRole(UserRole role) { this.role = role; }
-    public void setCompany(Integer company) { this.company = company; }
+    public void setCompany(Company company) { this.company = company; }
 
     @Override
     @NullMarked
