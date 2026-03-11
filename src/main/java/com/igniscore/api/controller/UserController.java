@@ -23,6 +23,11 @@ public class UserController {
         return service.findAll();
     }
 
+    @QueryMapping
+    public User user(@Argument Integer id) {
+        return service.finUserId(id);
+    }
+
     @MutationMapping
     public User updateUserCompany(@Argument Integer id, @Argument Integer company) {
         return service.updateUserCompany(id, company);

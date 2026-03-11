@@ -13,11 +13,13 @@ type User {
     name: String!
     email: String!
     role: String
+    company: Company
 }
 
 type Query {
     companies: [Company!]!
     users: [User!]!
+    user(id: ID!): User
 }
 
 type Mutation {
