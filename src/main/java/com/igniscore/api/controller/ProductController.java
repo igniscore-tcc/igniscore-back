@@ -19,7 +19,7 @@ public class ProductController {
     }
 
     @MutationMapping
-    public Product createProduct(@Argument String name, @Argument String type, @Argument Date validity, @Argument String lot, @Argument Float price){
-        return service.createProduct(name, type, validity, lot, price);
+    public Product createProduct(@Argument String name, @Argument String type, @Argument Date validity, @Argument String lot, @Argument Float price, @Argument Integer company_id){
+        return service.createProduct(name, type, validity, lot, price, company_id);
     }
 }
