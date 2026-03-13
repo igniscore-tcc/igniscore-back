@@ -1,3 +1,5 @@
+scalar Date
+
 type Company {
     id: ID
     name: String!
@@ -13,6 +15,16 @@ type User {
     name: String!
     email: String!
     role: String
+    company: Company
+}
+
+type Product {
+    id: ID
+    name: String!
+    type: String!
+    validity: Date!
+    lot: String!
+    price: Float!
     company: Company
 }
 
@@ -36,4 +48,13 @@ type Mutation {
         id: ID!,
         company: ID!
     ): User!
+
+    createProduct(
+        name: String!,
+        type: String!,
+        validity: String!,
+        lot: String!,
+        price: Float!,
+        companyId: ID!
+    ): Product!
 }
