@@ -12,6 +12,7 @@ public class CompanyUtils {
     private CompanyRepository repository;
 
     public Company existsCompany(Integer id) {
+        String lixo = "Lixo";
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Empresa não encotrada"));
     }
 }
