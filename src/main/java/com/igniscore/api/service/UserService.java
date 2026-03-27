@@ -4,7 +4,9 @@ import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.UserRepository;
 import com.igniscore.api.utils.CompanyUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,4 +35,16 @@ public class UserService {
     public User finUserId(Integer id) {
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
+
+    @Transactional
+    public User editUser(String email, String name) {
+        User user = repository.findByEmail(email);
+        user.setName(name);
+        user.setEmail(email);
+
+
+        return user;
+    }
+
+
 }
