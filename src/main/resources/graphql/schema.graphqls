@@ -44,6 +44,11 @@ type Mutation {
         phone: String!
     ): Company!
 
+    editUser(
+        email: String!,
+        name: String!
+    ): User!
+
     updateUserCompany(
         id: ID!,
         company: ID!

@@ -32,4 +32,9 @@ public class UserController {
     public User updateUserCompany(@Argument Integer id, @Argument Integer company) {
         return service.updateUserCompany(id, company);
     }
+
+    @MutationMapping
+    public User editUser(@Argument String email, @Argument String name){
+        return service.editUser(email, name);
+    }
 }
