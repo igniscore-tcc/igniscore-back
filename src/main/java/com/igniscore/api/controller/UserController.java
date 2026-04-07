@@ -25,7 +25,7 @@ public class UserController {
 
     @QueryMapping
     public User user(@Argument Integer id) {
-        return service.finUserId(id);
+        return service.findUserId(id);
     }
 
     @MutationMapping
