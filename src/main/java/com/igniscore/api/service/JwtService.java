@@ -24,6 +24,7 @@ public class JwtService {
             return JWT.create()
                     .withIssuer("igniscore")
                     .withSubject(user.getEmail())
+                    .withClaim("companyId", user.getCompany() != null ? user.getCompany().getId() : null)
                     .withExpiresAt(getExpirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
@@ -41,6 +42,19 @@ public class JwtService {
                     .getSubject();
         } catch (JWTVerificationException exception) {
             return "";
+        }
+    }
+
+    public Integer getCompanyIdFromToken(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.require(algorithm)
+                    .withIssuer("igniscore")
+                    .build()
+                    .verify(token)
+                    .getClaim("companyId").asInt();
+        } catch (JWTVerificationException exception) {
+            return null;
         }
     }
 

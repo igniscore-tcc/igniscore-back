@@ -28,6 +28,16 @@ type Product {
     company: Company
 }
 
+type ProductOutput {
+    id: ID!
+    name: String!
+    type: String!
+    validity: Date!
+    lot: String!
+    price: Float!
+    company: Company
+}
+
 type Query {
     companies: [Company!]!
     users: [User!]!
@@ -59,7 +69,6 @@ type Mutation {
         type: String!,
         validity: Date!,
         lot: String!,
-        price: Float!,
-        companyId: ID!
-    ): Product!
+        price: Float!
+    ): ProductOutput!
 }
