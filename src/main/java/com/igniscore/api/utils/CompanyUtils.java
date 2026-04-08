@@ -14,4 +14,8 @@ public class CompanyUtils {
     public Company existsCompany(Integer id) {
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
     }
+
+    public Company loggedCompany(Integer id) {
+        return repository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
+    }
 }
