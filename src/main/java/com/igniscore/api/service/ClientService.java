@@ -2,9 +2,10 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
+import com.igniscore.api.model.User;
 import com.igniscore.api.repository.ClientRepository;
 import com.igniscore.api.utils.CompanyUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
@@ -12,30 +13,33 @@ import org.springframework.stereotype.Service;
 public class ClientService {
 
     private final ClientRepository repository;
+    private final CompanyUtils companyUtils;
 
-    public ClientService(ClientRepository repository) {
+    public ClientService(ClientRepository repository, CompanyUtils companyUtils) {
         this.repository = repository;
+        this.companyUtils = companyUtils;
     }
 
-    @Autowired
-    private CompanyUtils companyUtils;
+    public Client createClient(String name, String cnpj, String email, Integer number, String ie, String uf_ie, String obs) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
+            throw new RuntimeException("No authenticated user found");
+        }
 
-    public Client createClient(Client client, Integer companyId) {
+        Company company = companyUtils.loggedCompany(loggedUser.getCompany().getId());
 
-        Company company = companyUtils.existsCompany(companyId);
-        if (company == null) throw new RuntimeException("Company not found");
-
+        Client client = new Client();
+        client.setName(name);
+        client.setCnpj(cnpj);
+        client.setEmail(email);
+        client.setNumber(number);
+        client.setIe(ie);
+        client.setUfIe(uf_ie);
+        client.setObs(obs);
         client.setCompany(company);
 
-        //salva pra gerar ID
-        Client saved = repository.save(client);
+        repository.save(client);
 
-        //gera código
-        String codigo = "CLI-" + String.format("%04d", saved.getId());
-        saved.setCodigo(codigo);
-
-        //salva novamente com código
-        return repository.save(saved);
+        return client;
     }
-
 }

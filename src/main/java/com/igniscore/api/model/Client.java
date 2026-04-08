@@ -2,7 +2,7 @@ package com.igniscore.api.model;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
+//import java.time.LocalDate;
 
 @Entity
 @Table(name = "clients")
@@ -28,14 +28,14 @@ public class Client {
     @Column(name = "ie_client", nullable = false, unique = true)
     private String ie;
 
-    @Column(name = "ufIe_client", nullable = false, unique = true)
-    private String ufIe;
+    @Column(name = "uf_ie_client", nullable = false)
+    private String uf_ie;
 
-    @Column(name = "obs_client", nullable = false, unique = true)
+    @Column(name = "obs_client", nullable = true)
     private String obs;
 
-    @Column(name = "cod_client", nullable = false, unique = true)
-    private String cod;
+    //@Column(name = "cod_client", nullable = false, unique = true)
+    //private String cod;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_id_company")
@@ -66,12 +66,12 @@ public class Client {
     }
 
     public String getUfIe() {
-        return ufIe;
+        return uf_ie;
     }
 
-    public String codigo(){
+   /* public String codigo(){
         return cod;
-    }
+    } */
 
     public String getObs() {
         return obs;
@@ -105,7 +105,7 @@ public class Client {
         this.ie = ie;
     }
 
-    public void setUfIe(String ufIe) {this.ufIe = ufIe;}
+    public void setUfIe(String uf_ie) {this.uf_ie = uf_ie;}
 
     public void setObs(String obs) {this.obs = obs;}
 
@@ -113,7 +113,7 @@ public class Client {
         this.company = company;
     }
 
-    public void setCodigo(String codigo){this.cod = cod; }
+    /*public void setCodigo(String codigo){this.cod = cod; } */
 
 }
 
