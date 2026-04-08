@@ -32,7 +32,7 @@ public class UserService {
         return repository.save(user);
     }
 
-    public User finUserId(Integer id) {
+    public User findUserId(Integer id) {
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 

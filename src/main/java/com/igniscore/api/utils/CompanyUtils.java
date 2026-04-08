@@ -12,7 +12,7 @@ public class CompanyUtils {
     private CompanyRepository repository;
 
     public Company existsCompany(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Empresa não encotrada"));
+        return repository.findById(id).orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
     }
 
     public Company loggedCompany(Integer id) {
