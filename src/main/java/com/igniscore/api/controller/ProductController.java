@@ -1,14 +1,12 @@
 package com.igniscore.api.controller;
 
-import com.igniscore.api.model.Product;
-import com.igniscore.api.repository.ProductRepository;
+import com.igniscore.api.dto.ProductDTO;
 import com.igniscore.api.service.ProductService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Controller
 public class ProductController {
@@ -20,12 +18,11 @@ public class ProductController {
     }
 
     @MutationMapping
-    public Product createProduct(@Argument String name,
-                                 @Argument String type,
-                                 @Argument LocalDate validity,
-                                 @Argument String lot,
-                                 @Argument Float price,
-                                 @Argument Integer companyId) {
-        return service.createProduct(name, type, validity, lot, price, companyId);
+    public ProductDTO createProduct(@Argument String name,
+                                    @Argument String type,
+                                    @Argument LocalDate validity,
+                                    @Argument String lot,
+                                    @Argument Float price) {
+        return service.createProduct(name, type, validity, lot, price);
     }
 }

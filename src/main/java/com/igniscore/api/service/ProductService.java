@@ -1,29 +1,34 @@
 package com.igniscore.api.service;
 
+import com.igniscore.api.dto.CompanyDTO;
+import com.igniscore.api.dto.ProductDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.Product;
+import com.igniscore.api.model.User;
 import com.igniscore.api.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.igniscore.api.utils.CompanyUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Service
 public class ProductService {
     private final ProductRepository repository;
+    private final CompanyUtils companyUtils;
 
-    public ProductService(ProductRepository repository) {
+    public ProductService(ProductRepository repository, CompanyUtils companyUtils) {
         this.repository = repository;
+        this.companyUtils = companyUtils;
     }
 
-    @Autowired
-    private CompanyUtils companyUtils;
+    public ProductDTO createProduct(String name, String type, LocalDate validity, String lot, Float price) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
+            throw new RuntimeException("No authenticated user found");
+        }
 
-    public Product createProduct(String name, String type, LocalDate validity, String lot, Float price, Integer companyId) {
-        Company company = companyUtils.existsCompany(companyId);
-        if (company == null) throw new RuntimeException("Company not found");
+        Company company = companyUtils.loggedCompany(loggedUser.getCompany().getId());
 
         Product product = new Product();
         product.setName(name);
@@ -33,6 +38,33 @@ public class ProductService {
         product.setPrice(price);
         product.setCompany(company);
 
-        return repository.save(product);
+        Product savedProduct = repository.save(product);
+
+        return toDTO(savedProduct);
+    }
+
+    private ProductDTO toDTO(Product product) {
+        ProductDTO dto = new ProductDTO();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setType(product.getType());
+        dto.setValidity(product.getValidity());
+        dto.setLot(product.getLot());
+        dto.setPrice(product.getPrice());
+
+        Company company = product.getCompany();
+        if (company != null) {
+            CompanyDTO companyDTO = new CompanyDTO();
+            companyDTO.setId(company.getId());
+            companyDTO.setName(company.getName());
+            companyDTO.setCnpj(company.getCnpj());
+            companyDTO.setIe(company.getIe());
+            companyDTO.setUfIe(company.getUfIe());
+            companyDTO.setEmail(company.getEmail());
+            companyDTO.setPhone(company.getPhone());
+            dto.setCompany(companyDTO);
+        }
+
+        return dto;
     }
 }

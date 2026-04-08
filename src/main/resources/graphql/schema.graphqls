@@ -28,10 +28,33 @@ type Product {
     company: Company
 }
 
+type ProductOutput {
+    id: ID!
+    name: String!
+    type: String!
+    validity: Date!
+    lot: String!
+    price: Float!
+    company: Company
+}
+
+type Client {
+    id: ID
+    name: String!
+    cnpj: String!
+    email: String!
+    number: Int!
+    ie: String!
+    uf_ie: String!
+    obs: String
+    company: Company
+}
+
 type Query {
     companies: [Company!]!
     users: [User!]!
     user(id: ID!): User
+    client(id: ID!): Client
 }
 
 type Mutation {
@@ -59,7 +82,16 @@ type Mutation {
         type: String!,
         validity: Date!,
         lot: String!,
-        price: Float!,
-        companyId: ID!
-    ): Product!
+        price: Float!
+    ): ProductOutput!
+
+    createClient(
+        name: String!,
+        cnpj: String!,
+        email: String!,
+        number: Int!,
+        ie: String!,
+        uf_ie: String!,
+        obs: String
+    ): Client!
 }
