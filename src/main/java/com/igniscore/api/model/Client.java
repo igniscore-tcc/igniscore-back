@@ -34,6 +34,9 @@ public class Client {
     @Column(name = "obs_client", nullable = false, unique = true)
     private String obs;
 
+    @Column(name = "cod_client", nullable = false, unique = true)
+    private String cod;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_id_company")
     private Company company;
@@ -62,8 +65,12 @@ public class Client {
         return ie;
     }
 
-    public String ufIe() {
+    public String getUfIe() {
         return ufIe;
+    }
+
+    public String codigo(){
+        return cod;
     }
 
     public String getObs() {
@@ -105,6 +112,8 @@ public class Client {
     public void setCompany(Company company) {
         this.company = company;
     }
+
+    public void setCodigo(String codigo){this.cod = cod; }
 
 }
 

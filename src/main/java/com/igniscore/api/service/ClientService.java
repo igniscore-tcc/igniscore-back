@@ -2,13 +2,11 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
-import com.igniscore.api.model.User;
 import com.igniscore.api.repository.ClientRepository;
 import com.igniscore.api.utils.CompanyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class ClientService {
@@ -22,22 +20,22 @@ public class ClientService {
     @Autowired
     private CompanyUtils companyUtils;
 
-    public Client createClient(String name, String cnpj, String email, Integer number, String ie, String ufIe, String obs, Integer companyId) {
+    public Client createClient(Client client, Integer companyId) {
+
         Company company = companyUtils.existsCompany(companyId);
         if (company == null) throw new RuntimeException("Company not found");
 
-        Client client = new Client();
-        client.setName(name);
-        client.setCnpj(cnpj);
-        client.setEmail(email);
-        client.setNumber(number);
-        client.setIe(ie);
-        client.setUfIe(ufIe);
-        client.setObs(obs);
         client.setCompany(company);
 
-        return repository.save(client);
+        //salva pra gerar ID
+        Client saved = repository.save(client);
 
+        //gera código
+        String codigo = "CLI-" + String.format("%04d", saved.getId());
+        saved.setCodigo(codigo);
+
+        //salva novamente com código
+        return repository.save(saved);
     }
 
 }
