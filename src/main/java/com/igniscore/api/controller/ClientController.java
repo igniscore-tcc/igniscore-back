@@ -47,4 +47,9 @@ public class ClientController {
     public List<Client> clients() {
         return service.findAll();
     }
+
+    @QueryMapping
+    public Client client(@Argument Integer id){
+        return service.findClient(id);
+    }
 }

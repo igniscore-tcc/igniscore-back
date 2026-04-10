@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -82,4 +83,23 @@ public class ClientService {
 
         return repository.findByCompany(company);
     }
+
+    public Client findClient(Integer id) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
+            throw new RuntimeException("No authenticated user found");
+        }
+
+        Company company = companyUtils.loggedCompany(loggedUser.getCompany().getId());
+
+        Client client = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Client não encontrado"));
+
+        if(client.getCompany() != company) {
+            throw new RuntimeException("Esse cliente não pertence a essa empresa");
+        }
+
+        return client;
+    }
+
 }
