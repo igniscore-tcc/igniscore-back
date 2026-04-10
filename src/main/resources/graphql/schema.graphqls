@@ -55,6 +55,7 @@ type Query {
     users: [User!]!
     user(id: ID!): User
     client(id: ID!): Client
+    clients: [Client!]!
 }
 
 type Mutation {
