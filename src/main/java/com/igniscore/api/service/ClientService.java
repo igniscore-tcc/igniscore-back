@@ -42,4 +42,31 @@ public class ClientService {
 
         return client;
     }
+
+    public Client updateClient(String name, String cnpj, String email, Integer number, String ie, String uf_ie, String obs, Integer id){
+
+        Client client = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente nao encontrado"));
+
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
+            throw new RuntimeException("No authenticated user found");
+        }
+
+        Company company = companyUtils.loggedCompany(loggedUser.getCompany().getId());
+
+        if (!client.getCompany().getId().equals(company.getId())) {
+            throw new RuntimeException("Acesso negado");
+        }
+
+        if (name != null) client.setName(name);
+        if (cnpj != null) client.setCnpj(cnpj);
+        if (email != null) client.setEmail(email);
+        if (number != null) client.setNumber(number);
+        if (ie != null) client.setIe(ie);
+        if (uf_ie != null) client.setUfIe(uf_ie);
+        if (obs != null) client.setObs(obs);
+
+        return repository.save(client);
+    }
 }
