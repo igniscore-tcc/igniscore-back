@@ -96,12 +96,13 @@ type Mutation {
     ): Client!
 
     updateClient(
-        name: String!,
-        cnpj: String!,
-        email: String!,
-        number: Int!,
-        ie: String!,
-        uf_ie: String!,
+        id: ID!,
+        name: String,
+        cnpj: String,
+        email: String,
+        number: Int,
+        ie: String,
+        uf_ie: String,
         obs: String
     ): Client!
 }
