@@ -106,4 +106,8 @@ type Mutation {
         uf_ie: String,
         obs: String
     ): Client!
+
+    deleteClient(
+        id: ID!
+    ): String!
 }
