@@ -45,18 +45,10 @@ public class ClientService {
     }
 
     public Client updateClient(String name, String cnpj, String email, Integer number, String ie, String uf_ie, String obs, Integer id){
-
         Client client = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente nao encontrado"));
 
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
-            throw new RuntimeException("No authenticated user found");
-        }
-
-        Company company = companyUtils.loggedCompany(loggedUser.getCompany().getId());
-
-        if (!client.getCompany().getId().equals(company.getId())) {
+        if (!client.getCompany().getId().equals(getCompany().getId())) {
             throw new RuntimeException("Acesso negado");
         }
 
@@ -72,28 +64,14 @@ public class ClientService {
     }
 
     public List<Client> findAll() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
-            throw new RuntimeException("No authenticated user found");
-        }
-
-        Company company = companyUtils.loggedCompany(loggedUser.getCompany().getId());
-
-        return repository.findByCompany(company);
+        return repository.findByCompany(getCompany());
     }
 
     public Client findClient(Integer id) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
-            throw new RuntimeException("No authenticated user found");
-        }
-
-        Company company = companyUtils.loggedCompany(loggedUser.getCompany().getId());
-
         Client client = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Client não encontrado"));
 
-        if(client.getCompany() != company) {
+        if(client.getCompany() != getCompany()) {
             throw new RuntimeException("Esse cliente não pertence a essa empresa");
         }
 
@@ -101,26 +79,24 @@ public class ClientService {
     }
 
     public String deleteClient(Integer id) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
-            throw new RuntimeException("No authenticated user found");
-        }
-
-        Company company = companyUtils.loggedCompany(loggedUser.getCompany().getId());
-
         Client client = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Client não encontrado"));
 
-        if(client.getCompany() != company) {
+        if(client.getCompany() != getCompany()) {
             throw new RuntimeException("Esse cliente não pertence a essa empresa");
         }
-
-
         repository.delete(client);
 
         return "Deletado!";
     }
 
+    public Company getCompany() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
+            throw new RuntimeException("No authenticated user found");
+        }
 
+        return companyUtils.loggedCompany(loggedUser.getCompany().getId());
+    }
 
 }
