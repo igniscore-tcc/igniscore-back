@@ -52,4 +52,9 @@ public class ClientController {
     public Client client(@Argument Integer id){
         return service.findClient(id);
     }
+
+    @MutationMapping
+    public String deleteClient(@Argument Integer id){
+        return service.deleteClient(id);
+    }
 }
