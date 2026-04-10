@@ -8,6 +8,8 @@ import com.igniscore.api.utils.CompanyUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class ClientService {
@@ -68,5 +70,16 @@ public class ClientService {
         if (obs != null) client.setObs(obs);
 
         return repository.save(client);
+    }
+
+    public List<Client> findAll() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
+            throw new RuntimeException("No authenticated user found");
+        }
+
+        Company company = companyUtils.loggedCompany(loggedUser.getCompany().getId());
+
+        return repository.findByCompany(company);
     }
 }
