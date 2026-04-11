@@ -23,11 +23,11 @@ public class ClientController {
     public Client createClient(@Argument String name,
                                @Argument String cnpj,
                                @Argument String email,
-                               @Argument Integer number,
+                               @Argument String phone,
                                @Argument String ie,
-                               @Argument String uf_ie,
+                               @Argument String ufIe,
                                @Argument String obs) {
-        return service.createClient(name, cnpj, email, number, ie, uf_ie, obs);
+        return service.createClient(name, cnpj, email, phone, ie, ufIe, obs);
     }
 
 
@@ -36,11 +36,11 @@ public class ClientController {
                                @Argument String name,
                                @Argument String cnpj,
                                @Argument String email,
-                               @Argument Integer number,
+                               @Argument String phone,
                                @Argument String ie,
-                               @Argument String uf_ie,
+                               @Argument String ufIe,
                                @Argument String obs) {
-        return service.updateClient(name, cnpj, email, number, ie, uf_ie, obs, id);
+        return service.updateClient(name, cnpj, email, phone, ie, ufIe, obs, id);
     }
 
     @QueryMapping

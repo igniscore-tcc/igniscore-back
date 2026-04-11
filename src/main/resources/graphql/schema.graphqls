@@ -39,13 +39,14 @@ type ProductOutput {
 }
 
 type Client {
-    id: ID
+    id: ID!
+    number: Int!
     name: String!
     cnpj: String!
     email: String!
-    number: Int!
-    ie: String!
-    uf_ie: String!
+    phone: String
+    ie: String
+    ufIe: String
     obs: String
     company: Company
 }
@@ -90,9 +91,9 @@ type Mutation {
         name: String!,
         cnpj: String!,
         email: String!,
-        number: Int!,
+        phone: String!,
         ie: String!,
-        uf_ie: String!,
+        ufIe: String!,
         obs: String
     ): Client!
 
@@ -101,9 +102,9 @@ type Mutation {
         name: String,
         cnpj: String,
         email: String,
-        number: Int,
+        phone: String,
         ie: String,
-        uf_ie: String,
+        ufIe: String,
         obs: String
     ): Client!
 
