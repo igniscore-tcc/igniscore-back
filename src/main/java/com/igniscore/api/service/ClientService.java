@@ -28,7 +28,7 @@ public class ClientService {
     }
 
     @Transactional
-    public Client createClient(String name, String cnpj, String email, String phone, String ie, String ufIe, String obs) {
+    public Client createClient(String name, String cnpj, String email, String phone, String ie, String ufIe, String obs, Integer cpf) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
             throw new RuntimeException("No authenticated user found");
@@ -44,6 +44,7 @@ public class ClientService {
         client.setIe(ie);
         client.setUfIe(ufIe);
         client.setObs(obs);
+        client.setCpf(cpf);
         client.setCompany(company);
 
         Client saved = repository.save(client);
@@ -51,7 +52,7 @@ public class ClientService {
         return saved;
     }
 
-    public Client updateClient(String name, String cnpj, String email, String phone, String ie, String ufIe, String obs, Integer id){
+    public Client updateClient(String name, String cnpj, String email, String phone, String ie, String ufIe, String obs, Integer cpf,Integer id){
         Client client = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente nao encontrado"));
 
@@ -66,6 +67,7 @@ public class ClientService {
         if (ie != null) client.setIe(ie);
         if (ufIe != null) client.setUfIe(ufIe);
         if (obs != null) client.setObs(obs);
+        if (cpf != null) client.setCpf(cpf);
 
         return repository.save(client);
     }
@@ -76,7 +78,7 @@ public class ClientService {
 
     public Client findClient(Integer id) {
         Client client = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Client não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
         if(client.getCompany() != getCompany()) {
             throw new RuntimeException("Esse cliente não pertence a essa empresa");
@@ -87,7 +89,7 @@ public class ClientService {
 
     public String deleteClient(Integer id) {
         Client client = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Client não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
         if(client.getCompany() != getCompany()) {
             throw new RuntimeException("Esse cliente não pertence a essa empresa");
