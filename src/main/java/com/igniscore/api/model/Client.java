@@ -43,7 +43,7 @@ public class Client {
     private String obs;
 
     @Column(name = "cpf_client")
-    private Integer cpf;
+    private String cpf;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_id_company", nullable = false)
@@ -85,7 +85,7 @@ public class Client {
         return obs;
     }
 
-    public Integer getCpf() {
+    public String getCpf() {
         return cpf;
     }
 
@@ -125,7 +125,7 @@ public class Client {
         this.obs = obs;
     }
 
-    public void setCpf(Integer cpf) {
+    public void setCpf(String cpf) {
         this.cpf = cpf;
     }
 

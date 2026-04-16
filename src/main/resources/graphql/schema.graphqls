@@ -48,7 +48,7 @@ type Client {
     ie: String
     ufIe: String
     obs: String
-    cpf: Int
+    cpf: String
     company: Company
 }
 
@@ -96,7 +96,7 @@ type Mutation {
         ie: String!,
         ufIe: String!,
         obs: String,
-        cpf: Int
+        cpf: String
     ): Client!
 
     updateClient(
@@ -108,7 +108,7 @@ type Mutation {
         ie: String,
         ufIe: String,
         obs: String
-        cpf: Int
+        cpf: String
     ): Client!
 
     deleteClient(

@@ -27,7 +27,7 @@ public class ClientController {
                                @Argument String ie,
                                @Argument String ufIe,
                                @Argument String obs,
-                               @Argument Integer cpf) {
+                               @Argument String cpf) {
         return service.createClient(name, cnpj, email, phone, ie, ufIe, obs, cpf);
     }
 
@@ -41,8 +41,8 @@ public class ClientController {
                                @Argument String ie,
                                @Argument String ufIe,
                                @Argument String obs,
-                               @Argument Integer cpf) {
-        return service.updateClient(name, cnpj, email, phone, ie, ufIe, obs, id, cpf);
+                               @Argument String cpf) {
+        return service.updateClient(name, cnpj, email, phone, ie, ufIe, obs, cpf, id);
     }
 
     @QueryMapping

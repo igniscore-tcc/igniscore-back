@@ -28,7 +28,7 @@ public class ClientService {
     }
 
     @Transactional
-    public Client createClient(String name, String cnpj, String email, String phone, String ie, String ufIe, String obs, Integer cpf) {
+    public Client createClient(String name, String cnpj, String email, String phone, String ie, String ufIe, String obs, String cpf) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
             throw new RuntimeException("No authenticated user found");
@@ -52,7 +52,7 @@ public class ClientService {
         return saved;
     }
 
-    public Client updateClient(String name, String cnpj, String email, String phone, String ie, String ufIe, String obs, Integer cpf,Integer id){
+    public Client updateClient(String name, String cnpj, String email, String phone, String ie, String ufIe, String obs, String cpf,Integer id){
         Client client = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente nao encontrado"));
 
