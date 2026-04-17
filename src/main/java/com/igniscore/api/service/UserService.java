@@ -5,46 +5,108 @@ import com.igniscore.api.model.User;
 import com.igniscore.api.repository.UserRepository;
 import com.igniscore.api.utils.CompanyUtils;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+/**
+ * Service responsible for managing {@link User} entities.
+ *
+ * <p>This class handles user-related operations such as:
+ * <ul>
+ *     <li>Updating user-company associations</li>
+ *     <li>Retrieving users by identifier</li>
+ *     <li>Updating user profile data</li>
+ * </ul>
+ *
+ * <p>Design considerations:
+ * <ul>
+ *     <li>All persistence operations are delegated to {@link UserRepository}</li>
+ *     <li>Company validation is centralized via {@link CompanyUtils}</li>
+ * </ul>
+ */
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository repository;
+    private final UserRepository repository;
+    private final CompanyUtils companyUtils;
 
-    @Autowired
-    private CompanyUtils companyUtils;
-
-    public List<User> findAll() {
-        return repository.findAll();
+    /**
+     * Constructor-based dependency injection (preferred over field injection).
+     *
+     * @param repository   user persistence repository
+     * @param companyUtils utility for company validation and retrieval
+     */
+    public UserService(UserRepository repository, CompanyUtils companyUtils) {
+        this.repository = repository;
+        this.companyUtils = companyUtils;
     }
 
-    public User updateUserCompany(Integer id, Integer company_id) {
-        User user = repository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        Company company = companyUtils.existsCompany(company_id);
+    /**
+     * Updates the company associated with a user.
+     *
+     * <p>Flow:
+     * <ol>
+     *     <li>Retrieve user by ID</li>
+     *     <li>Validate target company exists</li>
+     *     <li>Update association</li>
+     *     <li>Persist changes</li>
+     * </ol>
+     *
+     * @param id          user identifier
+     * @param companyId   target company identifier
+     * @return updated user
+     *
+     * @throws RuntimeException if user or company is not found
+     */
+    public User updateUserCompany(Integer id, Integer companyId) {
+        User user = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found."));
+
+        Company company = companyUtils.existsCompany(companyId);
 
         user.setCompany(company);
+
         return repository.save(user);
     }
 
+    /**
+     * Retrieves a user by its identifier.
+     *
+     * @param id user identifier
+     * @return user entity
+     *
+     * @throws RuntimeException if user is not found
+     */
     public User findUserId(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found."));
     }
 
+    /**
+     * Updates user profile information.
+     *
+     * <p>This method assumes email is used as a unique identifier.
+     *
+     * <p>Important:
+     * This operation runs inside a transactional context,
+     * so changes are automatically persisted without explicitly calling save().
+     *
+     * @param email user's email (identifier)
+     * @param name  new name
+     * @return updated user entity
+     *
+     * @throws RuntimeException if user is not found
+     */
     @Transactional
-    public User editUser(String email, String name) {
+    public User update(String email, String name) {
         User user = repository.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found.");
+        }
+
         user.setName(name);
         user.setEmail(email);
 
-
         return user;
     }
-
-
 }

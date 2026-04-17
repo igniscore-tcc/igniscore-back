@@ -16,18 +16,43 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Main security configuration class for the application.
+ * This class defines how authentication and authorization are handled,
+ * configures security filters, and sets up password encoding.
+ */
 @SuppressWarnings("unused")
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
+    /**
+     * Custom security filter responsible for JWT authentication.
+     */
     private final SecurityFilter securityFilter;
 
+    /**
+     * Constructor for SecurityConfig.
+     *
+     * @param securityFilter the custom JWT security filter
+     */
     public SecurityConfig(SecurityFilter securityFilter) {
         this.securityFilter = securityFilter;
     }
 
+    /**
+     * Configures the security filter chain.
+     * This method defines:
+     * - CSRF configuration (disabled)
+     * - Endpoint authorization rules
+     * - Session management policy (stateless)
+     * - HTTP Basic configuration
+     * - Custom filter insertion
+     *
+     * @param http the HttpSecurity configuration object
+     * @return the configured SecurityFilterChain
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         return http
@@ -45,11 +70,23 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Provides the AuthenticationManager bean used for authentication processes.
+     *
+     * @param authenticationConfiguration the authentication configuration
+     * @return the AuthenticationManager instance
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    /**
+     * Provides the PasswordEncoder bean used to encrypt user passwords.
+     * Uses BCrypt hashing algorithm for secure password storage.
+     *
+     * @return the PasswordEncoder instance
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

@@ -3,37 +3,80 @@ package com.igniscore.api.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 
+/**
+ * Entity representing a product within the system.
+ *
+ * <p>This class models a product that belongs to a {@link Company},
+ * supporting a multi-tenant architecture where each company manages
+ * its own product catalog.
+ *
+ * <p>Responsibilities:
+ * <ul>
+ *     <li>Persist product-related data</li>
+ *     <li>Represent business attributes such as name, type, price, and validity</li>
+ *     <li>Maintain association with a company</li>
+ * </ul>
+ *
+ * <p>Design notes:
+ * <ul>
+ *     <li>Uses {@link LocalDate} for validity to represent date-only values</li>
+ *     <li>Company relationship is lazily loaded for performance optimization</li>
+ * </ul>
+ */
 @Entity
 @Table(name = "products")
 public class Product {
 
+    /**
+     * Primary key identifier.
+     */
     @SuppressWarnings("unused")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pk_id_product")
     private Integer id;
 
+    /**
+     * Product name.
+     */
     @Column(name = "name_prod")
     private String name;
 
+    /**
+     * Product type or category.
+     */
     @Column(name = "type_prod")
     private String type;
 
+    /**
+     * Product validity or expiration date.
+     */
     @Column(name = "validity_prod")
     private LocalDate validity;
 
+    /**
+     * Product batch or lot identifier.
+     */
     @Column(name = "lot_prod")
     private String lot;
 
+    /**
+     * Product price.
+     *
+     * <p>Note: Currently uses Float, which may lead to precision issues.
+     */
     @Column(name = "price_prod")
     private Float price;
 
+    /**
+     * Associated company (multi-tenant relationship).
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_id_company")
     private Company company;
 
+    // --- Getters ---
 
     public Integer getId() {
         return id;
@@ -62,6 +105,8 @@ public class Product {
     public String getName() {
         return name;
     }
+
+    // --- Setters ---
 
     public void setId(Integer id) {
         this.id = id;
