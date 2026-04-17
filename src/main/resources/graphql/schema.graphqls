@@ -48,6 +48,7 @@ type Client {
     ie: String
     ufIe: String
     obs: String
+    cpf: String
     company: Company
 }
 
@@ -89,12 +90,13 @@ type Mutation {
 
     createClient(
         name: String!,
-        cnpj: String!,
+        cnpj: String,
         email: String!,
         phone: String!,
         ie: String!,
         ufIe: String!,
-        obs: String
+        obs: String,
+        cpf: String
     ): Client!
 
     updateClient(
@@ -106,6 +108,7 @@ type Mutation {
         ie: String,
         ufIe: String,
         obs: String
+        cpf: String
     ): Client!
 
     deleteClient(
