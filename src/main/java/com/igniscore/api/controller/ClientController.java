@@ -1,22 +1,40 @@
 package com.igniscore.api.controller;
 
+import com.igniscore.api.dto.ClientRegisterDTO;
+import com.igniscore.api.dto.ClientUpdateDTO;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.service.ClientService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
-import java.util.List;
-
 /**
- * Controller responsible for handling GraphQL queries and mutations
- * related to Client entities.
- * This class provides endpoints for creating, updating, retrieving,
- * and deleting clients. All business logic is delegated to the
- * ClientService layer.
+ * GraphQL controller responsible for handling queries and mutations
+ * related to {@link Client} entities.
+ *
+ * <p>This layer acts as a thin transport adapter between the GraphQL API
+ * and the service layer. It delegates all business logic to {@link ClientService}
+ * and does not contain domain logic.
+ *
+ * <p><strong>Responsibilities:</strong>
+ * <ul>
+ *     <li>Expose GraphQL query and mutation endpoints</li>
+ *     <li>Map GraphQL arguments to DTOs</li>
+ *     <li>Delegate execution to the service layer</li>
+ * </ul>
+ *
+ * <p><strong>Design notes:</strong>
+ * <ul>
+ *     <li>Follows a thin-controller pattern</li>
+ *     <li>Relies on service layer for validation, authorization, and persistence</li>
+ *     <li>Supports pagination via {@link Pageable} abstraction</li>
+ * </ul>
  */
 @Controller
+@SuppressWarnings("unused")
 public class ClientController {
 
     /**
@@ -25,98 +43,83 @@ public class ClientController {
     private final ClientService service;
 
     /**
-     * Constructor for ClientController.
+     * Constructs the controller with required dependencies.
      *
-     * @param service the ClientService instance used to handle business logic
+     * @param service service layer handling client operations
      */
+    @SuppressWarnings("unused")
     public ClientController(ClientService service) {
         this.service = service;
     }
 
     /**
-     * GraphQL mutation used to create a new client.
-     * This method receives client data as arguments from the GraphQL request
-     * and forwards them to the service layer for processing and persistence.
+     * GraphQL mutation that creates a new {@link Client}.
      *
-     * @param name   the client's name
-     * @param cnpj   the client's CNPJ (for companies)
-     * @param email  the client's email address
-     * @param phone  the client's phone number
-     * @param ie     the state registration number
-     * @param ufIe   the state (UF) of the registration
-     * @param obs    additional observations or notes about the client
-     * @param cpf    the client's CPF (for individuals)
-     * @return the created Client entity
+     * <p>The input payload is mapped to {@link ClientRegisterDTO} and
+     * forwarded to the service layer for validation and persistence.
+     *
+     * @param input client creation payload
+     * @return the persisted {@link Client}
      */
     @MutationMapping
-    public Client storeClient(@Argument String name,
-                              @Argument String cnpj,
-                              @Argument String email,
-                              @Argument String phone,
-                              @Argument String ie,
-                              @Argument String ufIe,
-                              @Argument String obs,
-                              @Argument String cpf) {
-        return service.store(name, cnpj, email, phone, ie, ufIe, obs, cpf);
+    @SuppressWarnings("unused")
+    public Client storeClient(@Argument ClientRegisterDTO input) {
+        return service.store(input);
     }
 
     /**
-     * GraphQL mutation used to update an existing client.
-     * This method receives updated client data along with the client ID
-     * and forwards them to the service layer for processing.
+     * GraphQL mutation that updates an existing {@link Client}.
      *
-     * @param id     the unique identifier of the client to update
-     * @param name   the client's name
-     * @param cnpj   the client's CNPJ (for companies)
-     * @param email  the client's email address
-     * @param phone  the client's phone number
-     * @param ie     the state registration number
-     * @param ufIe   the state (UF) of the registration
-     * @param obs    additional observations or notes about the client
-     * @param cpf    the client's CPF (for individuals)
-     * @return the updated Client entity
+     * <p>Supports partial updates. Only fields provided in the input
+     * are applied to the target entity.
+     *
+     * @param input client update payload including identifier
+     * @return the updated {@link Client}
      */
     @MutationMapping
-    public Client updateClient(@Argument Integer id,
-                               @Argument String name,
-                               @Argument String cnpj,
-                               @Argument String email,
-                               @Argument String phone,
-                               @Argument String ie,
-                               @Argument String ufIe,
-                               @Argument String obs,
-                               @Argument String cpf) {
-        return service.update(name, cnpj, email, phone, ie, ufIe, obs, cpf, id);
+    @SuppressWarnings("unused")
+    public Client updateClient(@Argument ClientUpdateDTO input) {
+        return service.update(input);
     }
 
     /**
-     * GraphQL query used to retrieve all clients.
+     * GraphQL query that retrieves all clients within the current tenant scope.
      *
-     * @return a list of Client entities
+     * <p>Results are paginated using Spring Data {@link Pageable}.
+     *
+     * @param pageable pagination and sorting configuration
+     * @return paginated {@link Client} result set
      */
     @QueryMapping
-    public List<Client> clients() {
-        return service.findAll();
+    @SuppressWarnings("unused")
+    public Page<Client> findAll(Pageable pageable) {
+        return service.findAll(pageable);
     }
 
     /**
-     * GraphQL query used to retrieve a specific client by its ID.
+     * GraphQL query that retrieves a {@link Client} by its identifier.
      *
-     * @param id the unique identifier of the client
-     * @return the Client entity corresponding to the given ID
+     * <p>The result is scoped to the authenticated user's company.
+     *
+     * @param id client identifier
+     * @return matching {@link Client}
      */
     @QueryMapping
+    @SuppressWarnings("unused")
     public Client client(@Argument Integer id){
-        return service.findClient(id);
+        return service.findById(id);
     }
 
     /**
-     * GraphQL mutation used to delete a client by its ID.
+     * GraphQL mutation that deletes a {@link Client} by its identifier.
      *
-     * @param id the unique identifier of the client to delete
-     * @return a confirmation message indicating the result of the operation
+     * <p>The operation is restricted to the current tenant scope.
+     *
+     * @param id client identifier
+     * @return operation result message
      */
     @MutationMapping
+    @SuppressWarnings("unused")
     public String deleteClient(@Argument Integer id){
         return service.delete(id);
     }
