@@ -2,39 +2,61 @@ package com.igniscore.api.repository;
 
 import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
+import java.util.Optional;
 
 /**
- * Repository interface for {@link Client} entity persistence.
+ * Repository interface for managing persistence operations of the {@link Client} entity.
  *
- * <p>Extends {@link JpaRepository}, providing standard CRUD operations
- * and database interaction capabilities without requiring explicit implementation.
+ * <p>Extends {@link JpaRepository}, providing out-of-the-box CRUD operations,
+ * pagination, and sorting capabilities. The implementation is generated
+ * automatically by Spring Data JPA at runtime.
  *
- * <p>Responsibilities:
+ * <p><strong>Key responsibilities:</strong>
  * <ul>
- *     <li>Persist and retrieve Client entities</li>
- *     <li>Support multi-tenant queries based on Company ownership</li>
+ *     <li>Provide data access operations for {@link Client}</li>
+ *     <li>Support query derivation based on method naming conventions</li>
+ *     <li>Enforce logical data isolation in multi-tenant scenarios via {@link Company}</li>
  * </ul>
  *
- * <p>Design notes:
+ * <p><strong>Domain assumptions:</strong>
  * <ul>
- *     <li>Clients are associated with a {@link Company}</li>
- *     <li>Query methods enforce logical data isolation at the repository level</li>
- *     <li>Additional queries can be defined using Spring Data conventions</li>
+ *     <li>Each {@link Client} is associated with a single {@link Company}</li>
+ *     <li>All access patterns are scoped by Company to prevent cross-tenant data access</li>
+ * </ul>
+ *
+ * <p><strong>Notes:</strong>
+ * <ul>
+ *     <li>No manual implementation is required</li>
+ *     <li>Additional queries can be defined using Spring Data method naming conventions
+ *         or explicit query annotations</li>
  * </ul>
  */
 public interface ClientRepository extends JpaRepository<Client, Integer> {
 
     /**
-     * Retrieves all clients belonging to a specific company.
+     * Returns a paginated list of clients associated with the given company.
      *
-     * <p>This method is typically used to enforce multi-tenant data access,
-     * ensuring that users only retrieve clients associated with their company.
+     * <p>This method is intended for multi-tenant data access, ensuring that
+     * only clients belonging to the specified company are retrieved.
      *
-     * @param company company entity used as filter
-     * @return list of clients associated with the given company
+     * @param company the {@link Company} used as a filter
+     * @param pageable pagination and sorting information
+     * @return a {@link Page} of clients scoped to the given company
      */
-    List<Client> findByCompany(Company company);
+    Page<Client> findByCompany(Company company, Pageable pageable);
+
+    /**
+     * Retrieves a client by its identifier and associated company.
+     *
+     * <p>This method enforces tenant isolation by ensuring the client
+     * belongs to the specified company.
+     *
+     * @param id the client identifier
+     * @param company the {@link Company} used as a filter
+     * @return an {@link Optional} containing the client if found within the given company scope
+     */
+    Optional<Client> findByIdAndCompany(Integer id, Company company);
 }

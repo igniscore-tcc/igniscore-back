@@ -1,210 +1,202 @@
 package com.igniscore.api.service;
 
+import com.igniscore.api.dto.ClientRegisterDTO;
+import com.igniscore.api.dto.ClientUpdateDTO;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
-import com.igniscore.api.model.User;
 import com.igniscore.api.repository.ClientRepository;
-import com.igniscore.api.utils.CompanyUtils;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 /**
- * Service responsible for managing {@link Client} entities.
+ * Service layer responsible for managing {@link Client} entities.
  *
- * <p>This class encapsulates business rules such as:
+ * <p>Encapsulates business logic, transactional boundaries, and
+ * multi-tenant data isolation rules. All operations are scoped to the
+ * {@link Company} associated with the authenticated user.
+ *
+ * <p><strong>Core responsibilities:</strong>
  * <ul>
- *     <li>Ensuring every client is associated with a company</li>
- *     <li>Enforcing multi-tenant data isolation</li>
- *     <li>Validating ownership based on the authenticated user</li>
+ *     <li>Create, update, retrieve, and delete {@link Client} entities</li>
+ *     <li>Enforce tenant isolation at the service layer</li>
+ *     <li>Apply validation and partial update semantics</li>
  * </ul>
  *
- * <p>Assumptions:
+ * <p><strong>Multi-tenancy model:</strong>
  * <ul>
- *     <li>Every authenticated user belongs to a {@link Company}</li>
- *     <li>Clients cannot be accessed across different companies</li>
+ *     <li>Each {@link Client} is owned by a {@link Company}</li>
+ *     <li>All queries are constrained by company context</li>
+ *     <li>Cross-tenant access is prevented via repository filtering</li>
+ * </ul>
+ *
+ * <p><strong>Transaction model:</strong>
+ * <ul>
+ *     <li>Write operations are executed within transactional boundaries</li>
+ *     <li>Read operations are marked as {@code readOnly = true} for optimization</li>
+ * </ul>
+ *
+ * <p><strong>Failure behavior:</strong>
+ * <ul>
+ *     <li>Throws {@link AccessDeniedException} when authentication is invalid</li>
+ *     <li>Throws {@link EntityNotFoundException} when a client is not found
+ *         within the current tenant scope</li>
+ *     <li>Throws {@link IllegalArgumentException} for invalid input state</li>
  * </ul>
  */
 @Service
 public class ClientService {
 
     private final ClientRepository repository;
-    private final CompanyUtils companyUtils;
+    private final AuthenticatedUserService authUserService;
 
     @PersistenceContext
+    @SuppressWarnings("unused")
     private EntityManager entityManager;
 
     /**
-     * Constructor with dependency injection.
+     * Constructs the service with required dependencies.
      *
-     * @param repository   client persistence repository
-     * @param companyUtils utility for resolving the logged user's company
+     * @param repository persistence layer for {@link Client}
+     * @param authUserService service for retrieving authenticated user context
      */
-    public ClientService(ClientRepository repository, CompanyUtils companyUtils) {
+    public ClientService(ClientRepository repository, AuthenticatedUserService authUserService) {
         this.repository = repository;
-        this.companyUtils = companyUtils;
+        this.authUserService = authUserService;
     }
 
     /**
-     * Creates and persists a new client linked to the authenticated user's company.
+     * Creates and persists a new {@link Client} associated with the
+     * authenticated user's company.
      *
-     * <p>Flow:
+     * <p><strong>Execution flow:</strong>
      * <ol>
-     *     <li>Retrieve authenticated user</li>
-     *     <li>Resolve user's company</li>
-     *     <li>Create Client entity</li>
-     *     <li>Persist and refresh state from database</li>
+     *     <li>Resolve authenticated user's company</li>
+     *     <li>Validate DTO-level business constraints</li>
+     *     <li>Map DTO to entity</li>
+     *     <li>Persist entity and refresh from database</li>
      * </ol>
      *
-     * @return persisted client with up-to-date database state
-     * @throws RuntimeException if no authenticated user is found
+     * @param dto input payload for client creation
+     * @return persisted {@link Client} with database-synchronized state
+     * @throws AccessDeniedException if no authenticated user is available
+     * @throws IllegalArgumentException if CPF/CNPJ constraint is violated
      */
     @Transactional
-    public Client store(String name, String cnpj, String email, String phone,
-                        String ie, String ufIe, String obs, String cpf) {
+    public Client store(ClientRegisterDTO dto) {
 
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        Company company = authUserService.getCompanyOrThrow();
 
-        // Ensure a valid authenticated user exists
-        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
-            throw new RuntimeException("No authenticated user found.");
+        if (!dto.isCpfOrCnpjValid()) {
+            throw new IllegalArgumentException("CPF or CNPJ must be provided");
         }
 
-        // Resolve company in a multi-tenant safe way
-        Company company = companyUtils.loggedCompany(loggedUser.getCompany().getId());
-
-        // Create client entity
         Client client = new Client();
-        client.setName(name);
-        client.setCnpj(cnpj);
-        client.setEmail(email);
-        client.setPhone(phone);
-        client.setIe(ie);
-        client.setUfIe(ufIe);
-        client.setObs(obs);
-        client.setCpf(cpf);
+        client.setName(dto.getName());
+        client.setCnpj(dto.getCnpj());
+        client.setEmail(dto.getEmail());
+        client.setPhone(dto.getPhone());
+        client.setIe(dto.getIe());
+        client.setUfIe(dto.getUfIe());
+        client.setObs(dto.getObs());
+        client.setCpf(dto.getCpf());
         client.setCompany(company);
 
-        // Persist entity
         Client saved = repository.save(client);
 
-        // Sync with database state (e.g., triggers, defaults)
+        // Ensures entity state reflects database-side changes (e.g., triggers, defaults)
         entityManager.refresh(saved);
 
         return saved;
     }
 
     /**
-     * Updates an existing client using partial update semantics.
+     * Updates an existing {@link Client} using partial update semantics.
      *
-     * <p>Only non-null fields are updated.
+     * <p>Only non-null fields in the DTO are applied to the entity.
+     * Fields omitted in the request remain unchanged.
      *
-     * @param id client identifier
-     * @return updated client
-     *
-     * @throws RuntimeException if client does not exist or access is denied
+     * @param dto input payload containing update data and target identifier
+     * @return updated {@link Client}
+     * @throws AccessDeniedException if authentication is invalid
+     * @throws EntityNotFoundException if the client does not exist within the tenant scope
      */
     @Transactional
-    public Client update(String name, String cnpj, String email, String phone,
-                         String ie, String ufIe, String obs, String cpf, Integer id) {
+    public Client update(ClientUpdateDTO dto) {
 
-        Client client = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Client not found."));
+        Company company = authUserService.getCompanyOrThrow();
+        Client client = getClientOrThrow(dto.getId(), company);
 
-        Company company = getCompany();
-
-        // Security check (multi-tenant ownership)
-        if (!client.getCompany().getId().equals(company.getId())) {
-            throw new RuntimeException("Access denied.");
-        }
-
-        // Partial update (null-safe)
-        if (name != null) client.setName(name);
-        if (cnpj != null) client.setCnpj(cnpj);
-        if (email != null) client.setEmail(email);
-        if (phone != null) client.setPhone(phone);
-        if (ie != null) client.setIe(ie);
-        if (ufIe != null) client.setUfIe(ufIe);
-        if (obs != null) client.setObs(obs);
-        if (cpf != null) client.setCpf(cpf);
+        if (dto.getName() != null) client.setName(dto.getName());
+        if (dto.getCnpj() != null) client.setCnpj(dto.getCnpj());
+        if (dto.getEmail() != null) client.setEmail(dto.getEmail());
+        if (dto.getPhone() != null) client.setPhone(dto.getPhone());
+        if (dto.getIe() != null) client.setIe(dto.getIe());
+        if (dto.getUfIe() != null) client.setUfIe(dto.getUfIe());
+        if (dto.getObs() != null) client.setObs(dto.getObs());
+        if (dto.getCpf() != null) client.setCpf(dto.getCpf());
 
         return repository.save(client);
     }
 
     /**
-     * Retrieves all clients belonging to the authenticated user's company.
+     * Retrieves all clients associated with the authenticated user's company.
      *
-     * @return list of clients for the company
+     * @param pageable pagination and sorting configuration
+     * @return paginated list of {@link Client} within tenant scope
+     * @throws AccessDeniedException if authentication is invalid
      */
-    public List<Client> findAll() {
-        return repository.findByCompany(getCompany());
+    @Transactional(readOnly = true)
+    public Page<Client> findAll(Pageable pageable) {
+        Company company = authUserService.getCompanyOrThrow();
+        return repository.findByCompany(company, pageable);
     }
 
     /**
-     * Retrieves a specific client ensuring company-level isolation.
+     * Retrieves a {@link Client} by identifier within the current tenant scope.
      *
      * @param id client identifier
-     * @return client entity
-     *
-     * @throws RuntimeException if client does not exist or does not belong to the company
+     * @return matching {@link Client}
+     * @throws AccessDeniedException if authentication is invalid
+     * @throws EntityNotFoundException if not found within the company scope
      */
-    public Client findClient(Integer id) {
-        Client client = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Client not found."));
-
-        Company company = getCompany();
-
-        if (!client.getCompany().getId().equals(company.getId())) {
-            throw new RuntimeException("This client does not belong to this company.");
-        }
-
-        return client;
+    @Transactional(readOnly = true)
+    public Client findById(Integer id) {
+        Company company = authUserService.getCompanyOrThrow();
+        return getClientOrThrow(id, company);
     }
 
     /**
-     * Deletes a client ensuring company-level isolation.
+     * Deletes a {@link Client} within the current tenant scope.
      *
      * @param id client identifier
-     * @return success message
-     *
-     * @throws RuntimeException if client does not exist or access is denied
+     * @return confirmation message
+     * @throws AccessDeniedException if authentication is invalid
+     * @throws EntityNotFoundException if not found within the company scope
      */
     @Transactional
     public String delete(Integer id) {
-        Client client = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Client not found."));
-
-        Company company = getCompany();
-
-        if (!client.getCompany().getId().equals(company.getId())) {
-            throw new RuntimeException("This client does not belong to this company.");
-        }
-
+        Company company = authUserService.getCompanyOrThrow();
+        Client client = getClientOrThrow(id, company);
         repository.delete(client);
-
         return "Client successfully deleted.";
     }
 
     /**
-     * Resolves the company of the currently authenticated user.
+     * Resolves a client by identifier and company, enforcing tenant isolation.
      *
-     * <p>This method centralizes authentication context logic and
-     * should be used wherever tenant isolation is required.
-     *
-     * @return company associated with the authenticated user
-     * @throws RuntimeException if no authenticated user is found
+     * @param id client identifier
+     * @param company tenant context
+     * @return resolved {@link Client}
+     * @throws EntityNotFoundException if no matching client is found
      */
-    public Company getCompany() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
-            throw new RuntimeException("No authenticated user found.");
-        }
-
-        return companyUtils.loggedCompany(loggedUser.getCompany().getId());
+    private Client getClientOrThrow(Integer id, Company company) {
+        return repository.findByIdAndCompany(id, company)
+                .orElseThrow(() -> new EntityNotFoundException("Client not found"));
     }
 }

@@ -1,6 +1,9 @@
 package com.igniscore.api.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 /**
  * Entity representing a client within the system.
@@ -71,7 +74,8 @@ public class Client {
      * <p>This field is managed at the database level
      * (not insertable or updatable from application code).
      */
-    @Column(name = "number_client", nullable = false, insertable = false, updatable = false)
+    @Column(name = "number_client", insertable = false, updatable = false)
+    @Generated(event = EventType.INSERT)
     private Integer number;
 
     /**

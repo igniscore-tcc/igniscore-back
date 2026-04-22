@@ -42,9 +42,9 @@ type Client {
     id: ID!
     number: Int!
     name: String!
-    cnpj: String!
+    cnpj: String
     email: String!
-    phone: String
+    phone: String!
     ie: String
     ufIe: String
     obs: String
@@ -88,30 +88,34 @@ type Mutation {
         price: Float!
     ): ProductOutput!
 
-    storeClient(
-        name: String!,
-        cnpj: String,
-        email: String!,
-        phone: String!,
-        ie: String!,
-        ufIe: String!,
-        obs: String,
-        cpf: String
-    ): Client!
+    storeClient(input: ClientRegisterInput!): Client
 
-    updateClient(
-        id: ID!,
-        name: String,
-        cnpj: String,
-        email: String,
-        phone: String,
-        ie: String,
-        ufIe: String,
-        obs: String
-        cpf: String
-    ): Client!
+    updateClient(input: ClientUpdateInput!): Client!
 
     deleteClient(
         id: ID!
     ): String!
+}
+
+input ClientRegisterInput {
+    name: String!
+    email: String!
+    cnpj: String
+    cpf: String
+    phone: String!
+    ie: String
+    ufIe: String
+    obs: String
+}
+
+input ClientUpdateInput {
+    id: ID!
+    name: String
+    email: String
+    cnpj: String
+    cpf: String
+    phone: String
+    ie: String
+    ufIe: String
+    obs: String
 }

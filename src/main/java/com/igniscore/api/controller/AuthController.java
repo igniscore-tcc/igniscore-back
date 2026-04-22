@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("auth")
+@SuppressWarnings("unused")
 public class AuthController {
 
     /**
@@ -49,6 +50,7 @@ public class AuthController {
      * @param repository            the user repository
      * @param jwtService            the JWT service
      */
+    @SuppressWarnings("unused")
     public AuthController(AuthenticationManager authenticationManager, UserRepository repository, JwtService jwtService) {
         this.authenticationManager = authenticationManager;
         this.repository = repository;
@@ -65,6 +67,7 @@ public class AuthController {
      * @throws RuntimeException if authentication fails or the principal is invalid
      */
     @PostMapping("/login")
+    @SuppressWarnings("unused")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid @NonNull AutDTO data) {
         var usernamepassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var auth = this.authenticationManager.authenticate(usernamepassword);
@@ -88,6 +91,7 @@ public class AuthController {
      * @return a ResponseEntity indicating success or failure
      */
     @PostMapping("/register")
+    @SuppressWarnings("unused")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterDTO data) {
         if(this.repository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().build();
 
