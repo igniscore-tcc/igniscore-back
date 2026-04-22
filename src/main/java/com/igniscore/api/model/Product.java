@@ -69,6 +69,10 @@ public class Product {
     @Column(name = "price_prod")
     private Float price;
 
+
+    @Column(name = "status_prod")
+    private Boolean status;
+
     /**
      * Associated company (multi-tenant relationship).
      */
@@ -106,6 +110,10 @@ public class Product {
         return name;
     }
 
+    public Boolean getStatus() {
+        return status;
+    }
+
     // --- Setters ---
 
     public void setId(Integer id) {
@@ -134,5 +142,9 @@ public class Product {
 
     public void setCompany(Company company) {
         this.company = company;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
     }
 }
