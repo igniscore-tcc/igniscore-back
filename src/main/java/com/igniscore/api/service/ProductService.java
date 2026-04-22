@@ -4,10 +4,8 @@ import com.igniscore.api.dto.CompanyDTO;
 import com.igniscore.api.dto.ProductDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.Product;
-import com.igniscore.api.model.User;
 import com.igniscore.api.repository.ProductRepository;
 import com.igniscore.api.utils.CompanyUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,7 +27,7 @@ import java.time.LocalDate;
 public class ProductService {
 
     private final ProductRepository repository;
-    private final CompanyUtils companyUtils;
+    private final AuthenticatedUserService authUserService;
 
     /**
      * Constructor-based dependency injection.
@@ -37,9 +35,9 @@ public class ProductService {
      * @param repository   product persistence repository
      * @param companyUtils utility for resolving company context
      */
-    public ProductService(ProductRepository repository, CompanyUtils companyUtils) {
+    public ProductService(ProductRepository repository, CompanyUtils companyUtils, AuthenticatedUserService authUserService) {
         this.repository = repository;
-        this.companyUtils = companyUtils;
+        this.authUserService = authUserService;
     }
 
     /**
@@ -63,18 +61,10 @@ public class ProductService {
      *
      * @throws RuntimeException if no authenticated user is found
      */
-    public ProductDTO createProduct(String name, String type, LocalDate validity,
+    public ProductDTO create(String name, String type, LocalDate validity,
                                     String lot, Float price) {
 
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        // Ensure a valid authenticated user exists
-        if (authentication == null || !(authentication.getPrincipal() instanceof User loggedUser)) {
-            throw new RuntimeException("No authenticated user found");
-        }
-
-        // Resolve company in a multi-tenant safe way
-        Company company = companyUtils.loggedCompany(loggedUser.getCompany().getId());
+        Company company = authUserService.getCompanyOrThrow();
 
         // Create product entity
         Product product = new Product();
@@ -127,5 +117,25 @@ public class ProductService {
         }
 
         return dto;
+    }
+
+    public ProductDTO update(String name, String type, LocalDate validity,
+                                    String lot, Float price) {
+
+        Company company = authUserService.getCompanyOrThrow();
+
+        // Update product entity
+        Product product = new Product();
+        if(name != null) product.setName(name);
+        if(type != null) product.setType(type);
+        if(validity != null) product.setValidity(validity);
+        if(lot != null) product.setLot(lot);
+        if(price != null) product.setPrice(price);
+        if(company != null)product.setCompany(company);
+
+        // Persist entity
+        Product saved = repository.save(product);
+
+        return toDTO(saved);
     }
 }

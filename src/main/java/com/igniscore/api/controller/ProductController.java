@@ -48,6 +48,14 @@ public class ProductController {
                                     @Argument LocalDate validity,
                                     @Argument String lot,
                                     @Argument Float price) {
-        return service.createProduct(name, type, validity, lot, price);
+        return service.create(name, type, validity, lot, price);
+    }
+    @MutationMapping
+    public ProductDTO updateProduct(@Argument String name,
+                                    @Argument String type,
+                                    @Argument LocalDate validity,
+                                    @Argument String lot,
+                                    @Argument Float price) {
+        return service.update(name, type, validity, lot, price);
     }
 }
