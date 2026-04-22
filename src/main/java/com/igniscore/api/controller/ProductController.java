@@ -1,6 +1,7 @@
 package com.igniscore.api.controller;
 
 import com.igniscore.api.dto.ProductDTO;
+import com.igniscore.api.model.Product;
 import com.igniscore.api.service.ProductService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -49,5 +50,11 @@ public class ProductController {
                                     @Argument String lot,
                                     @Argument Float price) {
         return service.createProduct(name, type, validity, lot, price);
+    }
+
+
+    @MutationMapping
+    public Product deleteProduct(@Argument Integer id) {
+        return service.delete(id);
     }
 }

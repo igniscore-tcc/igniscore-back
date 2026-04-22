@@ -30,6 +30,7 @@ public class ProductService {
 
     private final ProductRepository repository;
     private final CompanyUtils companyUtils;
+    private final AuthenticatedUserService authUserService;
 
     /**
      * Constructor-based dependency injection.
@@ -37,9 +38,10 @@ public class ProductService {
      * @param repository   product persistence repository
      * @param companyUtils utility for resolving company context
      */
-    public ProductService(ProductRepository repository, CompanyUtils companyUtils) {
+    public ProductService(ProductRepository repository, CompanyUtils companyUtils, AuthenticatedUserService authUserService) {
         this.repository = repository;
         this.companyUtils = companyUtils;
+        this.authUserService = authUserService;
     }
 
     /**
@@ -127,5 +129,21 @@ public class ProductService {
         }
 
         return dto;
+    }
+
+
+    public Product delete(Integer id) {
+        Company company = authUserService.getCompanyOrThrow();
+
+        Product product = repository.findByCompany(company);
+
+        if(product == null) {
+            throw new RuntimeException("Product not found");
+        }
+
+        product.setStatus(false);
+
+        return  repository.save(product);
+
     }
 }

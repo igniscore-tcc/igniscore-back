@@ -88,6 +88,10 @@ type Mutation {
         price: Float!
     ): ProductOutput!
 
+    deleteProduct(
+        id: ID!
+    ): Product!
+
     storeClient(input: ClientRegisterInput!): Client
 
     updateClient(input: ClientUpdateInput!): Client!
