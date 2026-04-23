@@ -5,11 +5,14 @@ import com.igniscore.api.dto.ClientUpdateDTO;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.service.ClientService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 /**
  * GraphQL controller responsible for handling queries and mutations
@@ -92,8 +95,13 @@ public class ClientController {
      */
     @QueryMapping
     @SuppressWarnings("unused")
-    public Page<Client> findAll(Pageable pageable) {
-        return service.findAll(pageable);
+    public List<Client> clients(@Argument Integer page, @Argument Integer size) {
+        Pageable pageable = PageRequest.of(
+                page != null ? page : 0,
+                size != null ? size : 10
+        );
+
+        return service.findAll(pageable).getContent();
     }
 
     /**
