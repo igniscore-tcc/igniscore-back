@@ -25,6 +25,7 @@ type Product {
     validity: Date!
     lot: String!
     price: Float!
+    status: Boolean
     company: Company
 }
 
@@ -87,6 +88,10 @@ type Mutation {
         lot: String!,
         price: Float!
     ): ProductOutput!
+
+    deleteProduct(
+        id: ID!
+    ): Product!
 
     storeClient(input: ClientRegisterInput!): Client
 
