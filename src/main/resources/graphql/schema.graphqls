@@ -58,7 +58,7 @@ type Query {
     users: [User!]!
     user(id: ID!): User
     client(id: ID!): Client
-    clients: [Client!]!
+    clients(page: Int, size: Int): [Client!]!
 }
 
 type Mutation {
