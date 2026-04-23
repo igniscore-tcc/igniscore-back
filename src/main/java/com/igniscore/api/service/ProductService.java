@@ -135,15 +135,17 @@ public class ProductService {
     public Product delete(Integer id) {
         Company company = authUserService.getCompanyOrThrow();
 
-        Product product = repository.findByCompany(company);
+        Product product = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        if(product == null) {
-            throw new RuntimeException("Product not found");
+        if (!product.getCompany().getId().equals(company.getId())) {
+            throw new RuntimeException("Product not valid");
         }
 
         product.setStatus(false);
 
-        return  repository.save(product);
+        return repository.save(product);
+        //return product;
 
     }
 }

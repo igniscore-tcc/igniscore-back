@@ -25,6 +25,7 @@ type Product {
     validity: Date!
     lot: String!
     price: Float!
+    status: Boolean
     company: Company
 }
 

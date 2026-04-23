@@ -23,5 +23,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * </ul>
  */
 public interface ProductRepository extends JpaRepository<Product, Integer> {
-    Product findByCompany(Company company);
 }
