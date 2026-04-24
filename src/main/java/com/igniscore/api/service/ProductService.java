@@ -2,13 +2,17 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.CompanyDTO;
 import com.igniscore.api.dto.ProductDTO;
+import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.Product;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.ProductRepository;
 import com.igniscore.api.utils.CompanyUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
@@ -195,6 +199,7 @@ public class ProductService {
      *
      * @throws RuntimeException if no authenticated user is found
      */
+    @Transactional
     public ProductDTO update(Integer id, String name, String type, LocalDate validity,
                              String lot, Float price) {
 
@@ -219,5 +224,25 @@ public class ProductService {
         Product savedProduct = repository.save(product);
 
         return toDTO(savedProduct);
+    }
+
+    /**
+     * Retrieves a paginated list of products belonging to the authenticated user's company.
+     *
+     * <p>This method ensures data isolation by filtering products based on the company
+     * associated with the currently authenticated user.</p>
+     *
+     * <p>The transaction is marked as read-only to optimize performance and prevent
+     * unintended data modifications.</p>
+     *
+     * @param pageable the pagination and sorting information (page number, page size, sort order)
+     * @return a {@link org.springframework.data.domain.Page} containing products for the user's company
+     *
+     * @throws RuntimeException if the authenticated user is not associated with any company
+     */
+    @Transactional(readOnly = true)
+    public Page<Product> findAll(Pageable pageable) {
+        Company company = authUserService.getCompanyOrThrow();
+        return repository.findByCompany(company, pageable);
     }
 }
