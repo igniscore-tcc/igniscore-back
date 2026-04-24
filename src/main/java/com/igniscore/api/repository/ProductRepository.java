@@ -1,8 +1,11 @@
 package com.igniscore.api.repository;
 
+import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
 
 /**
  * Repository interface for {@link Product} entity persistence.

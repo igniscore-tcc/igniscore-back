@@ -49,7 +49,7 @@ public class ProductController {
                                     @Argument LocalDate validity,
                                     @Argument String lot,
                                     @Argument Float price) {
-        return service.createProduct(name, type, validity, lot, price);
+        return service.create(name, type, validity, lot, price);
     }
 
 
@@ -57,4 +57,15 @@ public class ProductController {
     public Product deleteProduct(@Argument Integer id) {
         return service.delete(id);
     }
+
+    @MutationMapping
+    public ProductDTO updateProduct(@Argument Integer id,
+                                 @Argument String name,
+                                 @Argument String type,
+                                 @Argument LocalDate validity,
+                                 @Argument String lot,
+                                 @Argument Float price) {
+
+        return service.update(id, name, type, validity, lot, price);
+    };
 }

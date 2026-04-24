@@ -93,6 +93,15 @@ type Mutation {
         id: ID!
     ): Product!
 
+    updateProduct(
+        id: ID!,
+        name: String,
+        type: String,
+        validity: Date,
+        lot: String,
+        price: Float
+    ): ProductOutput!
+
     storeClient(input: ClientRegisterInput!): Client
 
     updateClient(input: ClientUpdateInput!): Client!
