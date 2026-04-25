@@ -180,12 +180,12 @@ EXEMPLO: Usuário de Empresa A tenta acessar clientes
 │ 3. Resultado: NOT FOUND                 │
 │    (pois clientId=5 pertence a company=3)
 │                                          │
-│ ✅ SEGURANÇA: Erro genérico retornado   │
+│ SEGURANÇA: Erro genérico retornado   │
 │ "Client not found or access denied"     │
 └─────────────────────────────────────────┘
 
-   ❌ Cliente 5 é inacessível (pertence a Empresa C)
-   ✅ Isolamento de dados garantido!
+   Cliente 5 é inacessível (pertence a Empresa C)
+   Isolamento de dados garantido!
 ```
 
 ---
@@ -244,7 +244,7 @@ EXEMPLO: Usuário de Empresa A tenta acessar clientes
                │
                ▼
 ┌──────────────────────────────────────────────────────────┐
-│ ✅ TODAS VALIDAÇÕES PASSARAM                            │
+│ TODAS VALIDAÇÕES PASSARAM                            │
 │ → Execute operação                                       │
 │ → Salve client no banco                                  │
 │ → Registre em audit_logs                                 │
@@ -499,7 +499,7 @@ CLIENT REQUEST
          └─ RETURN: Client criado
 
          
-✅ GARANTIAS DE SEGURANÇA:
+GARANTIAS DE SEGURANÇA:
    • Company_id é recuperado do contexto autenticado
    • Nunca vem dos argumentos do usuário
    • Todos os testes incluem validação de company_id
