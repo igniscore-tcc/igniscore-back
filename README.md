@@ -179,14 +179,6 @@ Todos os documentos estão em `/docs/`:
 3. Execute os testes antes de fazer commit
 4. Mantenha a segurança multi-tenant em mente
 
-## 📞 Contatos
-
-| Área | Contato |
-|------|---------|
-| Desenvolvimento | dev@igniscore.com |
-| Segurança | security@igniscore.com |
-| DevOps | ops@igniscore.com |
-
 ## 📝 Licença
 
 TCC - Trabalho de Conclusão de Curso
