@@ -1,0 +1,567 @@
+# Diagramas de Arquitetura – Módulo Clients
+
+## 1. Arquitetura em Camadas
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     GraphQL API                             │
+│                  (Schema / Endpoints)                       │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│               SecurityFilter                                │
+│  ├─ Extrai JWT Token do header Authorization              │
+│  ├─ Valida assinatura do token                            │
+│  └─ Define contexto de autenticação (ThreadLocal)         │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│            ClientController                                 │
+│  ├─ @QueryMapping: clients()                              │
+│  ├─ @QueryMapping: clientById()                           │
+│  ├─ @MutationMapping: storeClient()                       │
+│  ├─ @MutationMapping: updateClient()                      │
+│  └─ @MutationMapping: deactivateClient()                  │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│              ClientService                                  │
+│  ├─ Validações de negócio (CNPJ, Email, etc)             │
+│  ├─ Filtragem por tenant (company_id)                     │
+│  ├─ Operações CRUD                                         │
+│  └─ Chamadas a AuditService                               │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│           ClientRepository (JPA)                            │
+│  ├─ findByIdAndCompanyId()     [SEGURO]                   │
+│  ├─ findByCompanyId()          [SEGURO]                   │
+│  ├─ findByCnpjAndCompanyId()   [SEGURO]                   │
+│  └─ save()                     [Persistência]              │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│              Database Layer                                 │
+│  ├─ Table: clients                                         │
+│  ├─ Table: audit_logs (histórico)                          │
+│  └─ Indexes para performance                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 2. Fluxo de Requisição Autenticada
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Client (Frontend / Postman / cURL)                         │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       │ POST /graphql
+                       │ Authorization: Bearer JWT_TOKEN
+                       │ Content-Type: application/json
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│  Spring Boot Application                                    │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. DispatcherServlet                                       │
+│     └─ Recebe requisição HTTP                              │
+│                                                              │
+│  2. SecurityFilter                                          │
+│     ├─ Extrai header "Authorization: Bearer TOKEN"         │
+│     ├─ Chama JwtService.validateToken()                    │
+│     └─ Popula SecurityContext com userId + companyId       │
+│                                                              │
+│  3. GraphQL Handler                                         │
+│     ├─ Parse query/mutation GraphQL                        │
+│     └─ Roteia para ClientController                        │
+│                                                              │
+│  4. ClientController                                        │
+│     ├─ Recebe argumento mapeado para DTO                   │
+│     └─ Chama ClientService.store(input)                    │
+│                                                              │
+│  5. ClientService                                           │
+│     ├─ Recupera company_id do contexto autenticado       │
+│     ├─ Valida entrada (CNPJ, Email, etc)                  │
+│     ├─ Valida unicidade: CNPJ + company_id                │
+│     ├─ Cria entity Client                                  │
+│     ├─ Chama repository.save()                             │
+│     ├─ Registra em audit_logs                              │
+│     └─ Retorna Client saved                                │
+│                                                              │
+│  6. ClientRepository                                        │
+│     ├─ Persiste no banco (INSERT)                          │
+│     └─ Retorna entidade com ID gerado                      │
+│                                                              │
+│  7. DatabaseLayer (MySQL/PostgreSQL)                       │
+│     ├─ Executa INSERT em clients                           │
+│     ├─ Valida constraints (UNIQUE, FK, etc)               │
+│     ├─ Insere log em audit_logs                            │
+│     └─ Retorna sucesso                                     │
+│                                                              │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+           GraphQL Response (JSON)
+           {
+             "data": {
+               "storeClient": {
+                 "id": 1,
+                 "name": "Acme Corp"
+               }
+             }
+           }
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│  Client recebe resposta                                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 3. Isolamento Multi-Tenant
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                  Database Igniscore                          │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  Table: companies                                            │
+│  ┌────┬──────────────┐                                       │
+│  │ id │ name         │                                       │
+│  ├────┼──────────────┤                                       │
+│  │ 1  │ Empresa A    │  ◄─────────────┐                     │
+│  │ 2  │ Empresa B    │                │                     │
+│  │ 3  │ Empresa C    │  ◄─────┐       │                     │
+│  └────┴──────────────┘        │       │                     │
+│                               │       │                     │
+│  Table: clients              │       │                     │
+│  ┌────┬──────────┬────────────┤       │                     │
+│  │ id │ name     │ fk_company │       │                     │
+│  ├────┼──────────┼────────────┤       │                     │
+│  │ 1  │ Cliente A │ 1          │───────┘                     │
+│  │ 2  │ Cliente B │ 1                                       │
+│  │ 3  │ Cliente C │ 2                                       │
+│  │ 4  │ Cliente D │ 2                                       │
+│  │ 5  │ Cliente E │ 3          │───────┐                    │
+│  │ 6  │ Cliente F │ 3          │───────┘                    │
+│  └────┴──────────┴────────────┘                             │
+│                                                               │
+│  Table: users                                                │
+│  ┌────┬─────────────┬────────────┐                           │
+│  │ id │ email       │ fk_company │                           │
+│  ├────┼─────────────┼────────────┤                           │
+│  │ 1  │ admin@a.com │ 1          │───┐                      │
+│  │ 2  │ user@a.com  │ 1          │───┘ Empresa A            │
+│  │ 3  │ admin@b.com │ 2          │───┐                      │
+│  │ 4  │ user@b.com  │ 2          │───┘ Empresa B            │
+│  │ 5  │ admin@c.com │ 3          │───┐                      │
+│  │ 6  │ user@c.com  │ 3          │───┘ Empresa C            │
+│  └────┴─────────────┴────────────┘                           │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+
+
+EXEMPLO: Usuário de Empresa A tenta acessar clientes
+
+┌─────────────────────────────────────────┐
+│ User: admin@a.com (company_id = 1)      │
+└────────────────┬────────────────────────┘
+                 │
+                 │ Requisição GraphQL
+                 │ clientById(id: 5)
+                 │
+                 ▼
+┌─────────────────────────────────────────┐
+│ ClientService.findById(5)               │
+│                                          │
+│ 1. Recupera company_id do contexto: 1   │
+│ 2. Busca: findByIdAndCompanyId(5, 1)    │
+│ 3. Resultado: NOT FOUND                 │
+│    (pois clientId=5 pertence a company=3)
+│                                          │
+│ ✅ SEGURANÇA: Erro genérico retornado   │
+│ "Client not found or access denied"     │
+└─────────────────────────────────────────┘
+
+   ❌ Cliente 5 é inacessível (pertence a Empresa C)
+   ✅ Isolamento de dados garantido!
+```
+
+---
+
+## 4. Validação de Segurança
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  Requisição: storeClient(input: {                        │
+│    name: "Novo Cliente"                                  │
+│    cnpj: "12.345.678/0001-99"                           │
+│    email: "contato@novocliente.com"                      │
+│  })                                                      │
+└──────────────┬───────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────┐
+│ VALIDAÇÃO 1: Autenticação                               │
+│ ├─ GET user from SecurityContext               [PASS]   │
+│ ├─ GET company from user.getCompany()          [PASS]   │
+│ └─ Se falhar → UNAUTHORIZED                   [FAIL]   │
+└──────────────┬───────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────┐
+│ VALIDAÇÃO 2: Entrada                                     │
+│ ├─ name != null && !empty                      [PASS]   │
+│ ├─ cnpj matches pattern XX.XXX.XXX/XXXX-XX    [PASS]   │
+│ ├─ email matches pattern .*@.*\\..*           [PASS]   │
+│ └─ Se falhar → BAD_REQUEST                    [FAIL]   │
+└──────────────┬───────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────┐
+│ VALIDAÇÃO 3: CNPJ                                        │
+│ ├─ Calcula dígitos verificadores                        │
+│ ├─ Compara com CNPJ fornecido               [PASS]   │
+│ └─ Se falhar → INVALID_CNPJ                 [FAIL]   │
+└──────────────┬───────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────┐
+│ VALIDAÇÃO 4: Unicidade por Tenant                        │
+│ ├─ SELECT * FROM clients                                 │
+│ │  WHERE cnpj = '12.345.678/0001-99'                    │
+│ │  AND fk_id_company = 1             [NOT FOUND]   │
+│ └─ Se encontrado → DUPLICATE_CNPJ            [FAIL]   │
+└──────────────┬───────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────┐
+│ VALIDAÇÃO 5: Email                                       │
+│ ├─ Valida formato de email               [PASS]   │
+│ └─ Se falhar → INVALID_EMAIL                    [FAIL]   │
+└──────────────┬───────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────┐
+│ ✅ TODAS VALIDAÇÕES PASSARAM                            │
+│ → Execute operação                                       │
+│ → Salve client no banco                                  │
+│ → Registre em audit_logs                                 │
+│ → Retorne client criado                                  │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 5. Ciclo de Vida do Cliente
+
+```
+┌────────────────┐
+│   NÃO EXISTE   │
+└────────┬───────┘
+         │
+         │ storeClient(...)
+         │
+         ▼
+┌────────────────────────┐
+│   ATIVO                │
+│                        │
+│ ├─ Pode ser atualizado │
+│ ├─ Pode consultar      │
+│ ├─ Listar              │
+│ └─ Associar contatos   │
+└────────┬───────────────┘
+         │
+         │ updateClient(...)
+         │ (não afeta estado)
+         │
+         ▼
+┌────────────────────────┐
+│   ATIVO (MODIFICADO)   │
+│                        │
+│ └─ Mesmas operações    │
+└──────┬────────────────┘
+       │
+       │ deactivateClient(...)
+       │
+       ▼
+┌────────────────────────┐
+│  INATIVO (SOFT DELETE) │
+│                        │
+│ ├─ Pode ser consultado │
+│ ├─ Não pode atualizar  │
+│ ├─ Não aparece em list │
+│ └─ Dados preservados   │
+└────────────────────────┘
+
+NOTA: Não há deleção física (hard delete)
+      Os dados são preservados para auditoria
+```
+
+---
+
+## 6. Integrações do Módulo Clients
+
+```
+                        ┌──────────────────┐
+                        │ Module: Clients  │
+                        └────────┬─────────┘
+                                 │
+
+        ┌────────────────────────┼────────────────────────┐
+        │                        │                        │
+        ▼                        ▼                        ▼
+   ┌─────────┐          ┌──────────────┐          ┌─────────────┐
+   │  Sales  │          │  Contacts    │          │ Addresses   │
+   │         │          │              │          │             │
+   │ ┌─────┐ │          │ ┌──────────┐ │          │ ┌─────────┐ │
+   │ │Sale ├─┼──────────┼─┤Contact   │ │          │ │Address  │ │
+   │ │     │ │          │ │client_id ├─┼──────────┼─┤client_id│ │
+   │ │FK:  │ │          │ │fk_client │ │          │ │fk_      │ │
+   │ │client├─┼──────────┼─├──────────┤ │          │ │client   │ │
+   │ │_id  │ │          │ │          │ │          │ │         │ │
+   │ └─────┘ │          │ └──────────┘ │          │ └─────────┘ │
+   │         │          │              │          │             │
+   └────┬────┘          └──────┬───────┘          └──────┬──────┘
+        │                      │                         │
+        │                      └─────────────┬──────────┘
+        │                                    │
+        │           ┌───────────────────────┘
+        │           │
+        ▼           ▼
+   ┌─────────────────────────┐
+   │  Module: Company        │
+   │                         │
+   │  ┌──────────────────┐   │
+   │  │ Company          │   │
+   │  │ id (tenant)      │   │
+   │  │ name             │   │
+   │  │ cnpj             │   │
+   │  │ ...              │   │
+   │  └────────┬─────────┘   │
+   │           │             │
+   │           │ FK owner    │
+   │           │             │
+   │  ┌────────▼──────────┐  │
+   │  │ Clients           │  │
+   │  │ fk_id_company ────┼──┤─────▶ clients table
+   │  └───────────────────┘  │
+   │                         │
+   └─────────────────────────┘
+        │
+        └─────────┬─────────────┐
+                  │             │
+        ┌─────────▼──┐  ┌──────▼────┐
+        │  Auth      │  │Audit Logs │
+        │            │  │           │
+        │┌──────────┐│  │ Track all │
+        ││User      ││  │ operations│
+        ││fk_company││  │ on clients│
+        │└──────────┘│  │           │
+        │ JWT Tokens │  └───────────┘
+        └────────────┘
+```
+
+---
+
+## 7. Modelo de Dados (Diagrama ER)
+
+```
+┌──────────────────────────────┐
+│        companies             │
+├──────────────────────────────┤
+│ pk_id_company (PK)      ║    │
+│ name_company            ║    │
+│ cnpj_company            ║    │
+│ ...                     ║    │
+└──────────────────────────────┘
+               ║
+               ║ 1
+               ║
+               ║ N
+               ║
+┌──────────────────────────────┐
+│        clients               │
+├──────────────────────────────┤
+│ pk_id_client (PK)            │
+│ name_client                  │
+│ cnpj_client                  │
+│ email_client                 │
+│ phone_client                 │
+│ number_client                │
+│ ie_client                    │
+│ uf_ie_client                 │
+│ cpf_client                   │
+│ obs_client                   │
+│ fk_id_company (FK) ◄────────┘│
+│                              │
+│ INDEXES:                     │
+│ ├─ UQ(fk_company, number)    │
+│ ├─ IDX(fk_company)           │
+│ ├─ IDX(cnpj)                 │
+│ └─ IDX(email)                │
+└──────────────────────────────┘
+       ║
+       ║ references
+       ║
+    ┌──┴──────────────────────┐
+    │                         │
+    ▼                         ▼
+┌──────────────┐     ┌──────────────┐
+│   sales      │     │   contacts   │
+│              │     │              │
+│ client_id(FK)│     │ client_id(FK)│
+│ total_amount │     │ name         │
+│ saleDate     │     │ email        │
+│ ...          │     │ ...          │
+└──────────────┘     └──────────────┘
+       ║                    ║
+       └────────┬───────────┘
+                │
+                ▼
+         ┌──────────────┐
+         │  addresses   │
+         │              │
+         │ client_id(FK)│
+         │ street       │
+         │ number       │
+         │ city         │
+         │ ...          │
+         └──────────────┘
+```
+
+---
+
+## 8. Fluxo de Segurança - Detalhado
+
+```
+CLIENT REQUEST
+│
+└─ GraphQL Query/Mutation
+   │
+   └─ POST /graphql
+      └─ Header: Authorization: Bearer eyJhbGc...
+         │
+         ▼
+    SPRING SECURITY FILTER CHAIN
+    │
+    ├─ 1. SecurityContextRepository
+    │     └─ Procura por token na requisição
+    │
+    ├─ 2. SecurityFilter (CUSTOM)
+    │     ├─ Extract: "Authorization: Bearer TOKEN"
+    │     ├─ Call: JwtService.validateToken(token)
+    │     │      └─ Verifica: assinatura, expiração, claims
+    │     ├─ Extracto: userId, companyId do token
+    │     └─ Set: SecurityContext.setAuthentication(...)
+    │
+    ├─ 3. AuthenticationProvider
+    │     └─ Valida credenciais (já feito via JWT)
+    │
+    ├─ 4. AuthorizationFilter
+    │     └─ Valida permissões (RBAC)
+    │
+    └─ 5. DispatcherServlet
+         └─ Roteia para ClientController
+            │
+            ▼
+         ClientController
+         │
+         ├─ Recebe @Argument ClientRegisterDTO
+         │
+         └─ Call: ClientService.store(input)
+            │
+            ▼
+         ClientService
+         │
+         ├─ GET: AuthenticatedUserService.getAuthenticatedCompany()
+         │       └─ Recupera company_id do ThreadLocal (seguro)
+         │
+         ├─ VALIDATE: input (CNPJ, Email, etc)
+         │
+         ├─ CHECK: Unicidade
+         │         └─ SELECT COUNT(*) FROM clients
+         │            WHERE cnpj = ? AND company_id = ?
+         │
+         ├─ CREATE: new Client()
+         │         └─ Set company_id obligatoriamente
+         │
+         ├─ SAVE: repository.save(client)
+         │        │
+         │        └─ Database INSERT
+         │           ├─ Valida constraints
+         │           └─ Garante company_id setado
+         │
+         ├─ LOG: AuditService.log(...)
+         │        └─ INSERT INTO audit_logs
+         │
+         └─ RETURN: Client criado
+
+         
+✅ GARANTIAS DE SEGURANÇA:
+   • Company_id é recuperado do contexto autenticado
+   • Nunca vem dos argumentos do usuário
+   • Todos os testes incluem validação de company_id
+   • Auditoria registra todas as operações
+```
+
+---
+
+## 9. Diagrama de Estados (State Machine)
+
+```
+                    ┌─────────────────┐
+                    │                 │
+                    │   Requisição    │
+                    │   GraphQL       │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Autenticado?    │
+                    └────┬────────┬───┘
+                         │        │
+                    Não  │        │ Sim
+                         ▼        ▼
+            ┌──────────────┐   ┌─────────────────┐
+            │ UNAUTHORIZED │   │ Token validado  │
+            └──────────────┘   └────────┬────────┘
+                                        │
+                                        ▼
+                               ┌─────────────────┐
+                               │ Operação?       │
+                               └──┬────┬────┬────┘
+                              /   │    │    \
+                    CREATE   /     │    │     \ READ
+                           /      │    │      \
+                          /    UPDATE  │   DELETE
+                         /            │        \
+                        ▼             ▼         ▼
+            ┌──────────┐  ┌──────────────┐  ┌──────────┐
+            │ VALIDATE │  │ GET + FILTER │  │ SOFT DEL │
+            │ + CREATE │  │ BY COMPANY   │  │ + AUDIT  │
+            └────┬─────┘  └──────┬───────┘  └────┬─────┘
+                 │               │               │
+                 ▼               ▼               ▼
+            ┌────────────┐  ┌──────────┐  ┌────────────┐
+            │ SAVE IN    │  │ RETURN   │  │ UPDATE DB  │
+            │ DATABASE   │  │ RESULTS  │  │ + AUDIT    │
+            └────┬───────┘  └────┬─────┘  └────┬───────┘
+                 │               │             │
+                 └───┬───────────┬─────────┬───┘
+                     │           │         │
+                     ▼           ▼         ▼
+                ┌────────────────────────────────┐
+                │ RETURN GraphQL Response        │
+                │ (JSON com resultado ou erro)   │
+                └────────────────────────────────┘
+                     │
+                     ▼
+                CLIENT receives response
+```
+
+---
+
+**Diagramas Versão**: 1.0  
+**Data**: 25 de abril de 2026
