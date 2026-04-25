@@ -42,10 +42,10 @@ O sistema utiliza um modelo **database-per-schema** com isolamento por tabela:
 ```
 
 **Vantagens deste modelo:**
-- ✅ Simplicidade operacional (um único banco de dados)
-- ✅ Baixa complexidade de backup e disaster recovery
-- ✅ Isolamento lógico eficiente
-- ✅ Facilita migrações e escalabilidade
+- Simplicidade operacional (um único banco de dados)
+- Baixa complexidade de backup e disaster recovery
+- Isolamento lógico eficiente
+- Facilita migrações e escalabilidade
 
 ---
 
@@ -150,7 +150,7 @@ public class ClientService {
     private final ClientRepository repository;
     private final AuthenticatedUserService authService;
     
-    // ✅ CORRETO: Filtra por company_id
+    // CORRETO: Filtra por company_id
     public Client findById(Integer id) {
         Integer companyId = authService.getAuthenticatedCompany().getId();
         
@@ -158,7 +158,7 @@ public class ClientService {
             .orElseThrow(() -> new ClientNotFoundException("Client not found"));
     }
     
-    // ✅ CORRETO: Lista apenas clientes da empresa
+    // CORRETO: Lista apenas clientes da empresa
     public Page<Client> listByCompany(Pageable pageable) {
         Integer companyId = authService.getAuthenticatedCompany().getId();
         
@@ -173,19 +173,19 @@ public class ClientService {
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Integer> {
     
-    // ✅ SEGURA: Filtra por company_id
+    // SEGURA: Filtra por company_id
     Optional<Client> findByIdAndCompanyId(Integer id, Integer companyId);
     
-    // ✅ SEGURA: Lista com filtro de company
+    // SEGURA: Lista com filtro de company
     Page<Client> findByCompanyId(Integer companyId, Pageable pageable);
     
-    // ✅ SEGURA: Busca por CNPJ com filtro de company
+    // SEGURA: Busca por CNPJ com filtro de company
     Optional<Client> findByCnpjAndCompanyId(String cnpj, Integer companyId);
     
-    // ❌ INSEGURA: Não deveria existir
+    // INSEGURA: Não deveria existir
     // Optional<Client> findById(Integer id);  // Sem filtro de company!
     
-    // ❌ INSEGURA: Não deveria existir
+    // INSEGURA: Não deveria existir
     // List<Client> findAll();  // Retorna TODOS os clientes!
 }
 ```
@@ -274,7 +274,7 @@ public Client findById(Integer id) {
     
     // 3. Pertence à empresa autenticada?
     if (!client.getCompany().getId().equals(company.getId())) {
-        // ✅ Levantar exceção sem revelar detalhes
+        // Levantar exceção sem revelar detalhes
         throw new UnauthorizedException("Access denied");
     }
     
@@ -360,7 +360,7 @@ public Client deactivate(Integer id) {
 ### 6.1 Mensagens de Erro - O QUE NÃO FAZER
 
 ```java
-// ❌ INSEGURO: Revela informações sensíveis
+// INSEGURO: Revela informações sensíveis
 try {
     client = repository.findById(unauthorizedClientId);
 } catch (EntityNotFoundException e) {
@@ -368,25 +368,25 @@ try {
     throw new GraphQLException("Client with ID 123 belongs to Company ABC");
 }
 
-// ❌ INSEGURO: Revela estrutura do banco de dados
+// INSEGURO: Revela estrutura do banco de dados
 throw new GraphQLException("Column 'fk_id_company' violates unique constraint");
 
-// ❌ INSEGURO: Stack trace exposto
+// INSEGURO: Stack trace exposto
 e.printStackTrace();
 ```
 
 ### 6.2 Mensagens de Erro - CORRETO
 
 ```java
-// ✅ SEGURO: Mensagem genérica, sem revelar detalhes
+// SEGURO: Mensagem genérica, sem revelar detalhes
 if (!client.getCompany().getId().equals(company.getId())) {
     throw new UnauthorizedException("Access denied");
 }
 
-// ✅ SEGURO: Não revela que cliente existe ou não
+// SEGURO: Não revela que cliente existe ou não
 throw new UnauthorizedException("Client not found or access denied");
 
-// ✅ SEGURO: Log detalhado no servidor, mensagem genérica ao cliente
+// SEGURO: Log detalhado no servidor, mensagem genérica ao cliente
 logger.warn("Unauthorized access attempt: User {} tried to access client {} from company {}",
     user.getId(), clientId, user.getCompanyId());
     
@@ -468,19 +468,19 @@ AND timestamp > DATE_SUB(NOW(), INTERVAL 24 HOUR);
 **Proteção**: JPA com parametrização automática
 
 ```java
-// ✅ SEGURO: JPA parameteriza automaticamente
+// SEGURO: JPA parameteriza automaticamente
 Optional<Client> client = repository.findByIdAndCompanyId(id, companyId);
 
-// ❌ INSEGURO: Não fazer queries com concatenação de strings
+// INSEGURO: Não fazer queries com concatenação de strings
 // "SELECT * FROM clients WHERE id = " + id;
 ```
 
 ### 8.2 CSRF (Cross-Site Request Forgery)
 
 **Proteção**: 
-- ✅ JWT tokens (stateless, sem cookies)
-- ✅ Same-origin policy
-- ✅ Validação de origin no SecurityConfig
+- JWT tokens (stateless, sem cookies)
+- Same-origin policy
+- Validação de origin no SecurityConfig
 
 ```java
 @Configuration
@@ -501,10 +501,10 @@ public class SecurityConfig {
 ### 8.3 Broken Authentication
 
 **Sistema de Proteção**:
-- ✅ Senhas com hash bcrypt
-- ✅ JWT com expiração
-- ✅ Refresh token com TTL menor
-- ✅ Validação de email
+- Senhas com hash bcrypt
+- JWT com expiração
+- Refresh token com TTL menor
+- Validação de email
 
 ```java
 @Service
@@ -517,12 +517,12 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
         
-        // ✅ Compara senha com hash
+        // Compara senha com hash
         if (!encoder.matches(password, user.getPassword())) {
             throw new UnauthorizedException("Invalid credentials");
         }
         
-        // ✅ Gera JWT com expiração
+        // Gera JWT com expiração
         String token = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         
@@ -534,9 +534,9 @@ public class AuthService {
 ### 8.4 Broken Authorization
 
 **Sistema de Controle**:
-- ✅ RBAC (Role-Based Access Control)
-- ✅ Validação de tenant em cada operação
-- ✅ Princípio do menor privilégio
+- RBAC (Role-Based Access Control)
+- Validação de tenant em cada operação
+- Princípio do menor privilégio
 
 ```java
 // Verificar permissão em cada operação
@@ -554,16 +554,16 @@ public Client deactivate(Integer id) {
 ### 8.5 Information Disclosure
 
 **Proteção**:
-- ✅ Não expor stack traces
-- ✅ Mensagens de erro genéricas
-- ✅ Sanitizar logs
-- ✅ Não revelar structure do banco
+- Não expor stack traces
+- Mensagens de erro genéricas
+- Sanitizar logs
+- Não revelar structure do banco
 
 ```java
-// ✅ SEGURO: Mensagem genérica
+// SEGURO: Mensagem genérica
 throw new UnauthorizedException("Access denied");
 
-// ❌ INSEGURO: Revela estrutura
+// INSEGURO: Revela estrutura
 throw new UnauthorizedException("Foreign key constraint violation on column fk_id_company");
 ```
 
