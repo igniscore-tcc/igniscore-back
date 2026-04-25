@@ -1,5 +1,7 @@
 package com.igniscore.api.dto;
 
+import com.igniscore.api.model.ProductType;
+
 import java.time.LocalDate;
 
 /**
@@ -38,7 +40,7 @@ public class ProductDTO {
     /**
      * Product type or category.
      */
-    private String type;
+    private ProductType type;
 
     /**
      * Product validity or expiration date.
@@ -72,7 +74,7 @@ public class ProductDTO {
         return name;
     }
 
-    public String getType() {
+    public ProductType getType() {
         return type;
     }
 
@@ -102,7 +104,7 @@ public class ProductDTO {
         this.name = name;
     }
 
-    public void setType(String type) {
+    public void setType(ProductType type) {
         this.type = type;
     }
 
