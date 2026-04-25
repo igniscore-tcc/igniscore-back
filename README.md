@@ -166,9 +166,9 @@ Todos os documentos estão em `/docs/`:
 
 | Componente | Status |
 |-----------|--------|
-| Desenvolvimento | ✅ Completo |
-| Documentação | ✅ Completo |
-| Testes | ✅ Implementado |
+| Desenvolvimento | Em desenvolvimento |
+| Documentação | Em desenvolvimento |
+| Testes | Não iniciado |
 | Segurança | ✅ Auditado |
 | Produção | ✅ Ativo |
 
