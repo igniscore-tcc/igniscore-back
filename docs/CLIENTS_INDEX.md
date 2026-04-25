@@ -1,28 +1,28 @@
 # Documentação Completa – Módulo Clients (Igniscore)
 
-## 📋 Índice de Documentação
+## Índice de Documentação
 
 Este é um índice centralizado da documentação do módulo **Clients** do projeto Igniscore. Abaixo você encontrará todas as documentações disponíveis, organizadas por tema.
 
 ---
 
-## 📂 Documentos Disponíveis
+## Documentos Disponíveis
 
-### 1. 📖 [README Técnico – Módulo Clients](./CLIENTS_README.md)
+### 1. [README Técnico – Módulo Clients](./CLIENTS_README.md)
 **Tipo**: Documentação Técnica Completa  
 **Público Alvo**: Desenvolvedores, Arquitetos, Product Managers
 
 Documentação técnica abrangente cobrindo:
-- ✅ Visão geral e objetivos do módulo
-- ✅ Modelo de dados (tabela `clients`, campos, constraints)
-- ✅ Regras de negócio e ciclo de vida
-- ✅ Arquitetura de camadas (Controller → Service → Repository)
-- ✅ Operações GraphQL disponíveis (Queries e Mutations)
-- ✅ Integrações com outros módulos
-- ✅ Segurança e isolamento multi-tenant
-- ✅ Tratamento de erros
-- ✅ Configuração e deployment
-- ✅ Testes
+- Visão geral e objetivos do módulo
+- Modelo de dados (tabela `clients`, campos, constraints)
+- Regras de negócio e ciclo de vida
+- Arquitetura de camadas (Controller → Service → Repository)
+- Operações GraphQL disponíveis (Queries e Mutations)
+- Integrações com outros módulos
+- Segurança e isolamento multi-tenant
+- Tratamento de erros
+- Configuração e deployment
+- Testes
 
 **Seções Principais**:
 - [Modelo de Dados](./CLIENTS_README.md#modelo-de-dados)
@@ -32,19 +32,19 @@ Documentação técnica abrangente cobrindo:
 
 ---
 
-### 2. 🔧 [Guia Prático – Exemplos de Uso](./CLIENTS_EXAMPLES.md)
+### 2. [Guia Prático – Exemplos de Uso](./CLIENTS_EXAMPLES.md)
 **Tipo**: Guia de Referência com Exemplos  
 **Público Alvo**: Desenvolvedores Frontend, Testers, Integradores
 
 Exemplos práticos e prontos para usar cobrindo:
-- ✅ Setup e autenticação (obtenção de JWT)
-- ✅ Criação de clientes (simples, completa, em lote)
-- ✅ Consultas e buscas (paginação, busca específica)
-- ✅ Atualizações parciais e em lote
-- ✅ Deleção e inativação
-- ✅ Casos de erro comuns com respostas reais
-- ✅ Integração com módulos relacionados
-- ✅ Dicas de performance
+- Setup e autenticação (obtenção de JWT)
+- Criação de clientes (simples, completa, em lote)
+- Consultas e buscas (paginação, busca específica)
+- Atualizações parciais e em lote
+- Deleção e inativação
+- Casos de erro comuns com respostas reais
+- Integração com módulos relacionados
+- Dicas de performance
 
 **Seções Principais**:
 - [Exemplos de Criação](./CLIENTS_EXAMPLES.md#criação-de-clientes)
@@ -54,20 +54,20 @@ Exemplos práticos e prontos para usar cobrindo:
 
 ---
 
-### 3. 🔒 [Guia de Segurança e Multi-Tenancy](./CLIENTS_SECURITY.md)
+### 3. [Guia de Segurança e Multi-Tenancy](./CLIENTS_SECURITY.md)
 **Tipo**: Documentação de Segurança  
 **Público Alvo**: Arquitetos, Especialistas de Segurança, Code Reviewers
 
 Documentação detalhada sobre segurança, isolamento de dados e conformidade:
-- ✅ Arquitetura multi-tenant (database-per-schema)
-- ✅ Fluxos de autenticação e autorização
-- ✅ Filtragem de dados por tenant
-- ✅ Validações de segurança por operação (CREATE, READ, UPDATE, DELETE)
-- ✅ Tratamento seguro de erros
-- ✅ Auditoria e logging
-- ✅ Proteção contra ataques comuns (SQL Injection, CSRF, XSS)
-- ✅ Testes de segurança
-- ✅ Checklist de deploy
+- Arquitetura multi-tenant (database-per-schema)
+- Fluxos de autenticação e autorização
+- Filtragem de dados por tenant
+- Validações de segurança por operação (CREATE, READ, UPDATE, DELETE)
+- Tratamento seguro de erros
+- Auditoria e logging
+- Proteção contra ataques comuns (SQL Injection, CSRF, XSS)
+- Testes de segurança
+- Checklist de deploy
 
 **Seções Principais**:
 - [Arquitetura Multi-Tenant](./CLIENTS_SECURITY.md#2-arquitetura-multi-tenant)
@@ -78,7 +78,7 @@ Documentação detalhada sobre segurança, isolamento de dados e conformidade:
 
 ---
 
-## 🎯 Guia Rápido por Caso de Uso
+## Guia Rápido por Caso de Uso
 
 ### Para Front-End Developer
 1. Leia [Setup e Autenticação](./CLIENTS_EXAMPLES.md#setup-e-autenticação)
@@ -112,7 +112,7 @@ Documentação detalhada sobre segurança, isolamento de dados e conformidade:
 
 ---
 
-## 📊 Resumo do Módulo
+## Resumo do Módulo
 
 | Aspecto | Descrição |
 |--------|-----------|
@@ -123,12 +123,12 @@ Documentação detalhada sobre segurança, isolamento de dados e conformidade:
 | **Autenticação** | JWT Bearer Token |
 | **API** | GraphQL (queries + mutations) |
 | **Integração** | Sales, Contacts, Addresses, Company |
-| **Operações CRUD** | ✅ Create, ✅ Read, ✅ Update, ⚠️ Delete (Soft) |
+| **Operações CRUD** | Create, Read, Update, Delete (Soft) |
 | **Status** | Produção |
 
 ---
 
-## 🚀 Fluxo Rápido: Criar um Cliente
+## Fluxo Rápido: Criar um Cliente
 
 ### 1. Autenticar
 ```bash
@@ -167,7 +167,7 @@ query {
 
 ---
 
-## 📞 Contatos e Suporte
+## Contatos e Suporte
 
 | Função | Contato |
 |--------|---------|
@@ -178,7 +178,7 @@ query {
 
 ---
 
-## 🔄 Histórico de Versões
+## Histórico de Versões
 
 | Versão | Data | Atualizações |
 |--------|------|-------------|
@@ -186,34 +186,34 @@ query {
 
 ---
 
-## 📝 Notas Importantes
+## Notas Importantes
 
 ### Multi-Tenancy
-- ⚠️ CADA operação deve validar que o cliente pertence à empresa autenticada
-- ⚠️ Nunca retornar clientes de outras empresas
-- ⚠️ Logs de auditoria são obrigatórios
+- CADA operação deve validar que o cliente pertence à empresa autenticada
+- Nunca retornar clientes de outras empresas
+- Logs de auditoria são obrigatórios
 
 ### Segurança
-- ⚠️ Sempre usar JWT para autenticação
-- ⚠️ Senhas devem ser hasheadas com bcrypt
-- ⚠️ Mensagens de erro não devem revelar detalhes
-- ⚠️ Validar CNPJ com dígitos verificadores
+- Sempre usar JWT para autenticação
+- Senhas devem ser hasheadas com bcrypt
+- Mensagens de erro não devem revelar detalhes
+- Validar CNPJ com dígitos verificadores
 
 ### Performance
-- 💡 Use paginação (máximo 100 registros por página)
-- 💡 Implemente cache para queries frequentes
-- 💡 Use índices em `fk_id_company`, `cnpj`, `email`
-- 💡 Considere cursor-based pagination para grandes datasets
+- Use paginação (máximo 100 registros por página)
+- Implemente cache para queries frequentes
+- Use índices em `fk_id_company`, `cnpj`, `email`
+- Considere cursor-based pagination para grandes datasets
 
 ### Validações
-- ✅ CNPJ deve ser válido e único por empresa
-- ✅ Email deve estar em formato válido
-- ✅ CPF (se fornecido) deve ser válido
-- ✅ Campos obrigatórios: name, cnpj, email
+- CNPJ deve ser válido e único por empresa
+- Email deve estar em formato válido
+- CPF (se fornecido) deve ser válido
+- Campos obrigatórios: name, cnpj, email
 
 ---
 
-## 🎓 Recursos Adicionais
+## Recursos Adicionais
 
 ### Especificações
 - [GraphQL Spec](https://spec.graphql.org/)
@@ -231,7 +231,7 @@ query {
 
 ---
 
-## ✅ Checklist Inicial
+## Checklist Inicial
 
 Novo desenvolvedor? Siga este checklist:
 
@@ -252,6 +252,6 @@ Novo desenvolvedor? Siga este checklist:
 
 **Documentação Versão**: 1.0  
 **Data**: 25 de abril de 2026  
-**Status**: ✅ Completo e em Produção
+**Status**: Completo e em Produção
 
 Para dúvidas ou contribuições, consulte o [README técnico principal](./CLIENTS_README.md).
