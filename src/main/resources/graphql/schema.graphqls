@@ -25,6 +25,7 @@ type Product {
     validity: Date!
     lot: String!
     price: Float!
+    status: Boolean
     company: Company
 }
 
@@ -57,7 +58,8 @@ type Query {
     users: [User!]!
     user(id: ID!): User
     client(id: ID!): Client
-    clients: [Client!]!
+    clients(page: Int, size: Int): [Client!]!
+    products(page : Int, size: Int): [ProductOutput!]!
 }
 
 type Mutation {
@@ -85,6 +87,19 @@ type Mutation {
         validity: Date!,
         lot: String!,
         price: Float!
+    ): ProductOutput!
+
+    deleteProduct(
+        id: ID!
+    ): Product!
+
+    updateProduct(
+        id: ID!,
+        name: String,
+        type: String,
+        validity: Date,
+        lot: String,
+        price: Float
     ): ProductOutput!
 
     storeClient(input: ClientRegisterInput!): Client
