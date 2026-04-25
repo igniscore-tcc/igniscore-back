@@ -81,7 +81,7 @@ type Mutation {
         cnpj: String!
     ): User!
 
-    createProduct(
+    storeProduct(
         name: String!,
         type: String!,
         validity: Date!,
