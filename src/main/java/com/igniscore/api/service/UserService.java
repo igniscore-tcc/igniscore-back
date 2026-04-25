@@ -28,6 +28,7 @@ public class UserService {
 
     private final UserRepository repository;
     private final CompanyUtils companyUtils;
+    private final AuthenticatedUserService authUserService;
 
     /**
      * Constructor-based dependency injection (preferred over field injection).
@@ -35,9 +36,10 @@ public class UserService {
      * @param repository   user persistence repository
      * @param companyUtils utility for company validation and retrieval
      */
-    public UserService(UserRepository repository, CompanyUtils companyUtils) {
+    public UserService(UserRepository repository, CompanyUtils companyUtils, AuthenticatedUserService authUserService) {
         this.repository = repository;
         this.companyUtils = companyUtils;
+        this.authUserService = authUserService;
     }
 
     /**
@@ -51,17 +53,15 @@ public class UserService {
      *     <li>Persist changes</li>
      * </ol>
      *
-     * @param id          user identifier
-     * @param companyId   target company identifier
+     * @param companyCnpj   target company identifier
      * @return updated user
      *
      * @throws RuntimeException if user or company is not found
      */
-    public User updateUserCompany(Integer id, Integer companyId) {
-        User user = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found."));
+    public User updateUserCompany(String companyCnpj) {
+        User user = this.authUserService.getUserOrThrow();
 
-        Company company = companyUtils.existsCompany(companyId);
+        Company company = companyUtils.existsCompany(companyCnpj);
 
         user.setCompany(company);
 

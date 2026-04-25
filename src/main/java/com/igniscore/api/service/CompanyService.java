@@ -1,7 +1,9 @@
 package com.igniscore.api.service;
 
 import com.igniscore.api.model.Company;
+import com.igniscore.api.model.User;
 import com.igniscore.api.repository.CompanyRepository;
+import com.igniscore.api.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,14 +27,18 @@ import java.util.List;
 public class CompanyService {
 
     private final CompanyRepository repository;
+    private final AuthenticatedUserService authUserService;
+    private final UserRepository userRepository;
 
     /**
      * Constructor-based dependency injection.
      *
      * @param repository company persistence repository
      */
-    public CompanyService(CompanyRepository repository) {
+    public CompanyService(CompanyRepository repository, AuthenticatedUserService authUserService, UserRepository userRepository) {
         this.repository = repository;
+        this.authUserService = authUserService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -62,6 +68,8 @@ public class CompanyService {
     public Company create(String name, String cnpj, String ie,
                           String ufIe, String email, String phone) {
 
+        User user = this.authUserService.getUserOrThrow();
+
         Company company = new Company();
 
         company.setName(name);
@@ -71,6 +79,11 @@ public class CompanyService {
         company.setEmail(email);
         company.setPhone(phone);
 
-        return repository.save(company);
+        Company savedCompany = repository.save(company);
+
+        user.setCompany(savedCompany);
+        userRepository.save(user);
+
+        return savedCompany;
     }
 }

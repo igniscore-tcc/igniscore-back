@@ -1,7 +1,13 @@
 package com.igniscore.api.repository;
 
+import com.igniscore.api.model.Client;
+import com.igniscore.api.model.Company;
 import com.igniscore.api.model.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
 
 /**
  * Repository interface for {@link Product} entity persistence.
@@ -22,4 +28,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * </ul>
  */
 public interface ProductRepository extends JpaRepository<Product, Integer> {
+    Page<Product> findByCompany(Company company, Pageable pageable);
 }

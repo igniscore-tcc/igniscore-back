@@ -3,6 +3,8 @@ package com.igniscore.api.repository;
 import com.igniscore.api.model.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 /**
  * Repository interface for {@link Company} entity persistence.
  *
@@ -24,4 +26,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * </ul>
  */
 public interface CompanyRepository extends JpaRepository<Company, Integer> {
+    Optional<Company> findByCnpj(String cnpj);
 }

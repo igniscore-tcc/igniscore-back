@@ -31,14 +31,13 @@ public class CompanyUtils {
     /**
      * Validates that a company exists by its identifier.
      *
-     * @param id company identifier
+     * @param cnpj company identifier
      * @return existing company
      *
      * @throws RuntimeException if the company is not found
      */
-    public Company existsCompany(Integer id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Company not found"));
+    public Company existsCompany(String cnpj) {
+        return repository.findByCnpj(cnpj).orElseThrow(() -> new RuntimeException("Company not found"));
     }
 
     /**
