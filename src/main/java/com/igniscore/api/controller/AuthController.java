@@ -92,7 +92,7 @@ public class AuthController {
      */
     @PostMapping("/register")
     @SuppressWarnings("unused")
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterDTO data) {
+    public ResponseEntity<LoginResponseDTO> register(@RequestBody @Valid RegisterDTO data) {
         if(this.repository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().build();
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
@@ -103,8 +103,10 @@ public class AuthController {
         newUser.setPassword(encryptedPassword);
         newUser.setRole(data.role());
 
-        this.repository.save(newUser);
+        User user = this.repository.save(newUser);
 
-        return ResponseEntity.ok().build();
+        var token = jwtService.generateJwt(user);
+
+        return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 }

@@ -76,8 +76,7 @@ type Mutation {
     ): User!
 
     updateUserCompany(
-        id: ID!,
-        company: ID!
+        cnpj: String!
     ): User!
 
     createProduct(
