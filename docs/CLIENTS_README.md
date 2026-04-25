@@ -23,7 +23,7 @@ O sistema não gerencia dados de inadimplência externa ou regras de negócio fi
 |-------|------|-----------|-----------|
 | `pk_id_client` | INT | PK, Auto-increment | Identificador único do cliente |
 | `name_client` | VARCHAR(100) | NOT NULL | Nome do cliente/razão social |
-| `cnpj_client` | VARCHAR(18) | NOT NULL | CNPJ do cliente (formato: XX.XXX.XXX/XXXX-XX) |
+| `cnpj_client` | VARCHAR(18) | - | CNPJ do cliente (formato: XXXXXXXXXXXXXX |
 | `email_client` | VARCHAR(255) | NOT NULL | Email de contato principal |
 | `phone_client` | VARCHAR(20) | - | Telefone para contato |
 | `number_client` | INT | NOT NULL, UNIQUE* | Número sequencial do cliente na empresa |
@@ -51,10 +51,10 @@ ALTER TABLE clients ADD CONSTRAINT uq_client_per_company
 ## Regras de Negócio
 
 ### Isolamento Multi-Tenant
-- ✅ Cada cliente pertence exclusivamente a uma empresa
-- ✅ Clientes podem ter dados duplicados entre empresas diferentes
-- ✅ Dentro de uma mesma empresa, `number_client` deve ser único
-- ✅ Ao deletar uma empresa, todos seus clientes são deletados em cascata
+- Cada cliente pertence exclusivamente a uma empresa
+- Clientes podem ter dados duplicados entre empresas diferentes
+- Dentro de uma mesma empresa, `number_client` deve ser único
+- Ao deletar uma empresa, todos seus clientes são deletados em cascata
 
 ### Ciclo de Vida do Cliente
 - **Criação**: Requer nome, CNPJ, email e empresa válida
@@ -63,10 +63,10 @@ ALTER TABLE clients ADD CONSTRAINT uq_client_per_company
 - **Deleção**: Apenas usuários com permissão podem deletar clientes (com auditoria)
 
 ### Acesso e Autorização
-- ✅ O cliente **não possui acesso** ao sistema
-- ✅ Apenas usuários autenticados (proprietários e funcionários) da empresa podem acessar seus clientes
-- ✅ Nenhum usuário pode acessar clientes de outra empresa
-- ✅ Controle de acesso baseado em contexto de empresa (tenant ID)
+- O cliente **não possui acesso** ao sistema
+- Apenas usuários autenticados (proprietários e funcionários) da empresa podem acessar seus clientes
+- Nenhum usuário pode acessar clientes de outra empresa
+- Controle de acesso baseado em contexto de empresa (tenant ID)
 
 ### Validações
 - CNPJ deve ser válido (formato e dígitos verificadores)
@@ -214,10 +214,10 @@ mutation {
 ```
 
 **Validações**:
-- ✅ Nome não pode estar vazio
-- ✅ CNPJ deve ser válido e único dentro da empresa
-- ✅ Email deve estar em formato válido
-- ✅ Empresa deve existir e estar ativa
+- Nome não pode estar vazio
+- CNPJ deve ser válido e único dentro da empresa
+- Email deve estar em formato válido
+- Empresa deve existir e estar ativa
 
 **Retorno**: Objeto `Client` completo criado
 
@@ -259,10 +259,10 @@ mutation {
 **Comportamento**: Apenas campos fornecidos são atualizados (PATCH semântico)
 
 **Validações**:
-- ✅ Cliente deve existir
-- ✅ Cliente deve pertencer à empresa autenticada
-- ✅ CNPJ atualizado deve ser único (se modificado)
-- ✅ Email atualizado deve ser válido (se modificado)
+- Cliente deve existir
+- Cliente deve pertencer à empresa autenticada
+- CNPJ atualizado deve ser único (se modificado)
+- Email atualizado deve ser válido (se modificado)
 
 **Retorno**: Objeto `Client` atualizado
 
@@ -282,8 +282,8 @@ mutation {
 **Comportamento**: Marca o cliente como inativo sem deletar do banco
 
 **Validações**:
-- ✅ Cliente deve existir
-- ✅ Cliente deve pertencer à empresa autenticada
+- Cliente deve existir
+- Cliente deve pertencer à empresa autenticada
 
 **Retorno**: Objeto `Client` com status atualizado
 
@@ -482,9 +482,9 @@ public class ClientService {
 ```
 
 ### Auditoria
-- ✅ Registrar quem criou o cliente e quando
-- ✅ Registrar atualizações com timestamp
-- ✅ Não revelar informações de clientes de outras empresas em erros
+- Registrar quem criou o cliente e quando
+- Registrar atualizações com timestamp
+- Não revelar informações de clientes de outras empresas em erros
 
 ---
 
@@ -640,15 +640,15 @@ GRAPHQL_SERVLET_PATH=/graphql
 ## Testes
 
 ### Testes Unitários (ClientService)
-- ✅ Teste de criação com validações
-- ✅ Teste de atualização parcial
-- ✅ Teste de isolamento de tenant
-- ✅ Teste de edge cases (CNPJ duplicado, email inválido)
+- Teste de criação com validações
+- Teste de atualização parcial
+- Teste de isolamento de tenant
+- Teste de edge cases (CNPJ duplicado, email inválido)
 
 ### Testes de Integração (ClientController)
-- ✅ Teste de endpoint GraphQL completo
-- ✅ Teste de autenticação e autorização
-- ✅ Teste de paginação
+- Teste de endpoint GraphQL completo
+- Teste de autenticação e autorização
+- Teste de paginação
 
 **Executar testes:**
 ```bash
