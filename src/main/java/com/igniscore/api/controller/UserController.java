@@ -59,13 +59,12 @@ public class UserController {
     /**
      * Updates the company associated with a user.
      *
-     * @param id      user identifier
-     * @param company company identifier
+     * @param cnpj company identifier
      * @return updated user
      */
     @MutationMapping
-    public User updateUserCompany(@Argument Integer id, @Argument Integer company) {
-        return service.updateUserCompany(id, company);
+    public User updateUserCompany(@Argument String cnpj) {
+        return service.updateUserCompany(cnpj);
     }
 
     /**
