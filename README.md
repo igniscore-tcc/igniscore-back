@@ -104,7 +104,7 @@ Consulte [CLIENTS_SECURITY.md](docs/CLIENTS_SECURITY.md) para detalhes sobre:
 - Testes de segurança
 - Checklist de deploy
 
-## 📋 Guia por Perfil
+## Guia por Perfil
 
 ### Frontend Developer
 1. Leia [Setup e Autenticação](docs/CLIENTS_EXAMPLES.md#setup-e-autenticação)
@@ -129,7 +129,7 @@ Consulte [CLIENTS_SECURITY.md](docs/CLIENTS_SECURITY.md) para detalhes sobre:
 3. Conheça [Regras de Negócio](docs/CLIENTS_README.md#regras-de-negócio)
 4. Explore [Operações Disponíveis](docs/CLIENTS_README.md#operações-disponíveis-graphql)
 
-## 🛠 Setup e Desenvolvimento
+## Setup e Desenvolvimento
 
 ### Pré-requisitos
 - Java 21+
