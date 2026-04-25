@@ -132,9 +132,9 @@ Consulte [CLIENTS_SECURITY.md](docs/CLIENTS_SECURITY.md) para detalhes sobre:
 ## 🛠 Setup e Desenvolvimento
 
 ### Pré-requisitos
-- Java 11+
+- Java 21+
 - Maven 3.8+
-- PostgreSQL 13+
+- PostgreSQL 17+
 - (Opcional) Docker Compose
 
 ### Executar Localmente
