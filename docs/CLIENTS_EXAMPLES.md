@@ -834,11 +834,11 @@ query GetMultipleClients {
 
 | Operação | Tipo | Endpoint | Autenticação | Paginação |
 |----------|------|----------|--------------|-----------|
-| Criar cliente | Mutation | `storeClient` | ✅ Obrigatória | ❌ N/A |
-| Atualizar cliente | Mutation | `updateClient` | ✅ Obrigatória | ❌ N/A |
-| Inativar cliente | Mutation | `deactivateClient` | ✅ Obrigatória | ❌ N/A |
-| Listar clientes | Query | `clients` | ✅ Obrigatória | ✅ Sim |
-| Buscar por ID | Query | `clientById` | ✅ Obrigatória | ❌ N/A |
+| Criar cliente | Mutation | `storeClient` | Obrigatória | N/A |
+| Atualizar cliente | Mutation | `updateClient` | Obrigatória | N/A |
+| Inativar cliente | Mutation | `deactivateClient` | Obrigatória | N/A |
+| Listar clientes | Query | `clients` | Obrigatória | Sim |
+| Buscar por ID | Query | `clientById` | Obrigatória | N/A |
 
 ---
 
