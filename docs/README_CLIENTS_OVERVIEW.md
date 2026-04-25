@@ -1,24 +1,24 @@
 # Documentação do Módulo Clients – Sumário Executivo
 
-## 🎯 Documento de Referência Rápida
+## Documento de Referência Rápida
 
 Este arquivo serve como **ponto de entrada rápido** para toda a documentação do módulo Clients. Use-o para navegar rapidamente para o documento que você precisa.
 
 ---
 
-## 📊 Status do Módulo
+## Status do Módulo
 
 | Aspecto | Status | Detalhes |
 |---------|--------|----------|
-| **Desenvolvimento** | ✅ Completado | Todas as operações CRUD implementadas |
-| **Testes** | ✅ Implementado | Testes unitários e integração |
-| **Documentação** | ✅ Completo | 6 documentos detalhados |
-| **Segurança** | ✅ Auditado | Isolamento multi-tenant garantido |
-| **Produção** | ✅ Ativo | Rodando em ambiente de produção |
+| **Desenvolvimento** | Completado | Todas as operações CRUD implementadas |
+| **Testes** | Implementado | Testes unitários e integração |
+| **Documentação** | Completo | 6 documentos detalhados |
+| **Segurança** | Auditado | Isolamento multi-tenant garantido |
+| **Produção** | Ativo | Rodando em ambiente de produção |
 
 ---
 
-## 📚 Documentos Disponíveis
+## Documentos Disponíveis
 
 ### 1. **README Técnico** (CLIENTS_README.md)
 **Use quando**: Você precisa entender como o módulo funciona tecnicamente
@@ -157,9 +157,9 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 ---
 
-## 🛣️ Roteiros Recomendados por Perfil
+## Roteiros Recomendados por Perfil
 
-### 👨‍💻 Sou Desenvolvedor Backend (Novo no Projeto)
+### Sou Desenvolvedor Backend (Novo no Projeto)
 
 1. **Semana 1**:
    - Leia: [Quick Start](CLIENTS_QUICKSTART.md) (5 min)
@@ -185,7 +185,7 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 ---
 
-### 👨‍💻 Sou Desenvolvedor Frontend
+### Sou Desenvolvedor Frontend
 
 1. **Quick Start** (5 min):
    - Leia: [Quick Start](CLIENTS_QUICKSTART.md)
@@ -209,7 +209,7 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 ---
 
-### 🔒 Sou Especialista em Segurança
+### Sou Especialista em Segurança
 
 1. **Arquitetura Multi-Tenant** (30 min):
    - [Arquitetura Multi-Tenant](CLIENTS_SECURITY.md#2-arquitetura-multi-tenant)
@@ -230,7 +230,7 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 ---
 
-### 📊 Sou Product Manager / Business Analyst
+### Sou Product Manager / Business Analyst
 
 1. **Visão Geral** (10 min):
    - [Visão Geral do Módulo](CLIENTS_README.md#visão-geral)
@@ -251,7 +251,7 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 ---
 
-### 🧪 Sou QA / Tester
+### Sou QA / Tester
 
 1. **Operações** (10 min):
    - [Operações GraphQL](CLIENTS_README.md#operações-disponíveis-graphql)
@@ -273,7 +273,7 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 ---
 
-## 🔍 Busca Rápida por Tópico
+## Busca Rápida por Tópico
 
 | Tópico | Documento | Seção |
 |--------|-----------|-------|
@@ -290,7 +290,7 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 ---
 
-## 📈 Estatísticas da Documentação
+## Estatísticas da Documentação
 
 | Métrica | Valor |
 |---------|-------|
@@ -304,7 +304,7 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 ---
 
-## ✅ Checklist: Você está Pronto?
+## Checklist: Você está Pronto?
 
 - [ ] Leu o Quick Start
 - [ ] Entende o Modelo de Dados
@@ -317,11 +317,11 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 - [ ] Fez code review do módulo
 - [ ] Testou em ambiente local
 
-**Se marcou todos**: Parabéns! Você é proficiente no módulo Clients! 🎉
+**Se marcou todos**: Parabéns! Você é proficiente no módulo Clients!
 
 ---
 
-## 🆘 Ainda tem Dúvidas?
+## Ainda tem Dúvidas?
 
 ### Checklist Rápido:
 
@@ -332,13 +332,13 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 5. **Veja diagramas** ([CLIENTS_ARCHITECTURE.md](CLIENTS_ARCHITECTURE.md))
 
 ### Se não encontrar:
-- 📧 Envie email: dev@igniscore.com
-- 🐛 Abra issue no GitHub
-- 💬 Converse com o time
+- Envie email: andersongamasilva08@gmail.com
+- Abra issue no GitHub
+- Converse com o time
 
 ---
 
-## 📝 Histórico de Atualizações
+## Histórico de Atualizações
 
 | Versão | Data | Atualizações |
 |--------|------|-------------|
@@ -346,7 +346,7 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 ---
 
-## 🎓 Próximas Etapas Sugeridas
+## Próximas Etapas Sugeridas
 
 1. **Leia este documento** (5 min) ← Você está aqui
 2. **Escolha seu roteiro** acima (baseado seu perfil)
@@ -359,11 +359,11 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 **Versão**: 1.0  
 **Data**: 25 de abril de 2026  
-**Status**: ✅ Documentação Completa e Pronta para Uso
+**Status**: Documentação Completa e Pronta para Uso
 
 ---
 
-## 🚀 Atalhos Diretos
+## Atalhos Diretos
 
 | Preciso... | Link |
 |-----------|------|
@@ -376,4 +376,4 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 ---
 
-**Bem-vindo ao Módulo Clients do Igniscore! Bom trabalho! 💪**
+**Bem-vindo ao Módulo Clients do Igniscore! Bom trabalho!**

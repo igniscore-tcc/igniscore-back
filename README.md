@@ -2,7 +2,7 @@
 
 Plataforma de gestão de clientes e produtos com suporte completo a multi-tenancy, autenticação JWT e operações GraphQL.
 
-## 🎯 Visão Geral
+## Visão Geral
 
 O **Igniscore** é uma aplicação Spring Boot que fornece uma API GraphQL robusta para gerenciar:
 - **Clients**: Gestão de clientes com isolamento por empresa (tenant)
@@ -11,7 +11,7 @@ O **Igniscore** é uma aplicação Spring Boot que fornece uma API GraphQL robus
 - **Users**: Autenticação e autorização com JWT
 - **Authentication**: Sistema seguro de login e controle de acesso
 
-## 📚 Documentação de Clientes
+## Documentação de Clientes
 
 Toda a documentação detalhada do módulo de clientes está em `/docs/`:
 
@@ -25,7 +25,7 @@ Toda a documentação detalhada do módulo de clientes está em `/docs/`:
 | [CLIENTS_SECURITY.md](docs/CLIENTS_SECURITY.md) | Segurança, multi-tenancy, proteção contra ataques | Arquitetos, DevOps |
 | [CLIENTS_INDEX.md](docs/CLIENTS_INDEX.md) | Índice centralizado de toda a documentação | Referência |
 
-## 🚀 Início Rápido
+## Início Rápido
 
 ### 1. Autenticação (Obter JWT Token)
 
@@ -70,7 +70,7 @@ query {
 }
 ```
 
-## 📊 Arquitetura
+## Arquitetura
 
 ```
 api/
@@ -83,18 +83,18 @@ api/
 └── utils/           # Utilitários (Auth, Validação)
 ```
 
-## ✨ Características Principais
+## Características Principais
 
-- ✅ **Multi-Tenancy**: Isolamento completo de dados por empresa
-- ✅ **GraphQL API**: Queries e Mutations tipadas e documentadas
-- ✅ **Autenticação JWT**: Token-based com expiração configurável
-- ✅ **Autorização**: Controle de acesso baseado em role (ADMIN, USER)
-- ✅ **Validações**: CNPJ, Email, CPF, IE com regras de negócio
-- ✅ **Paginação**: Suporte a listagens com offset/limit
-- ✅ **Tratamento de Erros**: Mensagens seguras e estruturadas
-- ✅ **Auditoria**: Logs de operações críticas
+- **Multi-Tenancy**: Isolamento completo de dados por empresa
+- **GraphQL API**: Queries e Mutations tipadas e documentadas
+- **Autenticação JWT**: Token-based com expiração configurável
+- **Autorização**: Controle de acesso baseado em role (ADMIN, USER)
+- **Validações**: CNPJ, Email, CPF, IE com regras de negócio
+- **Paginação**: Suporte a listagens com offset/limit
+- **Tratamento de Erros**: Mensagens seguras e estruturadas
+- **Auditoria**: Logs de operações críticas
 
-## 🔒 Segurança
+## Segurança
 
 Consulte [CLIENTS_SECURITY.md](docs/CLIENTS_SECURITY.md) para detalhes sobre:
 - Arquitetura multi-tenant
@@ -104,7 +104,7 @@ Consulte [CLIENTS_SECURITY.md](docs/CLIENTS_SECURITY.md) para detalhes sobre:
 - Testes de segurança
 - Checklist de deploy
 
-## 📋 Guia por Perfil
+## Guia por Perfil
 
 ### Frontend Developer
 1. Leia [Setup e Autenticação](docs/CLIENTS_EXAMPLES.md#setup-e-autenticação)
@@ -129,7 +129,7 @@ Consulte [CLIENTS_SECURITY.md](docs/CLIENTS_SECURITY.md) para detalhes sobre:
 3. Conheça [Regras de Negócio](docs/CLIENTS_README.md#regras-de-negócio)
 4. Explore [Operações Disponíveis](docs/CLIENTS_README.md#operações-disponíveis-graphql)
 
-## 🛠 Setup e Desenvolvimento
+## Setup e Desenvolvimento
 
 ### Pré-requisitos
 - Java 21+
@@ -151,7 +151,7 @@ mvn spring-boot:run
 # GraphQL Endpoint: http://localhost:8080/graphql
 ```
 
-## 📖 Estrutura da Documentação
+## Estrutura da Documentação
 
 Todos os documentos estão em `/docs/`:
 
@@ -162,31 +162,23 @@ Todos os documentos estão em `/docs/`:
 - **CLIENTS_SECURITY.md** → Tudo sobre segurança e multi-tenancy
 - **CLIENTS_QUICKSTART.md** → Guia rápido de início
 
-## 📊 Status do Projeto
+## Status do Projeto
 
 | Componente | Status |
 |-----------|--------|
-| Desenvolvimento | ✅ Completo |
-| Documentação | ✅ Completo |
-| Testes | ✅ Implementado |
-| Segurança | ✅ Auditado |
-| Produção | ✅ Ativo |
+| Desenvolvimento | Em desenvolvimento |
+| Documentação | Em desenvolvimento |
+| Testes | Não iniciado |
+| Segurança | Auditado |
+| Produção | Ativo |
 
-## 🤝 Contribuindo
+## Contribuindo
 
 1. Consulte a documentação em `/docs/` antes de começar
 2. Siga as convenções de código existentes
 3. Execute os testes antes de fazer commit
 4. Mantenha a segurança multi-tenant em mente
 
-## 📞 Contatos
-
-| Área | Contato |
-|------|---------|
-| Desenvolvimento | dev@igniscore.com |
-| Segurança | security@igniscore.com |
-| DevOps | ops@igniscore.com |
-
-## 📝 Licença
+## Licença
 
 TCC - Trabalho de Conclusão de Curso
