@@ -81,26 +81,13 @@ type Mutation {
         cnpj: String!
     ): User!
 
-    createProduct(
-        name: String!,
-        type: String!,
-        validity: Date!,
-        lot: String!,
-        price: Float!
-    ): ProductOutput!
+    storeProduct(input: ProductStoreInput!): Product!
 
     deleteProduct(
         id: ID!
     ): Product!
 
-    updateProduct(
-        id: ID!,
-        name: String,
-        type: String,
-        validity: Date,
-        lot: String,
-        price: Float
-    ): ProductOutput!
+    updateProduct(input: ProductUpdateInput!): Product!
 
     storeClient(input: ClientRegisterInput!): Client
 
@@ -132,4 +119,21 @@ input ClientUpdateInput {
     ie: String
     ufIe: String
     obs: String
+}
+
+input ProductStoreInput {
+    name: String!
+    type: String!
+    validity: Date!
+    lot: String!,
+    price: Float!
+}
+
+input ProductUpdateInput {
+    id: ID!
+    name: String
+    type: String
+    validity: Date
+    lot: String,
+    price: Float
 }
