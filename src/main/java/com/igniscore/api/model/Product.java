@@ -34,7 +34,7 @@ public class Product {
     @SuppressWarnings("unused")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "pk_id_product")
+    @Column(name = "pk_id_prod")
     private Integer id;
 
     /**
@@ -46,8 +46,9 @@ public class Product {
     /**
      * Product type or category.
      */
+    @Enumerated(EnumType.STRING)
     @Column(name = "type_prod")
-    private String type;
+    private ProductType type;
 
     /**
      * Product validity or expiration date.
@@ -102,7 +103,7 @@ public class Product {
         return validity;
     }
 
-    public String getType() {
+    public ProductType getType() {
         return type;
     }
 
@@ -124,7 +125,7 @@ public class Product {
         this.name = name;
     }
 
-    public void setType(String type) {
+    public void setType(ProductType type) {
         this.type = type;
     }
 

@@ -28,5 +28,9 @@ import java.util.Optional;
  * </ul>
  */
 public interface ProductRepository extends JpaRepository<Product, Integer> {
-    Page<Product> findByCompany(Company company, Pageable pageable, Boolean status);
+    Page<Product> findByCompanyAndStatusOrderByIdAsc(
+            Company company,
+            Boolean status,
+            Pageable pageable
+    );
 }

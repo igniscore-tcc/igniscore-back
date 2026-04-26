@@ -77,7 +77,7 @@ public class ProductService {
 
         Product product = new Product();
         product.setName(dto.getName());
-        product.setType(dto.getType().getType());
+        product.setType(dto.getType());
         product.setValidity(dto.getValidity());
         product.setLot(dto.getLot());
         product.setPrice(dto.getPrice());
@@ -122,7 +122,7 @@ public class ProductService {
         if (dto.getName() != null) product.setName(dto.getName());
 
         if (dto.getType() != null) {
-            product.setType(dto.getType().getType());
+            product.setType(dto.getType());
         }
 
         if (dto.getValidity() != null) product.setValidity(dto.getValidity());
@@ -152,7 +152,7 @@ public class ProductService {
 
         Company company = authUserService.getCompanyOrThrow();
 
-        return repository.findByCompany(company, pageable, true);
+        return repository.findByCompanyAndStatusOrderByIdAsc(company, true, pageable );
     }
 
     /**
