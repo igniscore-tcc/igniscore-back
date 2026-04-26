@@ -1,12 +1,12 @@
 package com.igniscore.api.controller;
 
-import com.igniscore.api.dto.ProductDTO;
 import com.igniscore.api.dto.ProductStoreDTO;
 import com.igniscore.api.dto.ProductUpdateDTO;
 import com.igniscore.api.model.Product;
 import com.igniscore.api.service.ProductService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -31,6 +31,7 @@ import java.util.List;
  * <p>All operations are scoped to the authenticated user's company through the service layer.
  */
 @Controller
+@SuppressWarnings("unused")
 public class ProductController {
 
     private final ProductService service;
@@ -53,6 +54,7 @@ public class ProductController {
      * @return persisted {@link Product} entity
      */
     @MutationMapping
+    @SuppressWarnings("unused")
     public Product storeProduct(@Argument ProductStoreDTO input) {
         return service.store(input);
     }
@@ -66,6 +68,7 @@ public class ProductController {
      * @return updated {@link Product} entity
      */
     @MutationMapping
+    @SuppressWarnings("unused")
     public Product updateProduct(@Argument ProductUpdateDTO input) {
         return service.update(input);
     }
@@ -91,7 +94,8 @@ public class ProductController {
 
         Pageable pageable = PageRequest.of(
                 page != null ? page : 0,
-                size != null ? size : 10
+                size != null ? size : 10,
+                Sort.by(Sort.Direction.ASC, "id")
         );
 
         return service.findAll(pageable).getContent();
@@ -107,6 +111,7 @@ public class ProductController {
      * @return updated {@link Product} entity marked as inactive
      */
     @MutationMapping
+    @SuppressWarnings("unused")
     public Product deleteProduct(@Argument Integer id) {
         return service.delete(id);
     }
