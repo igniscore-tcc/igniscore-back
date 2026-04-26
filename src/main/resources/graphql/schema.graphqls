@@ -21,7 +21,7 @@ type User {
 type Product {
     id: ID
     name: String!
-    type: String!
+    type: ProductType!
     validity: Date!
     lot: String!
     price: Float!
@@ -123,7 +123,7 @@ input ClientUpdateInput {
 
 input ProductStoreInput {
     name: String!
-    type: String!
+    type: ProductType!
     validity: Date!
     lot: String!,
     price: Float!
@@ -132,8 +132,22 @@ input ProductStoreInput {
 input ProductUpdateInput {
     id: ID!
     name: String
-    type: String
+    type: ProductType
     validity: Date
     lot: String,
     price: Float
+}
+
+enum ProductType {
+    EXTINGUISHER
+    SERVICE
+    CONSUMABLE
+    ACCESSORY
+    HOSE
+    DETECTOR
+    SPRINKLER
+    CENTRAL
+    LIGHTING
+    DOOR
+    HYDRANT
 }
