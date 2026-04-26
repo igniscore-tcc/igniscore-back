@@ -15,6 +15,13 @@ package com.igniscore.api.model;
  *     <li>{@link #SERVICE} - Represents service-based offerings (e.g., maintenance, inspection)</li>
  *     <li>{@link #CONSUMABLE} - Represents consumable items used in operations</li>
  *     <li>{@link #ACCESSORY} - Represents accessory items related to products or services</li>
+ *     <li>{@link #HOSE} - Represents fire hoses and hose-related equipment</li>
+ *     <li>{@link #DETECTOR} - Represents fire detection devices, including smoke and heat detectors</li>
+ *     <li>{@link #SPRINKLER} - Represents sprinkler system components and related equipment</li>
+ *     <li>{@link #CENTRAL} - Represents fire alarm control panels and central monitoring systems</li>
+ *     <li>{@link #LIGHTING} - Represents emergency lighting systems and related components</li>
+ *     <li>{@link #DOOR} - Represents fire-rated doors and associated safety door systems</li>
+ *     <li>{@link #HYDRANT} - Represents fire hydrants and hydrant system components</li>
  * </ul>
  */
 public enum ProductType {
@@ -37,8 +44,41 @@ public enum ProductType {
     /**
      * Accessory products related to primary items.
      */
-    ACCESSORY("accessory");
+    ACCESSORY("accessory"),
+    /**
+     * Fire hose and hose-related equipment.
+     */
+    HOSE("hose"),
 
+    /**
+     * Fire detection devices, including smoke and heat detectors.
+     */
+    DETECTOR("detector"),
+
+    /**
+     * Sprinkler system components and related equipment.
+     */
+    SPRINKLER("sprinkler"),
+
+    /**
+     * Fire alarm control panels and central monitoring systems.
+     */
+    CENTRAL("central"),
+
+    /**
+     * Emergency lighting systems and related components.
+     */
+    LIGHTING("lighting"),
+
+    /**
+     * Fire-rated doors and associated safety door systems.
+     */
+    DOOR("door"),
+
+    /**
+     * Fire hydrants and hydrant system components.
+     */
+    HYDRANT("hydrant");
     /**
      * External string representation of the product type.
      */
