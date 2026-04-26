@@ -4,9 +4,9 @@ import com.igniscore.api.dto.ClientRegisterDTO;
 import com.igniscore.api.dto.ClientUpdateDTO;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.service.ClientService;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -86,19 +86,22 @@ public class ClientController {
     }
 
     /**
-     * GraphQL query that retrieves all clients within the current tenant scope.
+     * Retrieves a paginated list of clients belonging to the current tenant.
      *
-     * <p>Results are paginated using Spring Data {@link Pageable}.
+     * <p>Results are always sorted by {@code id} in ascending order to ensure
+     * deterministic pagination. This avoids inconsistent ordering after updates.
      *
-     * @param pageable pagination and sorting configuration
-     * @return paginated {@link Client} result set
+     * @param page zero-based page index (defaults to {@code 0})
+     * @param size page size (defaults to {@code 10})
+     * @return the requested page content
      */
     @QueryMapping
     @SuppressWarnings("unused")
     public List<Client> clients(@Argument Integer page, @Argument Integer size) {
         Pageable pageable = PageRequest.of(
                 page != null ? page : 0,
-                size != null ? size : 10
+                size != null ? size : 10,
+                Sort.by(Sort.Direction.ASC, "id")
         );
 
         return service.findAll(pageable).getContent();
