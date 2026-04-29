@@ -262,7 +262,7 @@ Todos os documentos estão em `/docs/`:
 | Módulo Products | Completo           |
 | Documentação    | Completo           |
 | Testes          | Em desenvolvimento |
-| Segurança       | Auditado           |
+| Segurança       | Teste              |
 | Produção        | Ativo              |
 
 ## Contribuindo
