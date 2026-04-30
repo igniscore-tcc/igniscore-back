@@ -119,21 +119,26 @@ public class ProductService {
         Company company = authUserService.getCompanyOrThrow();
         Product product = getProductForCompany(dto.getId(), company);
 
-        if (dto.getName() != null) product.setName(dto.getName());
+        if (dto.getName() != null) {
+            product.setName(dto.getName());
+        }
 
         if (dto.getType() != null) {
             product.setType(dto.getType());
         }
 
-        if (dto.getValidity() != null) product.setValidity(dto.getValidity());
-        if (dto.getLot() != null) product.setLot(dto.getLot());
-        if (dto.getPrice() != null) product.setPrice(dto.getPrice());
+        if (dto.getValidity() != null) {
+            product.setValidity(dto.getValidity());
+        }
 
-        Product savedProduct = repository.save(product);
+        if (dto.getLot() != null) {
+            product.setLot(dto.getLot());
+        }
 
-        entityManager.refresh(savedProduct);
-
-        return savedProduct;
+        if (dto.getPrice() != null) {
+            product.setPrice(dto.getPrice());
+        }
+        return repository.save(product);
     }
 
     /**
