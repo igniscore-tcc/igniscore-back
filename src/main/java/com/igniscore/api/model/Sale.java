@@ -1,7 +1,7 @@
 package com.igniscore.api.model;
 
 import jakarta.persistence.*;
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -13,48 +13,59 @@ public class Sale {
     @Column(name = "pk_id_sale")
     private Integer id;
 
-    @Column(name = "quantity_items_sale")
+    @Column(name = "quantity_items_sale", nullable = false)
     private Integer quantity_items;
 
-    @Column(name = "discount_sale")
-    private Float discount;
+    @Column(
+            name = "discount_sale",
+            nullable = false,
+            precision = 5,
+            scale = 2
+    )
+    private BigDecimal discount;
 
-    @Column(name = "total_sale")
-    private Float total;
+    @Column(
+            name = "total_sale",
+            nullable = false,
+            precision = 10,
+            scale = 2
+    )
+    private BigDecimal total;
 
-    @Column(name = "date_sale")
+    @Column(name = "date_sale", nullable = false)
     private LocalDate date;
 
-    @Column(name = "type_sale")
+    @Column(name = "type_sale", nullable = false, length = 30)
     private String type;
 
-    @Column(name = "status_sale")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_sale", nullable = false, length = 20)
     private SaleStatus status;
 
-    @Column(name = "due_date")
+    @Column(name = "due_date", nullable = false)
     private LocalDate due_date;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_id_company")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "fk_id_company", nullable = false)
     private Company company;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_id_client")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "fk_id_client", nullable = false)
     private Client client;
 
     public Integer getId() {
         return id;
     }
 
-    public Integer getQuantity_items() {
+    public Integer getQuantityItems() {
         return quantity_items;
     }
 
-    public Float getDiscount() {
+    public BigDecimal getDiscount() {
         return discount;
     }
 
-    public Float getTotal() {
+    public BigDecimal getTotal() {
         return total;
     }
 
@@ -70,7 +81,7 @@ public class Sale {
         return status;
     }
 
-    public LocalDate getDue_date() {
+    public LocalDate getDueDate() {
         return due_date;
     }
 
@@ -86,15 +97,15 @@ public class Sale {
         this.id = id;
     }
 
-    public void setQuantity_items(Integer quantity_items) {
+    public void setQuantityItems(Integer quantity_items) {
         this.quantity_items = quantity_items;
     }
 
-    public void setDiscount(Float discount) {
+    public void setDiscount(BigDecimal discount) {
         this.discount = discount;
     }
 
-    public void setTotal(Float total) {
+    public void setTotal(BigDecimal total) {
         this.total = total;
     }
 
