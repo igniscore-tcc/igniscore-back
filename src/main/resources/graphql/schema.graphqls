@@ -53,6 +53,26 @@ type Client {
     company: Company
 }
 
+type SaleItem {
+    id: ID
+    quantity: Int!
+    unitPrice: Float!
+    total: Float!
+    product: Product!
+}
+
+type Sale {
+    id: ID
+    quantityItems: Int!
+    discount: Float!
+    total: Float!
+    date: Date!
+    type: String!
+    status: SaleStatus!
+    dueDate: Date!
+    client: Client!
+}
+
 type Query {
     companies: [Company!]!
     users: [User!]!
@@ -96,6 +116,12 @@ type Mutation {
     deleteClient(
         id: ID!
     ): String!
+
+    storeSale(
+        clientId: Int!,
+        paymentMethod: String!,
+        items: [SaleItemInput!]!
+    ): Sale!
 }
 
 input ClientRegisterInput {
@@ -138,6 +164,16 @@ input ProductUpdateInput {
     price: Float
 }
 
+input ProductRefInput {
+    id: ID!
+}
+
+input SaleItemInput {
+    product: ProductRefInput!
+    quantity: Int!
+    unitPrice: Float!
+}
+
 enum ProductType {
     EXTINGUISHER
     SERVICE
@@ -150,4 +186,10 @@ enum ProductType {
     LIGHTING
     DOOR
     HYDRANT
+}
+
+enum SaleStatus {
+    PENDING
+    PAID
+    CANCELED
 }
