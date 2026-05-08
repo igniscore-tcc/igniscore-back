@@ -2,12 +2,16 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.ClientRegisterDTO;
 import com.igniscore.api.dto.ClientUpdateDTO;
+import com.igniscore.api.model.Audit;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
+import com.igniscore.api.model.User;
+import com.igniscore.api.repository.AuditRepository;
 import com.igniscore.api.repository.ClientRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -54,6 +58,7 @@ public class ClientService {
 
     private final ClientRepository repository;
     private final AuthenticatedUserService authUserService;
+    private final AuditRepository auditRepository;
 
     @PersistenceContext
     @SuppressWarnings("unused")
@@ -65,9 +70,10 @@ public class ClientService {
      * @param repository persistence layer for {@link Client}
      * @param authUserService service for retrieving authenticated user context
      */
-    public ClientService(ClientRepository repository, AuthenticatedUserService authUserService) {
+    public ClientService(ClientRepository repository, AuthenticatedUserService authUserService, AuditRepository auditRepository) {
         this.repository = repository;
         this.authUserService = authUserService;
+        this.auditRepository = auditRepository;
     }
 
     /**
@@ -90,6 +96,7 @@ public class ClientService {
     @Transactional
     public Client store(ClientRegisterDTO dto) {
 
+        User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
 
         if (!dto.isCpfOrCnpjValid()) {
@@ -108,6 +115,16 @@ public class ClientService {
         client.setCompany(company);
 
         Client saved = repository.save(client);
+
+        Audit audit = new Audit();
+
+        audit.setEntity("Client");
+        audit.setAction("Create");
+        audit.setUser(user);
+        audit.setCompany(company);
+        audit.setNewData(client.getName());
+
+        auditRepository.save(audit);
 
         // Ensures entity state reflects database-side changes (e.g., triggers, defaults)
         entityManager.refresh(saved);
