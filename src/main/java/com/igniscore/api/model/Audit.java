@@ -1,6 +1,10 @@
 package com.igniscore.api.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.Map;
 
 @Entity
 @Table(name = "audit_logs")
@@ -17,11 +21,13 @@ public class Audit {
     @Column(name = "action_audit")
     private String action;
 
-    @Column(name = "old_data_audit")
-    private String old_data;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "old_data_audit", columnDefinition = "jsonb")
+    private Map<String, Object> old_data;
 
-    @Column(name = "new_data_audit")
-    private String new_data;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "new_data_audit", columnDefinition = "jsonb")
+    private Map<String, Object> new_data;
 
     @Column(name = "ip_address_audit")
     private String ip;
@@ -46,11 +52,11 @@ public class Audit {
         return action;
     }
 
-    public String getOldData() {
+    public Map<String, Object> getOldData() {
         return old_data;
     }
 
-    public String getNewData() {
+    public Map<String, Object> getNewData() {
         return new_data;
     }
 
@@ -78,11 +84,11 @@ public class Audit {
         this.action = action;
     }
 
-    public void setOldData(String old_data) {
+    public void setOldData(Map<String, Object> old_data) {
         this.old_data = old_data;
     }
 
-    public void setNewData(String new_data) {
+    public void setNewData(Map<String, Object> new_data) {
         this.new_data = new_data;
     }
 

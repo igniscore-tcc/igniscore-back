@@ -8,6 +8,7 @@ import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.AuditRepository;
 import com.igniscore.api.repository.ClientRepository;
+import com.igniscore.api.utils.AuditUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
@@ -32,7 +33,13 @@ import org.springframework.transaction.annotation.Transactional;
  *     <li>Apply validation and partial update semantics</li>
  * </ul>
  *
- * <p><strong>Multi-tenancy model:</strong>
+ * <p><strong>Multi-tenancy model:</strong>@Transactional
+    public String delete(Integer id) {
+        Company company = authUserService.getCompanyOrThrow();
+        Client client = getClientOrThrow(id, company);
+        repository.delete(client);
+        return "Client successfully deleted.";
+    }
  * <ul>
  *     <li>Each {@link Client} is owned by a {@link Company}</li>
  *     <li>All queries are constrained by company context</li>
@@ -58,7 +65,7 @@ public class ClientService {
 
     private final ClientRepository repository;
     private final AuthenticatedUserService authUserService;
-    private final AuditRepository auditRepository;
+    private final AuditUtils audit;
 
     @PersistenceContext
     @SuppressWarnings("unused")
@@ -70,10 +77,13 @@ public class ClientService {
      * @param repository persistence layer for {@link Client}
      * @param authUserService service for retrieving authenticated user context
      */
-    public ClientService(ClientRepository repository, AuthenticatedUserService authUserService, AuditRepository auditRepository) {
+    public ClientService(ClientRepository repository,
+                         AuthenticatedUserService authUserService,
+                         AuditUtils audit
+    ) {
         this.repository = repository;
         this.authUserService = authUserService;
-        this.auditRepository = auditRepository;
+        this.audit = audit;
     }
 
     /**
@@ -116,15 +126,16 @@ public class ClientService {
 
         Client saved = repository.save(client);
 
-        Audit audit = new Audit();
 
-        audit.setEntity("Client");
-        audit.setAction("Create");
-        audit.setUser(user);
-        audit.setCompany(company);
-        audit.setNewData(client.getName());
+        audit.newAudit(
+                user,
+                company,
+                "Client",
+                "Create",
+                null,
+                saved
+        );
 
-        auditRepository.save(audit);
 
         // Ensures entity state reflects database-side changes (e.g., triggers, defaults)
         entityManager.refresh(saved);
@@ -146,8 +157,21 @@ public class ClientService {
     @Transactional
     public Client update(ClientUpdateDTO dto) {
 
+        User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
         Client client = getClientOrThrow(dto.getId(), company);
+
+        Client oldData = new Client();
+
+        oldData.setId(client.getId());
+        oldData.setName(client.getName());
+        oldData.setCnpj(client.getCnpj());
+        oldData.setEmail(client.getEmail());
+        oldData.setPhone(client.getPhone());
+        oldData.setIe(client.getIe());
+        oldData.setUfIe(client.getUfIe());
+        oldData.setObs(client.getObs());
+        oldData.setCpf(client.getCpf());
 
         if (dto.getName() != null) client.setName(dto.getName());
         if (dto.getCnpj() != null) client.setCnpj(dto.getCnpj());
@@ -158,7 +182,18 @@ public class ClientService {
         if (dto.getObs() != null) client.setObs(dto.getObs());
         if (dto.getCpf() != null) client.setCpf(dto.getCpf());
 
-        return repository.save(client);
+        Client updated = repository.save(client);
+
+        audit.newAudit(
+                user,
+                company,
+                "Client",
+                "Update",
+                oldData,
+                updated
+        );
+
+        return updated;
     }
 
     /**
@@ -198,9 +233,23 @@ public class ClientService {
      */
     @Transactional
     public String delete(Integer id) {
+
+        User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
+
         Client client = getClientOrThrow(id, company);
+
+        audit.newAudit(
+                user,
+                company,
+                "Client",
+                "Delete",
+                client,
+                null
+        );
+
         repository.delete(client);
+
         return "Client successfully deleted.";
     }
 
