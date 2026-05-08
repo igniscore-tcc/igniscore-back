@@ -80,6 +80,7 @@ type Query {
     client(id: ID!): Client
     clients(page: Int, size: Int): [Client!]!
     products(page : Int, size: Int): [ProductOutput!]!
+    sales(page : Int, size: Int): [Sale!]!
 }
 
 type Mutation {
@@ -124,16 +125,17 @@ type Mutation {
     ): Sale!
 }
 
-input ClientRegisterInput {
-    name: String!
-    email: String!
-    cnpj: String
-    cpf: String
-    phone: String!
-    ie: String
-    ufIe: String
-    obs: String
-}
+    input ClientRegisterInput {
+        companyId: ID!
+        name: String!
+        email: String!
+        cnpj: String
+        cpf: String
+        phone: String!
+        ie: String
+        ufIe: String
+        obs: String
+    }
 
 input ClientUpdateInput {
     id: ID!

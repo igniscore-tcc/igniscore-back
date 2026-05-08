@@ -5,6 +5,8 @@ import com.igniscore.api.repository.ClientRepository;
 import com.igniscore.api.repository.ProductRepository;
 import com.igniscore.api.repository.SaleItemRepository;
 import com.igniscore.api.repository.SaleRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,5 +98,13 @@ public class SaleService {
         sale.setTotal(total);
 
         return repository.save(sale);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Sale> findAll(Pageable pageable) {
+
+        Company company = authUserService.getCompanyOrThrow();
+
+        return repository.findByCompany(company, true, pageable );
     }
 }

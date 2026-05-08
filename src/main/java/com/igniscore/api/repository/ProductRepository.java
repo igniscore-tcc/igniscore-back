@@ -33,4 +33,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             Boolean status,
             Pageable pageable
     );
+
+    Page<Product> findByCompany(Company company, Pageable pageable);
 }
