@@ -3,10 +3,11 @@ package com.igniscore.api.service;
 import com.igniscore.api.dto.ProductDTO;
 import com.igniscore.api.dto.ProductStoreDTO;
 import com.igniscore.api.dto.ProductUpdateDTO;
-import com.igniscore.api.model.Client;
+import com.igniscore.api.model.User;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.Product;
 import com.igniscore.api.repository.ProductRepository;
+import com.igniscore.api.utils.AuditUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
@@ -38,6 +39,7 @@ public class ProductService {
 
     private final ProductRepository repository;
     private final AuthenticatedUserService authUserService;
+    private final AuditUtils audit;
 
     /**
      * Constructor-based dependency injection.
@@ -45,9 +47,13 @@ public class ProductService {
      * @param repository repository responsible for product persistence
      * @param authUserService service responsible for authenticated user context resolution
      */
-    public ProductService(ProductRepository repository, AuthenticatedUserService authUserService) {
+    public ProductService(ProductRepository repository,
+                          AuthenticatedUserService authUserService,
+                          AuditUtils audit
+    ) {
         this.repository = repository;
         this.authUserService = authUserService;
+        this.audit = audit;
     }
 
     @PersistenceContext
@@ -75,9 +81,12 @@ public class ProductService {
     @Transactional
     public Product store(ProductStoreDTO dto) {
 
-        Company company = this.authUserService.getCompanyOrThrow();
+
+        User user = authUserService.getUserOrThrow();
+        Company company = authUserService.getCompanyOrThrow();
 
         Product product = new Product();
+
         product.setName(dto.getName());
         product.setType(dto.getType());
         product.setValidity(dto.getValidity());
@@ -87,6 +96,15 @@ public class ProductService {
         product.setStatus(true);
 
         Product saved = repository.save(product);
+
+        audit.newAudit(
+                user,
+                company,
+                "Product",
+                "Create",
+                null,
+                saved
+        );
 
         entityManager.refresh(saved);
 
@@ -118,8 +136,20 @@ public class ProductService {
     @Transactional
     public Product update(ProductUpdateDTO dto) {
 
+        User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
+
         Product product = getProductForCompany(dto.getId(), company);
+
+        Product oldData = new Product();
+
+        oldData.setId(product.getId());
+        oldData.setName(product.getName());
+        oldData.setType(product.getType());
+        oldData.setValidity(product.getValidity());
+        oldData.setLot(product.getLot());
+        oldData.setPrice(product.getPrice());
+        oldData.setStatus(product.getStatus());
 
         if (dto.getName() != null) {
             product.setName(dto.getName());
@@ -140,7 +170,19 @@ public class ProductService {
         if (dto.getPrice() != null) {
             product.setPrice(dto.getPrice());
         }
-        return repository.save(product);
+
+        Product updated = repository.save(product);
+
+        audit.newAudit(
+                user,
+                company,
+                "Product",
+                "Update",
+                oldData,
+                updated
+        );
+
+        return updated;
     }
 
     /**
@@ -185,12 +227,37 @@ public class ProductService {
     @Transactional
     public Product delete(Integer id) {
 
+
+
+        User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
+
         Product product = getProductForCompany(id, company);
+
+        Product oldData = new Product();
+
+        oldData.setId(product.getId());
+        oldData.setName(product.getName());
+        oldData.setType(product.getType());
+        oldData.setValidity(product.getValidity());
+        oldData.setLot(product.getLot());
+        oldData.setPrice(product.getPrice());
+        oldData.setStatus(product.getStatus());
 
         product.setStatus(false);
 
-        return repository.save(product);
+        Product deleted = repository.save(product);
+
+        audit.newAudit(
+                user,
+                company,
+                "Product",
+                "Delete",
+                oldData,
+                deleted
+        );
+
+        return deleted;
     }
 
     /**

@@ -1,9 +1,11 @@
 package com.igniscore.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.persistence.Column;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Entity representing a client within the system.
@@ -24,6 +26,10 @@ import org.hibernate.generator.EventType;
  *     <li>Enforced via composite unique constraint (company + number)</li>
  * </ul>
  */
+@JsonIgnoreProperties({
+        "hibernateLazyInitializer",
+        "handler"
+})
 @Entity
 @Table(
         name = "clients",
@@ -107,6 +113,7 @@ public class Client {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_id_company", nullable = false)
+    @JsonIgnore
     private Company company;
 
     // --- Getters ---
