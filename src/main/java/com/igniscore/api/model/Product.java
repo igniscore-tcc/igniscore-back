@@ -1,5 +1,7 @@
 package com.igniscore.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -24,6 +26,10 @@ import java.time.LocalDate;
  *     <li>Company relationship is lazily loaded for performance optimization</li>
  * </ul>
  */
+@JsonIgnoreProperties({
+        "hibernateLazyInitializer",
+        "handler"
+})
 @Entity
 @Table(name = "products")
 public class Product {
@@ -79,6 +85,7 @@ public class Product {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_id_company")
+    @JsonIgnore
     private Company company;
 
     // --- Getters ---
