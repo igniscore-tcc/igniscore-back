@@ -1,4 +1,5 @@
 scalar Date
+scalar BigDecimal
 
 type Company {
     id: ID
@@ -54,23 +55,24 @@ type Client {
 }
 
 type SaleItem {
-    id: ID
+    id: ID!
     quantity: Int!
-    unitPrice: Float!
-    total: Float!
+    unitPrice: BigDecimal!
+    total: BigDecimal!
     product: Product!
 }
 
 type Sale {
-    id: ID
+    id: ID!
     quantityItems: Int!
-    discount: Float!
-    total: Float!
+    discount: BigDecimal!
+    total: BigDecimal!
     date: Date!
-    type: String!
+    paymentMethod: PaymentMethod!
     status: SaleStatus!
     dueDate: Date!
     client: Client!
+    items: [SaleItem!]!
 }
 
 type Query {
@@ -118,11 +120,7 @@ type Mutation {
         id: ID!
     ): String!
 
-    storeSale(
-        clientId: Int!,
-        paymentMethod: String!,
-        items: [SaleItemInput!]!
-    ): Sale!
+    storeSale(input: CreateSaleInput!): Sale!
 }
 
     input ClientRegisterInput {
@@ -170,10 +168,24 @@ input ProductRefInput {
     id: ID!
 }
 
-input SaleItemInput {
-    product: ProductRefInput!
+input CreateSaleItemInput {
+    productId: Int!
     quantity: Int!
-    unitPrice: Float!
+    unitPrice: BigDecimal!
+}
+
+input CreateSaleInput {
+    clientId: Int!
+    paymentMethod: PaymentMethod!
+    items: [CreateSaleItemInput!]!
+}
+
+enum PaymentMethod {
+    PIX
+    CASH
+    CREDIT_CARD
+    DEBIT_CARD
+    BANK_SLIP
 }
 
 enum ProductType {

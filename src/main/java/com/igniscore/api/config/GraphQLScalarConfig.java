@@ -18,13 +18,16 @@ public class GraphQLScalarConfig {
      * This method registers:
      * - Date scalar for handling date values
      * - DateTime scalar for handling date-time values
+     * - BigDecimal for price values
      *
      * @return a RuntimeWiringConfigurer that adds custom scalars to the GraphQL schema
      */
     @Bean
     public RuntimeWiringConfigurer runtimeWiringConfigurer() {
+
         return wiringBuilder -> wiringBuilder
                 .scalar(ExtendedScalars.Date)
-                .scalar(ExtendedScalars.DateTime);
+                .scalar(ExtendedScalars.DateTime)
+                .scalar(ExtendedScalars.GraphQLBigDecimal);
     }
 }
