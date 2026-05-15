@@ -1,5 +1,6 @@
 package com.igniscore.api.controller;
 
+import com.igniscore.api.dto.ClientQueryDTO;
 import com.igniscore.api.dto.ClientRegisterDTO;
 import com.igniscore.api.dto.ClientUpdateDTO;
 import com.igniscore.api.model.Client;
@@ -11,8 +12,6 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
-
-import java.util.List;
 
 /**
  * GraphQL controller responsible for handling queries and mutations
@@ -86,25 +85,45 @@ public class ClientController {
     }
 
     /**
-     * Retrieves a paginated list of clients belonging to the current tenant.
+     * Retrieves a paginated list of {@link Client} entities belonging to the
+     * authenticated tenant context.
      *
-     * <p>Results are always sorted by {@code id} in ascending order to ensure
-     * deterministic pagination. This avoids inconsistent ordering after updates.
+     * <p>This query applies deterministic ordering using the client identifier
+     * in ascending order to guarantee stable pagination behavior across requests.
+     * The response includes both the current page content and pagination metadata
+     * wrapped inside {@link ClientQueryDTO}.
      *
-     * @param page zero-based page index (defaults to {@code 0})
-     * @param size page size (defaults to {@code 10})
-     * @return the requested page content
+     * <p><strong>Returned metadata:</strong>
+     * <ul>
+     *     <li>Total number of pages</li>
+     *     <li>Total number of registered clients</li>
+     *     <li>Current page content</li>
+     * </ul>
+     *
+     * <p><strong>Pagination defaults:</strong>
+     * <ul>
+     *     <li>{@code page = 0}</li>
+     *     <li>{@code size = 10}</li>
+     * </ul>
+     *
+     * @param page zero-based page index
+     * @param size maximum number of records per page
+     * @return paginated client response with metadata
      */
     @QueryMapping
     @SuppressWarnings("unused")
-    public List<Client> clients(@Argument Integer page, @Argument Integer size) {
+    public ClientQueryDTO clients(@Argument Integer page, @Argument Integer size) {
+
         Pageable pageable = PageRequest.of(
                 page != null ? page : 0,
                 size != null ? size : 10,
                 Sort.by(Sort.Direction.ASC, "id")
         );
 
-        return service.findAll(pageable).getContent();
+        return service.findAll(
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
     }
 
     /**
