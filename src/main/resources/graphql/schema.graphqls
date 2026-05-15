@@ -76,13 +76,29 @@ type Sale {
 }
 
 type Query {
+
     companies: [Company!]!
+
     users: [User!]!
+
     user(id: ID!): User
+
     client(id: ID!): Client
-    clients(page: Int, size: Int): [Client!]!
+
+    clients(page: Int, size: Int): ClientQuery!
+
     products(page : Int, size: Int): [ProductOutput!]!
+
     sales(page : Int, size: Int): [Sale!]!
+}
+
+type ClientQuery {
+
+    clients: [Client!]!
+
+    totalPages: Int!
+
+    totalClients: Int!
 }
 
 type Mutation {

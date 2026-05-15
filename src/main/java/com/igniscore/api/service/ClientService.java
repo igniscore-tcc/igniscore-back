@@ -1,5 +1,6 @@
 package com.igniscore.api.service;
 
+import com.igniscore.api.dto.ClientQueryDTO;
 import com.igniscore.api.dto.ClientRegisterDTO;
 import com.igniscore.api.dto.ClientUpdateDTO;
 import com.igniscore.api.model.Audit;
@@ -14,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -197,19 +199,6 @@ public class ClientService {
     }
 
     /**
-     * Retrieves all clients associated with the authenticated user's company.
-     *
-     * @param pageable pagination and sorting configuration
-     * @return paginated list of {@link Client} within tenant scope
-     * @throws AccessDeniedException if authentication is invalid
-     */
-    @Transactional(readOnly = true)
-    public Page<Client> findAll(Pageable pageable) {
-        Company company = authUserService.getCompanyOrThrow();
-        return repository.findByCompany(company, pageable);
-    }
-
-    /**
      * Retrieves a {@link Client} by identifier within the current tenant scope.
      *
      * @param id client identifier
@@ -264,5 +253,45 @@ public class ClientService {
     private Client getClientOrThrow(Integer id, Company company) {
         return repository.findByIdAndCompany(id, company)
                 .orElseThrow(() -> new EntityNotFoundException("Client not found"));
+    }
+
+    /**
+     * Retrieves paginated {@link Client} records visible to the authenticated tenant.
+     *
+     * <p>This operation applies pagination constraints through Spring Data's
+     * {@link Pageable} abstraction and returns both the current page content
+     * and pagination metadata wrapped inside {@link ClientQueryDTO}.
+     *
+     * <p><strong>Returned metadata:</strong>
+     * <ul>
+     *     <li>Total number of pages</li>
+     *     <li>Total number of registered clients</li>
+     *     <li>Current page content</li>
+     * </ul>
+     *
+     * <p><strong>Execution flow:</strong>
+     * <ol>
+     *     <li>Create pagination configuration using page number and size</li>
+     *     <li>Execute paginated repository query</li>
+     *     <li>Extract content and pagination metadata</li>
+     *     <li>Build response DTO</li>
+     * </ol>
+     *
+     * @param pageNumber zero-based page index
+     * @param size maximum number of records per page
+     * @return paginated client response containing records and metadata
+     */
+    @Transactional(readOnly = true)
+    public ClientQueryDTO findAll(int pageNumber, int size) {
+
+        Pageable pageable = PageRequest.of(pageNumber, size);
+
+        Page<Client> page = repository.findAll(pageable);
+
+        return new ClientQueryDTO(
+                page.getContent(),
+                page.getTotalPages(),
+                page.getTotalElements()
+        );
     }
 }
