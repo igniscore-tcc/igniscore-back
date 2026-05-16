@@ -65,5 +65,5 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
      * @return optional containing the product when found
      */
     @EntityGraph(attributePaths = {"company"})
-    Optional<Product> findByIdActive(Integer id);
+    Optional<Product> findByIdAndStatusTrue(Integer id);
 }

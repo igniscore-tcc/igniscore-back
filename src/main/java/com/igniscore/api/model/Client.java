@@ -7,6 +7,9 @@ import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * Entity representing a client within the system.
  *
@@ -40,7 +43,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
                 )
         }
 )
-public class Client {
+public class Client implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * Primary key identifier.

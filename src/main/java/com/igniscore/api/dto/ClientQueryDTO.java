@@ -2,6 +2,8 @@ package com.igniscore.api.dto;
 
 import com.igniscore.api.model.Client;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -25,22 +27,25 @@ import java.util.List;
  *     <li>Frontend table/grid rendering</li>
  * </ul>
  */
-public class ClientQueryDTO {
+public class ClientQueryDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * Current page content.
      */
-    private List<Client> clients;
+    private final List<Client> clients;
 
     /**
      * Total number of pages available for the query.
      */
-    private int totalPages;
+    private final int totalPages;
 
     /**
      * Total number of registered clients matching the query.
      */
-    private long totalClients;
+    private final long totalClients;
 
     /**
      * Constructs a paginated client response DTO.

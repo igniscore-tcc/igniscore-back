@@ -310,7 +310,7 @@ public class ProductService {
      */
     private Product getProductForCompany(Integer id, Company company) {
 
-        Product product = repository.findByIdActive(id)
+        Product product = repository.findByIdAndStatusTrue(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         if (!product.getCompany().getId().equals(company.getId())) {

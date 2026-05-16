@@ -69,4 +69,13 @@ public class CacheKeyService {
                 ":page:" + pageable.getPageNumber() +
                 ":size:" + pageable.getPageSize();
     }
+
+    public String clientsKey(Pageable pageable) {
+
+        Integer companyId = authUserService.getCompanyOrThrow().getId();
+
+        return "company:" + companyId +
+                ":page:" + pageable.getPageNumber() +
+                ":size:" + pageable.getPageSize();
+    }
 }
