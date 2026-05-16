@@ -2,65 +2,71 @@ package com.igniscore.api.dto;
 
 import com.igniscore.api.model.ProductType;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * Data Transfer Object (DTO) representing a product.
+ * Data Transfer Object (DTO) representing product data exposed by the API.
  *
- * <p>This class is used to expose product data outside the service layer,
- * typically in API responses. It decouples the internal {@code Product} entity
- * from external consumers.
+ * <p>This DTO is intended for outbound data transport, primarily in API
+ * response payloads. It provides a stable external representation of
+ * product information while decoupling consumers from the internal
+ * persistence model.
  *
- * <p>Responsibilities:
+ * <p>Main responsibilities:
  * <ul>
- *     <li>Provide a safe representation of product data</li>
- *     <li>Hide internal entity structure</li>
- *     <li>Aggregate related data (e.g., company information)</li>
+ *     <li>Expose product-related data to external consumers</li>
+ *     <li>Prevent direct exposure of JPA entities</li>
+ *     <li>Provide a serialization-friendly structure for API responses</li>
+ *     <li>Represent company ownership information through nested DTOs</li>
  * </ul>
  *
  * <p>Design notes:
  * <ul>
- *     <li>Includes a nested {@link CompanyDTO} to represent ownership</li>
- *     <li>Uses {@link LocalDate} for date-only values</li>
- *     <li>Intended for read operations (API responses)</li>
+ *     <li>Uses {@link LocalDate} for date-only domain values</li>
+ *     <li>Uses {@link BigDecimal} for monetary representation</li>
+ *     <li>Contains a nested {@link CompanyDTO} instead of exposing the entity directly</li>
+ *     <li>Primarily intended for read operations</li>
  * </ul>
  */
 public class ProductDTO {
 
     /**
-     * Product identifier.
+     * Unique identifier of the product.
      */
     private Integer id;
 
     /**
-     * Product name.
+     * Commercial or display name of the product.
      */
     private String name;
 
     /**
-     * Product type or category.
+     * Product classification or category.
      */
     private ProductType type;
-
     /**
-     * Product validity or expiration date.
+     * Product expiration or validity date.
+     *
+     * <p>Represents a date-only value without time-zone information.
      */
     private LocalDate validity;
-
     /**
-     * Product batch or lot identifier.
+     * Product batch or lot identifier used for traceability.
      */
     private String lot;
-
     /**
-     * Product price.
+     * Monetary value associated with the product.
      *
-     * <p>Note: Uses Float, which may lead to precision issues.
+     * <p>Uses {@link BigDecimal} to preserve decimal precision
+     * required for financial calculations.
      */
-    private Float price;
-
+    private BigDecimal price;
     /**
-     * Company associated with the product.
+     * Company associated with the product ownership.
+     *
+     * <p>Represented through a DTO abstraction to avoid exposing
+     * persistence entities directly to API consumers.
      */
     private CompanyDTO company;
 
@@ -86,7 +92,7 @@ public class ProductDTO {
         return lot;
     }
 
-    public Float getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
@@ -116,7 +122,7 @@ public class ProductDTO {
         this.lot = lot;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

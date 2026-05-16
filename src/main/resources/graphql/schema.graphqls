@@ -25,7 +25,7 @@ type Product {
     type: ProductType!
     validity: Date!
     lot: String!
-    price: Float!
+    price: BigDecimal!
     status: Boolean
     company: Company
 }
@@ -36,7 +36,7 @@ type ProductOutput {
     type: String!
     validity: Date!
     lot: String!
-    price: Float!
+    price: BigDecimal!
     company: Company
 }
 
@@ -168,7 +168,7 @@ input ProductStoreInput {
     type: ProductType!
     validity: Date!
     lot: String!,
-    price: Float!
+    price: BigDecimal!
 }
 
 input ProductUpdateInput {
@@ -177,7 +177,7 @@ input ProductUpdateInput {
     type: ProductType
     validity: Date
     lot: String,
-    price: Float
+    price: BigDecimal
 }
 
 input ProductRefInput {

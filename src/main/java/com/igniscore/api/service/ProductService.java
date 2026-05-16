@@ -1,6 +1,5 @@
 package com.igniscore.api.service;
 
-import com.igniscore.api.dto.ProductDTO;
 import com.igniscore.api.dto.ProductStoreDTO;
 import com.igniscore.api.dto.ProductUpdateDTO;
 import com.igniscore.api.model.User;
@@ -10,29 +9,33 @@ import com.igniscore.api.repository.ProductRepository;
 import com.igniscore.api.utils.AuditUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service responsible for managing {@link Product} entities.
+ * Service layer responsible for lifecycle management of {@link Product} entities.
  *
- * <p>This service implements core product operations including creation, update,
- * soft deletion, and retrieval, always enforcing multi-tenant isolation based on
- * the authenticated user's company context.
+ * <p>This service encapsulates all business operations related to products,
+ * including creation, update, retrieval, and soft deletion, while enforcing
+ * strict multi-tenant isolation through the authenticated user's company context.
  *
- * <p>All business rules assume a valid authenticated user provided by
- * {@link AuthenticatedUserService}.
- *
- * <p>Responsibilities include:
+ * <p>Main responsibilities:
  * <ul>
- *     <li>Creating products bound to a company</li>
- *     <li>Applying partial updates to products</li>
- *     <li>Performing soft deletion via status flag</li>
- *     <li>Enforcing company-level access control</li>
- *     <li>Retrieving paginated product data</li>
+ *     <li>Persisting products associated with a company</li>
+ *     <li>Applying partial updates to existing products</li>
+ *     <li>Performing logical deletion using the status flag</li>
+ *     <li>Restricting access to company-owned resources only</li>
+ *     <li>Providing paginated retrieval of active products</li>
+ *     <li>Generating audit records for mutating operations</li>
+ *     <li>Managing cache invalidation and cached reads</li>
  * </ul>
+ *
+ * <p>All operations assume a valid authenticated context provided by
+ * {@link AuthenticatedUserService}.
  */
 @Service
 public class ProductService {
@@ -61,26 +64,31 @@ public class ProductService {
     private EntityManager entityManager;
 
     /**
-     * Creates and persists a new product associated with the authenticated user's company.
+     * Creates and persists a new {@link Product} associated with the authenticated company.
      *
-     * <p>The product is initialized with active status and persisted within the current
-     * persistence context. After saving, the entity state is synchronized with the database
-     * using {@link EntityManager#refresh(Object)}.
+     * <p>The created product is initialized as active ({@code status = true})
+     * and linked to the authenticated user's company.
+     *
+     * <p>After persistence, the entity state is refreshed from the database
+     * to guarantee synchronization with generated values and persistence-side updates.
+     *
+     * <p>An audit record is generated describing the creation event.
      *
      * <p>Flow:
      * <ol>
-     *     <li>Resolve authenticated user's company</li>
-     *     <li>Map DTO data to entity</li>
+     *     <li>Resolve authenticated user and company</li>
+     *     <li>Map DTO fields into a new entity instance</li>
      *     <li>Persist entity</li>
-     *     <li>Refresh entity state from database</li>
+     *     <li>Create audit entry</li>
+     *     <li>Refresh entity state</li>
      * </ol>
      *
      * @param dto DTO containing product creation data
      * @return persisted {@link Product} entity
      */
     @Transactional
+    @CacheEvict(value = "products", allEntries = true)
     public Product store(ProductStoreDTO dto) {
-
 
         User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
@@ -112,28 +120,36 @@ public class ProductService {
     }
 
     /**
-     * Updates an existing product using partial update semantics.
+     * Updates an existing {@link Product} using partial update semantics.
      *
-     * <p>Only non-null fields provided in the DTO will be applied to the entity.
-     * Fields not present remain unchanged.
+     * <p>Only non-null values provided by the DTO are applied to the entity.
+     * Existing values remain unchanged when the corresponding DTO field is {@code null}.
      *
-     * <p>Access control is enforced by ensuring the product belongs to the authenticated user's company.
+     * <p>The target product must belong to the authenticated user's company.
+     *
+     * <p>A snapshot containing the previous entity state is created before mutation
+     * to support audit logging.
+     *
+     * <p>An audit record is generated describing the update operation.
      *
      * <p>Flow:
      * <ol>
-     *     <li>Resolve authenticated user's company</li>
-     *     <li>Retrieve product ensuring company ownership</li>
+     *     <li>Resolve authenticated user and company</li>
+     *     <li>Validate product ownership</li>
+     *     <li>Capture previous state for auditing</li>
      *     <li>Apply partial updates</li>
      *     <li>Persist updated entity</li>
-     *     <li>Refresh entity state from database</li>
+     *     <li>Create audit entry</li>
      * </ol>
      *
      * @param dto DTO containing update data and product identifier
      * @return updated {@link Product} entity
      *
-     * @throws RuntimeException if product is not found or does not belong to company
+     * @throws RuntimeException if the product does not exist
+     *         or does not belong to the authenticated company
      */
     @Transactional
+    @CacheEvict(value = "products", allEntries = true)
     public Product update(ProductUpdateDTO dto) {
 
         User user = authUserService.getUserOrThrow();
@@ -186,16 +202,24 @@ public class ProductService {
     }
 
     /**
-     * Retrieves a paginated list of active products belonging to the authenticated user's company.
+     * Retrieves a paginated list of active products belonging to the authenticated company.
      *
-     * <p>Only products with {@code status = true} are returned, ensuring soft-deleted records
-     * are excluded from the result set.
+     * <p>Only products marked as active ({@code status = true}) are returned.
      *
-     * <p>Data isolation is enforced at the company level.
+     * <p>Results are cached using a pageable-aware cache key strategy in order
+     * to reduce database load for repeated read operations.
+     *
+     * <p>Data isolation is enforced by filtering products using the authenticated
+     * company context.
      *
      * @param pageable pagination and sorting configuration
-     * @return paginated list of products scoped to the authenticated user's company
+     * @return paginated list of active company products
      */
+    @Cacheable(
+            value = "products",
+            key = "@cacheKeyService.productsKey(#pageable)",
+            unless = "#result == null"
+    )
     @Transactional(readOnly = true)
     public Page<Product> findAll(Pageable pageable) {
 
@@ -205,29 +229,38 @@ public class ProductService {
     }
 
     /**
-     * Performs a soft deletion of a product.
+     * Performs a logical deletion of a {@link Product}.
      *
-     * <p>The product is not physically removed from the database. Instead, its status
-     * flag is set to {@code false}, marking it as inactive and excluding it from
-     * standard queries.
+     * <p>The entity is not physically removed from the database.
+     * Instead, its status flag is set to {@code false}, excluding it
+     * from standard active queries.
+     *
+     * <p>The target product must belong to the authenticated user's company.
+     *
+     * <p>A snapshot containing the previous entity state is created before mutation
+     * to support audit logging.
+     *
+     * <p>An audit record is generated describing the deletion event.
      *
      * <p>Flow:
      * <ol>
-     *     <li>Resolve authenticated user's company</li>
-     *     <li>Retrieve product ensuring company ownership</li>
-     *     <li>Mark product as inactive</li>
+     *     <li>Resolve authenticated user and company</li>
+     *     <li>Validate product ownership</li>
+     *     <li>Capture previous state for auditing</li>
+     *     <li>Mark entity as inactive</li>
      *     <li>Persist updated entity</li>
+     *     <li>Create audit entry</li>
      * </ol>
      *
      * @param id product identifier
      * @return updated {@link Product} entity marked as inactive
      *
-     * @throws RuntimeException if product is not found or does not belong to company
+     * @throws RuntimeException if the product does not exist
+     *         or does not belong to the authenticated company
      */
     @Transactional
+    @CacheEvict(value = "products", allEntries = true)
     public Product delete(Integer id) {
-
-
 
         User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
@@ -261,20 +294,23 @@ public class ProductService {
     }
 
     /**
-     * Retrieves a product by ID ensuring it belongs to the specified company.
+     * Retrieves and validates a {@link Product} for the specified company context.
      *
-     * <p>This method centralizes multi-tenant validation logic, preventing duplication
-     * across service methods and ensuring consistent access control enforcement.
+     * <p>This method centralizes ownership validation logic to ensure
+     * consistent multi-tenant access control across all service operations.
+     *
+     * <p>The product must exist and belong to the authenticated company.
      *
      * @param id product identifier
-     * @param company authenticated user's company
+     * @param company authenticated company context
      * @return validated {@link Product} entity
      *
-     * @throws RuntimeException if product is not found or does not belong to company
+     * @throws RuntimeException if the product does not exist
+     *         or does not belong to the provided company
      */
     private Product getProductForCompany(Integer id, Company company) {
 
-        Product product = repository.findById(id)
+        Product product = repository.findByIdActive(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         if (!product.getCompany().getId().equals(company.getId())) {
