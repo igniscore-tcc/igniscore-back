@@ -1,38 +1,69 @@
 package com.igniscore.api.repository;
 
-import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
 /**
- * Repository interface for {@link Product} entity persistence.
+ * Repository responsible for persistence and retrieval operations
+ * related to {@link Product} entities.
  *
- * <p>Extends {@link JpaRepository}, providing standard CRUD operations
- * and database interaction capabilities without requiring explicit implementation.
+ * <p>This interface extends {@link JpaRepository}, inheriting standard
+ * CRUD operations and pagination support provided by Spring Data JPA.
  *
- * <p>Responsibilities:
+ * <p>Main responsibilities:
  * <ul>
- *     <li>Persist and retrieve Product entities</li>
- *     <li>Provide built-in CRUD operations (save, findById, delete, etc.)</li>
+ *     <li>Persisting product entities</li>
+ *     <li>Retrieving products scoped by company ownership</li>
+ *     <li>Supporting paginated product queries</li>
+ *     <li>Optimizing association loading through entity graphs</li>
  * </ul>
  *
- * <p>Design notes:
+ * <p>Performance notes:
  * <ul>
- *     <li>Custom query methods can be added as needed using Spring Data conventions</li>
- *     <li>Acts as the data access layer for product-related operations</li>
+ *     <li>{@link EntityGraph} is used to eagerly load the associated
+ *     {@link Company} entity when required</li>
+ *     <li>This approach helps reduce N+1 query issues during
+ *     product retrieval operations</li>
  * </ul>
  */
 public interface ProductRepository extends JpaRepository<Product, Integer> {
+
+    /**
+     * Retrieves a paginated list of products belonging to a company
+     * filtered by logical status.
+     *
+     * <p>Results are ordered by product identifier in ascending order.
+     *
+     * <p>The associated {@link Company} entity is eagerly loaded
+     * through an entity graph.
+     *
+     * @param company company owner of the products
+     * @param status logical product status filter
+     * @param pageable pagination and sorting configuration
+     * @return paginated list of matching products
+     */
+    @EntityGraph(attributePaths = {"company"})
     Page<Product> findByCompanyAndStatusOrderByIdAsc(
             Company company,
             Boolean status,
             Pageable pageable
     );
 
-    Page<Product> findByCompany(Company company, Pageable pageable);
+    /**
+     * Retrieves a product by its identifier.
+     *
+     * <p>The associated {@link Company} entity is eagerly loaded
+     * through an entity graph.
+     *
+     * @param id product identifier
+     * @return optional containing the product when found
+     */
+    @EntityGraph(attributePaths = {"company"})
+    Optional<Product> findByIdAndStatusTrue(Integer id);
 }

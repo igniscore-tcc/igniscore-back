@@ -4,26 +4,43 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * Entity representing a product within the system.
+ * JPA entity representing a product managed within the platform.
  *
- * <p>This class models a product that belongs to a {@link Company},
- * supporting a multi-tenant architecture where each company manages
- * its own product catalog.
+ * <p>This entity models products owned by a specific {@link Company},
+ * supporting multi-tenant data isolation where each company maintains
+ * an independent product catalog.
  *
- * <p>Responsibilities:
+ * <p>The entity stores operational and commercial product information,
+ * including identification data, categorization, pricing, validity,
+ * batch tracking, and activation status.
+ *
+ * <p>Main responsibilities:
  * <ul>
- *     <li>Persist product-related data</li>
- *     <li>Represent business attributes such as name, type, price, and validity</li>
- *     <li>Maintain association with a company</li>
+ *     <li>Persist product domain data</li>
+ *     <li>Represent product lifecycle state</li>
+ *     <li>Maintain company ownership association</li>
+ *     <li>Support logical deletion through status flag</li>
  * </ul>
  *
- * <p>Design notes:
+ * <p>Persistence notes:
  * <ul>
- *     <li>Uses {@link LocalDate} for validity to represent date-only values</li>
- *     <li>Company relationship is lazily loaded for performance optimization</li>
+ *     <li>Mapped to table {@code products}</li>
+ *     <li>Uses {@link GenerationType#IDENTITY} for primary key generation</li>
+ *     <li>Company association is lazily loaded for performance optimization</li>
+ *     <li>Price uses {@link BigDecimal} with fixed precision and scale</li>
+ * </ul>
+ *
+ * <p>Serialization notes:
+ * <ul>
+ *     <li>Hibernate lazy-loading proxy properties are ignored during JSON serialization</li>
+ *     <li>Company association is excluded from JSON output to avoid unnecessary exposure
+ *     and serialization recursion issues</li>
  * </ul>
  */
 @JsonIgnoreProperties({
@@ -32,10 +49,16 @@ import java.time.LocalDate;
 })
 @Entity
 @Table(name = "products")
-public class Product {
+public class Product implements Serializable {
 
     /**
-     * Primary key identifier.
+     * Serialization version identifier.
+     */
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Primary key identifier of the product.
      */
     @SuppressWarnings("unused")
     @Id
@@ -44,44 +67,69 @@ public class Product {
     private Integer id;
 
     /**
-     * Product name.
+     * Commercial or display name of the product.
      */
     @Column(name = "name_prod")
     private String name;
 
     /**
-     * Product type or category.
+     * Product classification or category.
+     *
+     * <p>Persisted using the enum constant name.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "type_prod")
     private ProductType type;
 
     /**
-     * Product validity or expiration date.
+     * Product expiration or validity date.
+     *
+     * <p>Uses {@link LocalDate} because time-zone or time-of-day
+     * precision is not required for this domain attribute.
      */
     @Column(name = "validity_prod")
     private LocalDate validity;
 
     /**
-     * Product batch or lot identifier.
+     * Batch or lot identifier used for traceability.
      */
     @Column(name = "lot_prod")
     private String lot;
 
     /**
-     * Product price.
+     * Monetary value of the product.
      *
-     * <p>Note: Currently uses Float, which may lead to precision issues.
+     * <p>Stored using fixed decimal precision:
+     * <ul>
+     *     <li>Precision: 10</li>
+     *     <li>Scale: 2</li>
+     * </ul>
+     *
+     * <p>This configuration supports values up to 99,999,999.99.
      */
-    @Column(name = "price_prod")
-    private Float price;
+    @Column(name = "price_prod", precision = 10, scale = 2)
+    private BigDecimal price;
 
 
+    /**
+     * Logical activation status of the product.
+     *
+     * <p>Used to implement soft deletion semantics:
+     * <ul>
+     *     <li>{@code true}  = active product</li>
+     *     <li>{@code false} = logically deleted/inactive product</li>
+     * </ul>
+     */
     @Column(name = "status_prod")
     private Boolean status;
 
     /**
-     * Associated company (multi-tenant relationship).
+     * Company that owns the product.
+     *
+     * <p>This association enforces multi-tenant ownership boundaries.
+     *
+     * <p>Configured with lazy loading to reduce unnecessary entity loading
+     * during standard product retrieval operations.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_id_company")
@@ -98,7 +146,7 @@ public class Product {
         return company;
     }
 
-    public Float getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
@@ -144,7 +192,7 @@ public class Product {
         this.lot = lot;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
