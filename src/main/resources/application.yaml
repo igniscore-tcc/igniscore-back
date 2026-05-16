@@ -16,6 +16,11 @@ spring:
     graphiql:
       enabled: true
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 api:
   security:
     token:

@@ -5,73 +5,105 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * Data Transfer Object (DTO) used for product update requests.
+ * Data Transfer Object (DTO) used for product update operations.
  *
- * <p>Supports partial updates, meaning all fields except the identifier
- * are optional. Only non-null values should be applied.
+ * <p>This DTO supports partial update semantics, allowing clients
+ * to send only the fields that should be modified.
  *
- * <p><strong>Validation strategy:</strong>
+ * <p>All attributes are optional except the product identifier,
+ * which is required to locate the target entity.
+ *
+ * <p>Main responsibilities:
  * <ul>
- *     <li>Product ID is mandatory</li>
- *     * <li>Provided fields must respect domain constraints</li>
+ *     <li>Transport update data between client and application layers</li>
+ *     <li>Support partial entity modification</li>
+ *     <li>Apply validation rules to provided values</li>
  * </ul>
  *
- * <p><strong>Notes:</strong>
+ * <p>Validation strategy:
  * <ul>
- *     <li>Null fields are ignored during update</li>
- *     <li>Expiration date, when provided, must be in the future</li>
- *     <li>Price, when provided, must be greater than zero</li>
+ *     <li>The product identifier is mandatory</li>
+ *     <li>Optional fields are validated only when present</li>
+ *     <li>Null fields are ignored during update processing</li>
+ * </ul>
+ *
+ * <p>Design notes:
+ * <ul>
+ *     <li>Uses {@link LocalDate} for date-only values</li>
+ *     <li>Uses {@link BigDecimal} for monetary precision</li>
+ *     <li>Intended exclusively for update operations</li>
  * </ul>
  */
 public class ProductUpdateDTO {
-
     /**
-     * Product identifier.
+     * Unique identifier of the product to be updated.
      *
-     * <p>Required for locating the product to update.
+     * <p>Validation rules:
+     * <ul>
+     *     <li>Must not be null</li>
+     * </ul>
      */
     @NotNull(message = "Product ID is required")
     private Integer id;
-
     /**
-     * Product name.
+     * Commercial or display name of the product.
      *
-     * <p>Optional field.
+     * <p>Optional field used in partial update operations.
+     *
+     * <p>When {@code null}, the current value remains unchanged.
      */
     private String name;
-
     /**
-     * Product type.
+     * Product classification or category.
      *
-     * <p>Optional field.
+     * <p>Optional field used in partial update operations.
+     *
+     * <p>When {@code null}, the current value remains unchanged.
      */
     private ProductType type;
-
     /**
-     * Product expiration date.
+     * Product expiration or validity date.
      *
-     * <p>Optional. Must be a future date when provided.
+     * <p>Optional field used in partial update operations.
+     *
+     * <p>Validation rules:
+     * <ul>
+     *     <li>Must represent a future date when provided</li>
+     * </ul>
+     *
+     * <p>When {@code null}, the current value remains unchanged.
      */
     @Future(message = "Validity date must be in the future")
     private LocalDate validity;
-
     /**
-     * Product batch/lot number.
+     * Product batch or lot identifier used for traceability.
      *
-     * <p>Optional field.
+     * <p>Optional field used in partial update operations.
+     *
+     * <p>When {@code null}, the current value remains unchanged.
      */
     private String lot;
-
     /**
-     * Product sale price.
+     * Monetary value associated with the product.
      *
-     * <p>Optional. Must be greater than zero when provided.
+     * <p>Optional field used in partial update operations.
+     *
+     * <p>Validation rules:
+     * <ul>
+     *     <li>Must be greater than zero when provided</li>
+     * </ul>
+     *
+     * <p>Uses {@link BigDecimal} to preserve decimal precision
+     * required for financial calculations.
+     *
+     * <p>When {@code null}, the current value remains unchanged.
      */
     @Positive(message = "Price must be greater than zero")
-    private Float price;
+    private BigDecimal price;
 
     public Integer getId() {
         return id;
@@ -97,7 +129,7 @@ public class ProductUpdateDTO {
         return lot;
     }
 
-    public Float getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
@@ -117,7 +149,7 @@ public class ProductUpdateDTO {
         this.lot = lot;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 }

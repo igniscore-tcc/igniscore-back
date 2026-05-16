@@ -3,23 +3,21 @@ package com.igniscore.api.service;
 import com.igniscore.api.dto.ClientQueryDTO;
 import com.igniscore.api.dto.ClientRegisterDTO;
 import com.igniscore.api.dto.ClientUpdateDTO;
-import com.igniscore.api.model.Audit;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
-import com.igniscore.api.repository.AuditRepository;
 import com.igniscore.api.repository.ClientRepository;
 import com.igniscore.api.utils.AuditUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 /**
  * Service layer responsible for managing {@link Client} entities.
@@ -35,13 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
  *     <li>Apply validation and partial update semantics</li>
  * </ul>
  *
- * <p><strong>Multi-tenancy model:</strong>@Transactional
-    public String delete(Integer id) {
-        Company company = authUserService.getCompanyOrThrow();
-        Client client = getClientOrThrow(id, company);
-        repository.delete(client);
-        return "Client successfully deleted.";
-    }
+ * <p><strong>Multi-tenancy model:</strong>
  * <ul>
  *     <li>Each {@link Client} is owned by a {@link Company}</li>
  *     <li>All queries are constrained by company context</li>
@@ -79,9 +71,10 @@ public class ClientService {
      * @param repository persistence layer for {@link Client}
      * @param authUserService service for retrieving authenticated user context
      */
-    public ClientService(ClientRepository repository,
-                         AuthenticatedUserService authUserService,
-                         AuditUtils audit
+    public ClientService(
+            ClientRepository repository,
+            AuthenticatedUserService authUserService,
+            AuditUtils audit
     ) {
         this.repository = repository;
         this.authUserService = authUserService;
@@ -106,6 +99,7 @@ public class ClientService {
      * @throws IllegalArgumentException if CPF/CNPJ constraint is violated
      */
     @Transactional
+    @CacheEvict(value = "clients", allEntries = true)
     public Client store(ClientRegisterDTO dto) {
 
         User user = authUserService.getUserOrThrow();
@@ -157,6 +151,7 @@ public class ClientService {
      * @throws EntityNotFoundException if the client does not exist within the tenant scope
      */
     @Transactional
+    @CacheEvict(value = "clients", allEntries = true)
     public Client update(ClientUpdateDTO dto) {
 
         User user = authUserService.getUserOrThrow();
@@ -221,6 +216,7 @@ public class ClientService {
      * @throws EntityNotFoundException if not found within the company scope
      */
     @Transactional
+    @CacheEvict(value = "clients", allEntries = true)
     public String delete(Integer id) {
 
         User user = authUserService.getUserOrThrow();
@@ -277,16 +273,18 @@ public class ClientService {
      *     <li>Build response DTO</li>
      * </ol>
      *
-     * @param pageNumber zero-based page index
-     * @param size maximum number of records per page
      * @return paginated client response containing records and metadata
      */
+    @Cacheable(
+            value = "clients",
+            key = "@cacheKeyService.clientsKey(#pageable)",
+            unless = "#result == null"
+    )
     @Transactional(readOnly = true)
-    public ClientQueryDTO findAll(int pageNumber, int size) {
+    public ClientQueryDTO findAll(Pageable pageable) {
+        Company company = authUserService.getCompanyOrThrow();
 
-        Pageable pageable = PageRequest.of(pageNumber, size);
-
-        Page<Client> page = repository.findAll(pageable);
+        Page<Client> page = repository.findByCompany(company, pageable);
 
         return new ClientQueryDTO(
                 page.getContent(),

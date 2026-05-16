@@ -120,10 +120,7 @@ public class ClientController {
                 Sort.by(Sort.Direction.ASC, "id")
         );
 
-        return service.findAll(
-                pageable.getPageNumber(),
-                pageable.getPageSize()
-        );
+        return service.findAll(pageable);
     }
 
     /**
