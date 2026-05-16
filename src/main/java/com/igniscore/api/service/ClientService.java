@@ -33,13 +33,7 @@ import org.springframework.cache.annotation.CacheEvict;
  *     <li>Apply validation and partial update semantics</li>
  * </ul>
  *
- * <p><strong>Multi-tenancy model:</strong>@Transactional
-    public String delete(Integer id) {
-        Company = authUserService.getCompanyOrThrow();
-        Client = getClientOrThrow(id, company);
-        repository.delete(client);
-        return "Client successfully deleted.";
-    }
+ * <p><strong>Multi-tenancy model:</strong>
  * <ul>
  *     <li>Each {@link Client} is owned by a {@link Company}</li>
  *     <li>All queries are constrained by company context</li>
