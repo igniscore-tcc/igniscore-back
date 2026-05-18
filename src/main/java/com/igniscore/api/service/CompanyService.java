@@ -1,5 +1,6 @@
 package com.igniscore.api.service;
 
+import com.igniscore.api.dto.CreateCompanyDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.CompanyRepository;
@@ -56,28 +57,21 @@ public class CompanyService {
      * <p>This method constructs a {@link Company} entity from input parameters
      * and saves it to the database.
      *
-     * @param name   company name
-     * @param cnpj   company CNPJ (Brazilian business identifier)
-     * @param ie     state registration (Inscrição Estadual)
-     * @param ufIe   state abbreviation for IE
-     * @param email  company contact email
-     * @param phone  company contact phone
      *
      * @return persisted company entity
      */
-    public Company create(String name, String cnpj, String ie,
-                          String ufIe, String email, String phone) {
+    public Company storeCompany(CreateCompanyDTO dto) {
 
         User user = this.authUserService.getUserOrThrow();
 
         Company company = new Company();
 
-        company.setName(name);
-        company.setCnpj(cnpj);
-        company.setIe(ie);
-        company.setUfIe(ufIe);
-        company.setEmail(email);
-        company.setPhone(phone);
+        company.setName(dto.getName());
+        company.setCnpj(dto.getCnpj());
+        company.setIe(dto.getIe());
+        company.setUfIe(dto.getUfIe());
+        company.setEmail(dto.getEmail());
+        company.setPhone(dto.getPhone());
 
         Company savedCompany = repository.save(company);
 

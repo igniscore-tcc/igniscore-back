@@ -1,5 +1,6 @@
 package com.igniscore.api.model;
 
+import com.igniscore.api.dto.CreateCompanyDTO;
 import jakarta.persistence.*;
 
 import java.io.Serial;
@@ -104,6 +105,18 @@ public class Company implements Serializable {
      */
     @Column(name = "phone_company", nullable = false, unique = true)
     private String phone;
+
+    public Company() {
+    }
+
+    public Company(CreateCompanyDTO dto) {
+        this.name = dto.getName();
+        this.cnpj = dto.getCnpj();
+        this.ie = dto.getIe();
+        this.ufIe = dto.getUfIe();
+        this.email = dto.getEmail();
+        this.phone = dto.getPhone();
+    }
 
     // --- Getters ---
 

@@ -1,5 +1,6 @@
 package com.igniscore.api.controller;
 
+import com.igniscore.api.dto.CreateCompanyDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.service.CompanyService;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -49,21 +50,10 @@ public class CompanyController {
      * This method receives company data as arguments from the GraphQL request
      * and forwards them to the service layer for processing and persistence.
      *
-     * @param name   the name of the company
-     * @param cnpj   the CNPJ (Brazilian company registration number)
-     * @param ie     the state registration number
-     * @param ufIe   the state (UF) of the registration
-     * @param email  the company's contact email
-     * @param phone  the company's contact phone number
      * @return the created Company entity
      */
     @MutationMapping
-    public Company createCompany(@Argument String name,
-                                 @Argument String cnpj,
-                                 @Argument String ie,
-                                 @Argument String ufIe,
-                                 @Argument String email,
-                                 @Argument String phone) {
-        return service.create(name, cnpj, ie, ufIe, email, phone);
+    public Company createCompany(@Argument CreateCompanyDTO input) {
+        return service.storeCompany(input);
     }
 }
