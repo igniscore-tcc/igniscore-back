@@ -102,14 +102,7 @@ type ClientQuery {
 }
 
 type Mutation {
-    createCompany(
-        name: String!,
-        cnpj: String!,
-        ie: String,
-        ufIe: String,
-        email: String!,
-        phone: String!
-    ): Company!
+    createCompany(input: CreateCompanyInput!): Company!
 
     updateUser(
         email: String!,
@@ -139,17 +132,26 @@ type Mutation {
     storeSale(input: CreateSaleInput!): Sale!
 }
 
-    input ClientRegisterInput {
-        companyId: ID!
-        name: String!
-        email: String!
-        cnpj: String
-        cpf: String
-        phone: String!
-        ie: String
-        ufIe: String
-        obs: String
-    }
+input CreateCompanyInput {
+    name: String!
+    cnpj: String!
+    ie: String
+    ufIe: String
+    email: String!
+    phone: String!
+}
+
+input ClientRegisterInput {
+    companyId: ID!
+    name: String!
+    email: String!
+    cnpj: String
+    cpf: String
+    phone: String!
+    ie: String
+    ufIe: String
+    obs: String
+}
 
 input ClientUpdateInput {
     id: ID!
