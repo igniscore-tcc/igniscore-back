@@ -65,7 +65,7 @@ public class Client implements Serializable {
     /**
      * Client CNPJ (Brazilian business identifier).
      */
-    @Column(name = "cnpj_client", nullable = false)
+    @Column(name = "cnpj_client")
     private String cnpj;
 
     /**
