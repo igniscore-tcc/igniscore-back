@@ -109,16 +109,7 @@ public class ClientService {
             throw new IllegalArgumentException("CPF or CNPJ must be provided");
         }
 
-        Client client = new Client();
-        client.setName(dto.getName());
-        client.setCnpj(dto.getCnpj());
-        client.setEmail(dto.getEmail());
-        client.setPhone(dto.getPhone());
-        client.setIe(dto.getIe());
-        client.setUfIe(dto.getUfIe());
-        client.setObs(dto.getObs());
-        client.setCpf(dto.getCpf());
-        client.setCompany(company);
+        Client client = new Client(dto, company);
 
         Client saved = repository.save(client);
 
@@ -158,28 +149,9 @@ public class ClientService {
         Company company = authUserService.getCompanyOrThrow();
         Client client = getClientOrThrow(dto.getId(), company);
 
-        Client oldData = new Client();
+        Client oldData = new Client(client);
 
-        oldData.setId(client.getId());
-        oldData.setName(client.getName());
-        oldData.setCnpj(client.getCnpj());
-        oldData.setEmail(client.getEmail());
-        oldData.setPhone(client.getPhone());
-        oldData.setIe(client.getIe());
-        oldData.setUfIe(client.getUfIe());
-        oldData.setObs(client.getObs());
-        oldData.setCpf(client.getCpf());
-
-        if (dto.getName() != null) client.setName(dto.getName());
-        if (dto.getCnpj() != null) client.setCnpj(dto.getCnpj());
-        if (dto.getEmail() != null) client.setEmail(dto.getEmail());
-        if (dto.getPhone() != null) client.setPhone(dto.getPhone());
-        if (dto.getIe() != null) client.setIe(dto.getIe());
-        if (dto.getUfIe() != null) client.setUfIe(dto.getUfIe());
-        if (dto.getObs() != null) client.setObs(dto.getObs());
-        if (dto.getCpf() != null) client.setCpf(dto.getCpf());
-
-        Client updated = repository.save(client);
+        client.update(dto);
 
         audit.newAudit(
                 user,
@@ -187,10 +159,10 @@ public class ClientService {
                 "Client",
                 "Update",
                 oldData,
-                updated
+                client
         );
 
-        return updated;
+        return client;
     }
 
     /**

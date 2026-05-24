@@ -1,6 +1,8 @@
 package com.igniscore.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.igniscore.api.dto.ClientRegisterDTO;
+import com.igniscore.api.dto.ClientUpdateDTO;
 import jakarta.persistence.*;
 import jakarta.persistence.Column;
 import org.hibernate.annotations.Generated;
@@ -122,6 +124,34 @@ public class Client implements Serializable {
     @JsonIgnore
     private Company company;
 
+    public Client() {
+    }
+
+    public Client(ClientRegisterDTO dto, Company company) {
+        this.name = dto.getName();
+        this.cnpj = dto.getCnpj();
+        this.email = dto.getEmail();
+        this.phone = dto.getPhone();
+        this.ie = dto.getIe();
+        this.uf_ie = dto.getUfIe();
+        this.obs = dto.getObs();
+        this.cpf = dto.getCpf();
+        this.company = company;
+    }
+
+    @SuppressWarnings("CopyConstructorMissesField")
+    public Client(Client client) {
+        this.id = client.id;
+        this.name = client.name;
+        this.cnpj = client.cnpj;
+        this.email = client.email;
+        this.phone = client.phone;
+        this.ie = client.ie;
+        this.uf_ie = client.uf_ie;
+        this.obs = client.obs;
+        this.cpf = client.cpf;
+    }
+
     // --- Getters ---
 
     public Integer getId() {
@@ -208,5 +238,16 @@ public class Client implements Serializable {
 
     public void setCompany(Company company) {
         this.company = company;
+    }
+
+    public void update(ClientUpdateDTO dto) {
+        if (dto.getName() != null) this.name = dto.getName();
+        if (dto.getCnpj() != null) this.cnpj = dto.getCnpj();
+        if (dto.getEmail() != null) this.email = dto.getEmail();
+        if (dto.getPhone() != null) this.phone = dto.getPhone();
+        if (dto.getIe() != null) this.ie = dto.getIe();
+        if (dto.getUfIe() != null) this.uf_ie = dto.getUfIe();
+        if (dto.getObs() != null) this.obs = dto.getObs();
+        if (dto.getCpf() != null) this.cpf = dto.getCpf();
     }
 }
