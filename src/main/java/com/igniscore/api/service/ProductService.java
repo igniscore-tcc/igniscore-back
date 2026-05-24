@@ -93,15 +93,7 @@ public class ProductService {
         User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
 
-        Product product = new Product();
-
-        product.setName(dto.getName());
-        product.setType(dto.getType());
-        product.setValidity(dto.getValidity());
-        product.setLot(dto.getLot());
-        product.setPrice(dto.getPrice());
-        product.setCompany(company);
-        product.setStatus(true);
+        Product product = new Product(dto, company);
 
         Product saved = repository.save(product);
 
@@ -157,37 +149,9 @@ public class ProductService {
 
         Product product = getProductForCompany(dto.getId(), company);
 
-        Product oldData = new Product();
+        Product oldData = new Product(product);
 
-        oldData.setId(product.getId());
-        oldData.setName(product.getName());
-        oldData.setType(product.getType());
-        oldData.setValidity(product.getValidity());
-        oldData.setLot(product.getLot());
-        oldData.setPrice(product.getPrice());
-        oldData.setStatus(product.getStatus());
-
-        if (dto.getName() != null) {
-            product.setName(dto.getName());
-        }
-
-        if (dto.getType() != null) {
-            product.setType(dto.getType());
-        }
-
-        if (dto.getValidity() != null) {
-            product.setValidity(dto.getValidity());
-        }
-
-        if (dto.getLot() != null) {
-            product.setLot(dto.getLot());
-        }
-
-        if (dto.getPrice() != null) {
-            product.setPrice(dto.getPrice());
-        }
-
-        Product updated = repository.save(product);
+        product.update(dto);
 
         audit.newAudit(
                 user,
@@ -195,10 +159,10 @@ public class ProductService {
                 "Product",
                 "Update",
                 oldData,
-                updated
+                product
         );
 
-        return updated;
+        return product;
     }
 
     /**
@@ -267,19 +231,9 @@ public class ProductService {
 
         Product product = getProductForCompany(id, company);
 
-        Product oldData = new Product();
+        Product oldData = new Product(product);
 
-        oldData.setId(product.getId());
-        oldData.setName(product.getName());
-        oldData.setType(product.getType());
-        oldData.setValidity(product.getValidity());
-        oldData.setLot(product.getLot());
-        oldData.setPrice(product.getPrice());
-        oldData.setStatus(product.getStatus());
-
-        product.setStatus(false);
-
-        Product deleted = repository.save(product);
+        product.deactivate();
 
         audit.newAudit(
                 user,
@@ -287,10 +241,10 @@ public class ProductService {
                 "Product",
                 "Delete",
                 oldData,
-                deleted
+                product
         );
 
-        return deleted;
+        return product;
     }
 
     /**
