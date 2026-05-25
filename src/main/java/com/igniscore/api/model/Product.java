@@ -2,6 +2,8 @@ package com.igniscore.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.igniscore.api.dto.ProductStoreDTO;
+import com.igniscore.api.dto.ProductUpdateDTO;
 import jakarta.persistence.*;
 
 import java.io.Serial;
@@ -136,6 +138,29 @@ public class Product implements Serializable {
     @JsonIgnore
     private Company company;
 
+    public Product() {
+    }
+
+    public Product(ProductStoreDTO dto, Company company) {
+        this.name = dto.getName();
+        this.type = dto.getType();
+        this.validity = dto.getValidity();
+        this.lot = dto.getLot();
+        this.price = dto.getPrice();
+        this.company = company;
+        this.status = true;
+    }
+
+    public Product(Product product) {
+        this.id = product.id;
+        this.name = product.name;
+        this.type = product.type;
+        this.validity = product.validity;
+        this.lot = product.lot;
+        this.price = product.price;
+        this.status = product.status;
+    }
+
     // --- Getters ---
 
     public Integer getId() {
@@ -202,5 +227,32 @@ public class Product implements Serializable {
 
     public void setStatus(Boolean status) {
         this.status = status;
+    }
+
+    public void update(ProductUpdateDTO dto) {
+
+        if (dto.getName() != null) {
+            this.name = dto.getName();
+        }
+
+        if (dto.getType() != null) {
+            this.type = dto.getType();
+        }
+
+        if (dto.getValidity() != null) {
+            this.validity = dto.getValidity();
+        }
+
+        if (dto.getLot() != null) {
+            this.lot = dto.getLot();
+        }
+
+        if (dto.getPrice() != null) {
+            this.price = dto.getPrice();
+        }
+    }
+
+    public void deactivate() {
+        this.status = false;
     }
 }

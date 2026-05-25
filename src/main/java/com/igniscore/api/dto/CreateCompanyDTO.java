@@ -1,9 +1,14 @@
 package com.igniscore.api.dto;
 
+import com.igniscore.api.validation.ValidCNPJ;
+import jakarta.validation.constraints.NotBlank;
+
 public class CreateCompanyDTO {
 
     private String name;
 
+    @NotBlank(message = "CNPJ é obrigatório")
+    @ValidCNPJ
     private String cnpj;
 
     private String ie;

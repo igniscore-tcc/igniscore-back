@@ -5,6 +5,7 @@ import com.igniscore.api.dto.ClientRegisterDTO;
 import com.igniscore.api.dto.ClientUpdateDTO;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.service.ClientService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -65,7 +66,7 @@ public class ClientController {
      */
     @MutationMapping
     @SuppressWarnings("unused")
-    public Client storeClient(@Argument ClientRegisterDTO input) {
+    public Client storeClient(@Argument @Valid ClientRegisterDTO input) {
         return service.store(input);
     }
 
@@ -80,7 +81,7 @@ public class ClientController {
      */
     @MutationMapping
     @SuppressWarnings("unused")
-    public Client updateClient(@Argument ClientUpdateDTO input) {
+    public Client updateClient(@Argument @Valid ClientUpdateDTO input) {
         return service.update(input);
     }
 

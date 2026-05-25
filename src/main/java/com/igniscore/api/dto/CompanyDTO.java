@@ -1,5 +1,8 @@
 package com.igniscore.api.dto;
 
+import com.igniscore.api.validation.ValidCNPJ;
+import jakarta.validation.constraints.NotBlank;
+
 /**
  * Data Transfer Object (DTO) representing a company.
  *
@@ -41,6 +44,8 @@ public class CompanyDTO {
     /**
      * Company CNPJ (Brazilian business identifier).
      */
+    @NotBlank(message = "CNPJ é obrigatório")
+    @ValidCNPJ
     private String cnpj;
 
     /**
