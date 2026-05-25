@@ -3,6 +3,7 @@ package com.igniscore.api.controller;
 import com.igniscore.api.dto.CreateCompanyDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.service.CompanyService;
+import jakarta.validation.Valid;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -53,7 +54,7 @@ public class CompanyController {
      * @return the created Company entity
      */
     @MutationMapping
-    public Company createCompany(@Argument CreateCompanyDTO input) {
+    public Company createCompany(@Argument @Valid CreateCompanyDTO input) {
         return service.storeCompany(input);
     }
 }
