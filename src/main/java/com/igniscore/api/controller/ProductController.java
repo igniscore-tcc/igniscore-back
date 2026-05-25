@@ -4,6 +4,7 @@ import com.igniscore.api.dto.ProductStoreDTO;
 import com.igniscore.api.dto.ProductUpdateDTO;
 import com.igniscore.api.model.Product;
 import com.igniscore.api.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -55,7 +56,7 @@ public class ProductController {
      */
     @MutationMapping
     @SuppressWarnings("unused")
-    public Product storeProduct(@Argument ProductStoreDTO input) {
+    public Product storeProduct(@Argument @Valid ProductStoreDTO input) {
         return service.store(input);
     }
 
@@ -69,7 +70,7 @@ public class ProductController {
      */
     @MutationMapping
     @SuppressWarnings("unused")
-    public Product updateProduct(@Argument ProductUpdateDTO input) {
+    public Product updateProduct(@Argument @Valid ProductUpdateDTO input) {
         return service.update(input);
     }
 

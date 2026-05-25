@@ -1,5 +1,6 @@
 package com.igniscore.api.dto;
 
+import com.igniscore.api.validation.ValidCNPJ;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.AssertTrue;
 
@@ -59,13 +60,9 @@ public class ClientUpdateDTO {
      * <p>Accepts either:
      * <ul>
      *     <li>14 numeric digits</li>
-     *     <li>Formatted pattern: XX.XXX.XXX/XXXX-XX</li>
      * </ul>
      */
-    @Pattern(
-            regexp = "(\\d{14})|(\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2})",
-            message = "Invalid CNPJ format"
-    )
+    @ValidCNPJ
     private String cnpj;
 
     /**
@@ -108,18 +105,6 @@ public class ClientUpdateDTO {
      * Additional notes or observations about the client.
      */
     private String obs;
-
-    /**
-     * Cross-field validation to ensure that at least one identification
-     * document (CPF or CNPJ) is provided.
-     *
-     * @return true if either CPF or CNPJ is non-null and non-blank
-     */
-    @AssertTrue(message = "CPF or CNPJ must be provided")
-    public boolean isCpfOrCnpjValid() {
-        return (cpf != null && !cpf.isBlank()) ||
-                (cnpj != null && !cnpj.isBlank());
-    }
 
     public Integer getId() {
         return id;
