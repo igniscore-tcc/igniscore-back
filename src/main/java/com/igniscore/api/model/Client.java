@@ -152,6 +152,8 @@ public class Client implements Serializable {
         this.cpf = client.cpf;
     }
 
+
+
     // --- Getters ---
 
     public Integer getId() {
