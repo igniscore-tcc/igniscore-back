@@ -120,6 +120,19 @@ public class ClientRegisterDTO {
                 (cnpj != null && !cnpj.isBlank());
     }
 
+    public ClientRegisterDTO(String name, String email, String cnpj, String phone, String ie, String ufIe, String obs) {
+        this.name = name;
+        this.email = email;
+        this.cnpj = cnpj;
+        this.phone = phone;
+        this.ie = ie;
+        this.ufIe = ufIe;
+        this.obs = obs;
+    }
+
+    public ClientRegisterDTO() {
+    }
+
     public String getName() {
         return name;
     }
