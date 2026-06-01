@@ -1,5 +1,6 @@
 package com.igniscore.api.repository;
 
+import com.igniscore.api.dto.TopSellingProductDTO;
 import com.igniscore.api.model.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -7,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public interface DashboardRepository extends JpaRepository<Company, Integer> {
 
@@ -41,5 +43,22 @@ public interface DashboardRepository extends JpaRepository<Company, Integer> {
             @Param("companyId") Integer companyId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
+    );
+
+    @Query("""
+    SELECT new com.igniscore.api.dto.TopSellingProductDTO(
+        p.id,
+        p.name,
+        SUM(si.quantity)
+    )
+    FROM SaleItem si
+    JOIN si.product p
+    JOIN si.sale s
+    WHERE s.company.id = :companyId
+    GROUP BY p.id, p.name
+    ORDER BY SUM(si.quantity) DESC
+    """)
+    List<TopSellingProductDTO> findTopSellingProducts(
+            @Param("companyId") Integer companyId
     );
 }

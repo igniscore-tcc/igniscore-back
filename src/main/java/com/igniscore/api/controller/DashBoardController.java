@@ -1,9 +1,12 @@
 package com.igniscore.api.controller;
 
 import com.igniscore.api.dto.DashboardDTO;
+import com.igniscore.api.dto.TopSellingProductDTO;
 import com.igniscore.api.service.DashboardService;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 @Controller
 public class DashBoardController {
@@ -17,5 +20,10 @@ public class DashBoardController {
     @QueryMapping
     public DashboardDTO dashboard() {
         return dashboardService.getDashboardMetrics();
+    }
+
+    @QueryMapping
+    public List<TopSellingProductDTO> topSellingProducts() {
+        return dashboardService.getTopSellingProducts();
     }
 }

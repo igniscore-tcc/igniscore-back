@@ -1,11 +1,13 @@
 package com.igniscore.api.service;
 
 import com.igniscore.api.dto.DashboardDTO;
+import com.igniscore.api.dto.TopSellingProductDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.repository.DashboardRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class DashboardService {
@@ -53,6 +55,15 @@ public class DashboardService {
                 monthlyRevenue,
                 0L,
                 0L
+        );
+    }
+
+    public List<TopSellingProductDTO> getTopSellingProducts() {
+
+        Company company = authUserService.getCompanyOrThrow();
+
+        return dashboardRepository.findTopSellingProducts(
+                company.getId()
         );
     }
 }

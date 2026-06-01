@@ -84,6 +84,12 @@ type Dashboard {
     expiringProducts: Int!
 }
 
+type TopSellingProduct {
+    productId: Int!
+    productName: String!
+    totalSold: Int!
+}
+
 type Query {
 
     companies: [Company!]!
@@ -101,6 +107,8 @@ type Query {
     sales(page : Int, size: Int): [Sale!]!
 
     dashboard: Dashboard!
+
+    topSellingProducts: [TopSellingProduct!]!
 }
 
 type ClientQuery {
