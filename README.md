@@ -1,6 +1,6 @@
 # Igniscore - API GraphQL
 
-Plataforma de gestão de clientes e produtos com suporte completo a multi-tenancy, autenticação JWT e operações GraphQL.
+Plataforma completa de gestão de vendas com suporte a multi-tenancy, autenticação JWT e operações GraphQL. Gerencia clientes, produtos e vendas com isolamento total por empresa.
 
 ## Visão Geral
 
@@ -9,6 +9,7 @@ O **Igniscore** é uma aplicação Spring Boot que fornece uma API GraphQL robus
 - **Clients**: Gestão de clientes com isolamento por empresa (tenant)
 - **Companies**: Gerenciamento de empresas contratantes
 - **Products**: Catálogo de produtos com tipos e categorias
+- **Sales**: Gerenciamento de vendas, itens e descontos
 - **Users**: Autenticação e autorização com JWT
 - **Authentication**: Sistema seguro de login e controle de acesso
 
@@ -16,24 +17,36 @@ O **Igniscore** é uma aplicação Spring Boot que fornece uma API GraphQL robus
 
 Toda a documentação está organizada em `/docs/` com índices e exemplos para cada módulo:
 
-### Documentação do Módulo Clientes
+### 📄 Documentação do Módulo Clientes
 
 | Documento                                                     | Descrição                                   | Público            |
 | ------------------------------------------------------------- | ------------------------------------------- | ------------------ |
-| [README_CLIENTS_OVERVIEW.md](docs/README_CLIENTS_OVERVIEW.md) | Ponto de entrada rápido - Guia de navegação | Todos              |
+| [CLIENTS_INDEX.md](docs/CLIENTS_INDEX.md)                     | Índice centralizado ⭐ Comece aqui         | Todos              |
 | [CLIENTS_README.md](docs/CLIENTS_README.md)                   | Documentação técnica completa               | Devs, Arquitetos   |
 | [CLIENTS_EXAMPLES.md](docs/CLIENTS_EXAMPLES.md)               | Exemplos práticos prontos para usar         | Frontend, Testers  |
 | [CLIENTS_SECURITY.md](docs/CLIENTS_SECURITY.md)               | Segurança e multi-tenancy                   | Arquitetos, DevOps |
-| [CLIENTS_INDEX.md](docs/CLIENTS_INDEX.md)                     | Índice centralizado                         | Referência         |
 
-### Documentação do Módulo Products
+### 📄 Documentação do Módulo Products
 
 | Documento                                         | Descrição                              | Público            |
 | ------------------------------------------------- | -------------------------------------- | ------------------ |
-| [PRODUCTS_INDEX.md](docs/PRODUCTS_INDEX.md)       | Índice centralizado e ponto de entrada | Todos              |
+| [PRODUCTS_INDEX.md](docs/PRODUCTS_INDEX.md)       | Índice centralizado ⭐ Comece aqui     | Todos              |
 | [PRODUCTS_README.md](docs/PRODUCTS_README.md)     | Documentação técnica completa          | Devs, Arquitetos   |
 | [PRODUCTS_EXAMPLES.md](docs/PRODUCTS_EXAMPLES.md) | Exemplos práticos prontos para usar    | Frontend, Testers  |
 | [PRODUCTS_SECURITY.md](docs/PRODUCTS_SECURITY.md) | Segurança e multi-tenancy              | Arquitetos, DevOps |
+
+### 📄 Documentação do Módulo Sales (Vendas)
+
+| Documento                                         | Descrição                              | Público            |
+| ------------------------------------------------- | -------------------------------------- | ------------------ |
+| [SALES_INDEX.md](docs/SALES_INDEX.md)             | Índice centralizado ⭐ Comece aqui     | Todos              |
+| [SALES_README.md](docs/SALES_README.md)           | Documentação técnica completa          | Devs, Arquitetos   |
+| [SALES_EXAMPLES.md](docs/SALES_EXAMPLES.md)       | Exemplos práticos prontos para usar    | Frontend, Testers  |
+| [SALES_SECURITY.md](docs/SALES_SECURITY.md)       | Segurança e multi-tenancy              | Arquitetos, DevOps |
+
+### 📋 Visão Geral dos Módulos
+
+- [MODULES_OVERVIEW.md](docs/MODULES_OVERVIEW.md) - Comparação e integração entre os 3 módulos
 
 ## Início Rápido
 
@@ -92,15 +105,52 @@ mutation {
 }
 ```
 
-### 4. Listar Produtos (Paginado)
+### 4. Criar Venda
+
+```graphql
+mutation {
+  storeSale(input: {
+    clientId: 5
+    date: "2026-06-01"
+    paymentMethod: CREDIT_CARD
+    dueDate: "2026-07-01"
+  }) {
+    id
+    status
+    total
+  }
+}
+```
+
+### 5. Adicionar Item à Venda
+
+```graphql
+mutation {
+  addSaleItem(input: {
+    saleId: 1
+    productId: 10
+    quantity: 5
+    unitPrice: 85.50
+  }) {
+    id
+    quantityItems
+    total
+  }
+}
+```
+
+### 6. Listar Vendas (Paginado)
 
 ```graphql
 query {
-  products(page: 0, size: 10) {
+  sales(page: 0, size: 10) {
     id
-    name
-    type
-    price
+    total
+    date
+    status
+    client {
+      name
+    }
   }
 }
 ```
@@ -128,8 +178,10 @@ api/
 - **Paginação**: Suporte a listagens com offset/limit
 - **Tratamento de Erros**: Mensagens seguras e estruturadas
 - **Auditoria**: Logs de operações críticas
-- **Catalogo de Produtos**: Tipos predefinidos (extintor, sprinkler, etc)
+- **Catálogo de Produtos**: Tipos predefinidos (extintor, sprinkler, etc)
 - **Soft Delete**: Inativação lógica sem exclusão física
+- **Gerenciamento de Vendas**: Criar vendas, adicionar itens, aplicar descontos
+- **Transações**: Múltiplos status de venda (PENDING, COMPLETED, CANCELED)
 
 ## Segurança
 
@@ -155,61 +207,71 @@ Consulte as documentações de segurança para detalhes completos:
 - Proteção contra ataques comuns
 - Checklist de deploy
 
+### Sales (Vendas)
+
+[SALES_SECURITY.md](docs/SALES_SECURITY.md) para detalhes sobre:
+
+- Arquitetura multi-tenant
+- Fluxos de autenticação e autorização
+- Validações por operação (CREATE, READ, UPDATE, DELETE)
+- Tratamento seguro de erros
+- Proteção contra ataques
+- Checklist de deploy
+
 ## Guia por Perfil
 
 ### Frontend Developer
 
-Atualizar dados de clientes e produtos:
+Desenvolver interfaces para clientes, produtos e vendas:
 
 1. Leia [Setup Clientes](docs/CLIENTS_EXAMPLES.md#setup-e-autenticação)
 2. Leia [Setup Products](docs/PRODUCTS_EXAMPLES.md#setup-e-autenticação)
-3. Veja [Exemplos de Clientes](docs/CLIENTS_EXAMPLES.md#criação-de-clientes)
-4. Veja [Exemplos de Products](docs/PRODUCTS_EXAMPLES.md#criação-de-produtos)
-5. Consulte [Casos de Erro](docs/PRODUCTS_EXAMPLES.md#casos-de-erro-comuns)
+3. Leia [Setup Sales](docs/SALES_EXAMPLES.md#setup-e-autenticação)
+4. Veja exemplos: [Clientes](docs/CLIENTS_EXAMPLES.md), [Products](docs/PRODUCTS_EXAMPLES.md), [Sales](docs/SALES_EXAMPLES.md)
+5. Consulte [Casos de Erro](docs/SALES_EXAMPLES.md#casos-de-erro-comuns)
 
 ### Backend Developer
 
-Implementar novas features:
+Implementar novas features ou otimizações:
 
 1. Comece com [Visão Geral Clientes](docs/CLIENTS_README.md#visão-geral)
 2. Comece com [Visão Geral Products](docs/PRODUCTS_README.md#visão-geral)
-3. Estude [Modelo Clientes](docs/CLIENTS_README.md#modelo-de-dados)
-4. Estude [Modelo Products](docs/PRODUCTS_README.md#modelo-de-dados)
-5. Analise [Arquitetura](docs/PRODUCTS_README.md#arquitetura-da-camada-de-products)
-6. Entenda [Operações GraphQL](docs/PRODUCTS_README.md#operações-disponíveis-graphql)
+3. Comece com [Visão Geral Sales](docs/SALES_README.md#visão-geral)
+4. Estude os modelos de dados
+5. Analise a arquitetura de camadas
+6. Entenda as operações GraphQL
 
 ### QA / Tester
 
-Validar funcionalidades:
+Validar todas as funcionalidades:
 
 1. Leia [Operações Clientes](docs/CLIENTS_README.md#operações-disponíveis-graphql)
 2. Leia [Operações Products](docs/PRODUCTS_README.md#operações-disponíveis-graphql)
-3. Execute [Exemplos Clientes](docs/CLIENTS_EXAMPLES.md)
-4. Execute [Exemplos Products](docs/PRODUCTS_EXAMPLES.md)
-5. Teste [Casos de Erro](docs/PRODUCTS_EXAMPLES.md#casos-de-erro-comuns)
-6. Valide [Isolamento Multi-Tenant](docs/PRODUCTS_SECURITY.md#8-testes-de-segurança)
+3. Leia [Operações Sales](docs/SALES_README.md#operações-disponíveis-graphql)
+4. Execute os exemplos de cada módulo
+5. Teste [Casos de Erro](docs/SALES_EXAMPLES.md#casos-de-erro-comuns)
+6. Valide isolamento multi-tenant
 
 ### Product Manager / Business Analyst
 
-Entender funcionalidades:
+Entender funcionalidades e regras de negócio:
 
-1. Leia [Visão Geral Clientes](docs/CLIENTS_README.md#visão-geral)
-2. Leia [Visão Geral Products](docs/PRODUCTS_README.md#visão-geral)
-3. Entenda [Regras Clientes](docs/CLIENTS_README.md#regras-de-negócio)
-4. Entenda [Regras Products](docs/PRODUCTS_README.md#regras-de-negócio)
-5. Conheça [Tipos de Products](docs/PRODUCTS_README.md#enum-producttype)
-6. Explore [Operações Disponíveis](docs/PRODUCTS_README.md#operações-disponíveis-graphql)
+1. Leia [Visão Geral dos Módulos](docs/MODULES_OVERVIEW.md)
+2. Conheça [Tipos de Products](docs/PRODUCTS_README.md#enum-producttype)
+3. Entenda [Regras de Negócio Sales](docs/SALES_README.md#regras-de-negócio)
+4. Explore [Operações Disponíveis](docs/SALES_README.md#operações-disponíveis-graphql)
+5. Estude os [Fluxos de Integração](docs/MODULES_OVERVIEW.md#-fluxos-de-integração)
 
 ### Security Architect
 
-Revisar segurança:
+Revisar segurança de todos os módulos:
 
-1. Comece com [Multi-Tenant Clientes](docs/CLIENTS_SECURITY.md#1-arquitetura-multi-tenant)
-2. Comece com [Multi-Tenant Products](docs/PRODUCTS_SECURITY.md#1-arquitetura-multi-tenant)
-3. Estude [Autenticação Clientes](docs/CLIENTS_SECURITY.md#2-fluxo-de-autenticação-e-autorização)
-4. Estude [Autenticação Products](docs/PRODUCTS_SECURITY.md#2-fluxo-de-autenticação-e-autorização)
-5. Revise [Testes de Segurança](docs/PRODUCTS_SECURITY.md#8-testes-de-segurança)
-6. Acompanhe [Checklist Deploy](docs/PRODUCTS_SECURITY.md#9-checklist-de-deploy)
+1. Estude [Multi-Tenant Clientes](docs/CLIENTS_SECURITY.md#1-arquitetura-multi-tenant)
+2. Estude [Multi-Tenant Products](docs/PRODUCTS_SECURITY.md#1-arquitetura-multi-tenant)
+3. Estude [Multi-Tenant Sales](docs/SALES_SECURITY.md#1-arquitetura-multi-tenant)
+4. Revise [Autenticação](docs/SALES_SECURITY.md#2-fluxo-de-autenticação-e-autorização)
+5. Valide [Testes de Segurança](docs/SALES_SECURITY.md#8-testes-de-segurança)
+6. Acompanhe [Checklist Deploy](docs/SALES_SECURITY.md#9-checklist-de-deploy)
 
 ## Setup e Desenvolvimento
 
@@ -238,32 +300,52 @@ mvn spring-boot:run
 
 Todos os documentos estão em `/docs/`:
 
-### Módulo Clientes
+### 📍 Comece Aqui (Índices Centralizados)
 
-- **README_CLIENTS_OVERVIEW.md** → Onde começar (leia primeiro!)
-- **CLIENTS_INDEX.md** → Índice centralizado da documentação
-- **CLIENTS_README.md** → Documentação técnica detalhada
-- **CLIENTS_EXAMPLES.md** → Exemplos práticos prontos para usar
-- **CLIENTS_SECURITY.md** → Tudo sobre segurança e multi-tenancy
-- **CLIENTS_QUICKSTART.md** → Guia rápido de início
+- **[DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)** → Mapa completo de toda a documentação ⭐
+- **[MODULES_OVERVIEW.md](docs/MODULES_OVERVIEW.md)** → Visão geral dos 3 módulos
+- **[README_CLIENTS_OVERVIEW.md](docs/README_CLIENTS_OVERVIEW.md)** → Guia de navegação
 
-### Módulo Products
+### 👥 Módulo Clientes
 
-- **PRODUCTS_INDEX.md** → Índice centralizado (leia primeiro!)
-- **PRODUCTS_README.md** → Documentação técnica detalhada
-- **PRODUCTS_EXAMPLES.md** → Exemplos práticos prontos para usar
-- **PRODUCTS_SECURITY.md** → Tudo sobre segurança e multi-tenancy
+### 👥 Módulo Clientes
+
+- **[CLIENTS_INDEX.md](docs/CLIENTS_INDEX.md)** → Índice centralizado ⭐ Comece aqui!
+- **[CLIENTS_README.md](docs/CLIENTS_README.md)** → Documentação técnica detalhada
+- **[CLIENTS_EXAMPLES.md](docs/CLIENTS_EXAMPLES.md)** → Exemplos práticos prontos para usar
+- **[CLIENTS_SECURITY.md](docs/CLIENTS_SECURITY.md)** → Tudo sobre segurança e multi-tenancy
+- **[CLIENTS_ARCHITECTURE.md](docs/CLIENTS_ARCHITECTURE.md)** → Fluxos e arquitetura
+- **[CLIENTS_QUICKSTART.md](docs/CLIENTS_QUICKSTART.md)** → 5 minutos para começar
+
+### 📦 Módulo Products
+
+- **[PRODUCTS_INDEX.md](docs/PRODUCTS_INDEX.md)** → Índice centralizado ⭐ Comece aqui!
+- **[PRODUCTS_README.md](docs/PRODUCTS_README.md)** → Documentação técnica detalhada
+- **[PRODUCTS_EXAMPLES.md](docs/PRODUCTS_EXAMPLES.md)** → Exemplos práticos prontos para usar
+- **[PRODUCTS_SECURITY.md](docs/PRODUCTS_SECURITY.md)** → Tudo sobre segurança e multi-tenancy
+
+### 💳 Módulo Sales (Vendas) ⭐ NOVO
+
+- **[SALES_INDEX.md](docs/SALES_INDEX.md)** → Índice centralizado ⭐ Comece aqui!
+- **[SALES_README.md](docs/SALES_README.md)** → Documentação técnica detalhada
+- **[SALES_EXAMPLES.md](docs/SALES_EXAMPLES.md)** → Exemplos práticos prontos para usar
+- **[SALES_SECURITY.md](docs/SALES_SECURITY.md)** → Tudo sobre segurança e multi-tenancy
+
+### 📊 Visão Geral e Configuração
+
+- **[MODULES_OVERVIEW.md](docs/MODULES_OVERVIEW.md)** → Visão geral e comparação dos 3 módulos
+- **[REDIS_DOCKER.md](docs/REDIS_DOCKER.md)** → Configuração de Redis e Docker
 
 ## Status do Projeto
 
-| Componente      | Status             |
-| --------------- | ------------------ |
-| Módulo Clientes | Completo           |
-| Módulo Products | Completo           |
-| Documentação    | Completo           |
-| Testes          | Em desenvolvimento |
-| Segurança       | Teste              |
-| Produção        | Ativo              |
+| Componente      | Status             | Documentação |
+| --------------- | ------------------ | ------------ |
+| Módulo Clientes | ✅ Completo        | ✅ Completo  |
+| Módulo Products | ✅ Completo        | ✅ Completo  |
+| Módulo Sales    | ✅ Completo        | ✅ Completo  |
+| Testes          | Em desenvolvimento | -            |
+| Segurança       | ✅ Teste           | ✅ Completo  |
+| Produção        | Ativo              | -            |
 
 ## Contribuindo
 
@@ -298,7 +380,61 @@ Veja [Enum ProductType](docs/PRODUCTS_README.md#enum-producttype) para detalhes 
 - Atualizar produto existente
 - Inativar/desativar produto
 
-Veja [Operações Products](docs/PRODUCTS_README.md#operações-disponíveis-graphql) e [Operações Clientes](docs/CLIENTS_README.md#operações-disponíveis-graphql) para detalhes completos.
+### Módulo Sales (Vendas)
+
+- Listar vendas com paginação
+- Buscar venda por ID
+- Listar vendas por cliente
+- Criar nova venda
+- Atualizar venda
+- Adicionar item à venda
+- Remover item da venda
+- Aplicar desconto
+- Completar venda
+- Cancelar venda
+
+Veja [Operações Products](docs/PRODUCTS_README.md#operações-disponíveis-graphql), [Operações Clientes](docs/CLIENTS_README.md#operações-disponíveis-graphql) e [Operações Sales](docs/SALES_README.md#operações-disponíveis-graphql) para detalhes completos.
+
+## 🚀 Documentação Rápida por Módulo
+
+### Comece com Sales (Vendas) ⭐ NOVO
+
+1. Leia [SALES_INDEX.md](docs/SALES_INDEX.md) - Índice com guia rápido
+2. Veja [Fluxo Rápido de Venda](docs/SALES_INDEX.md#fluxo-rápido-criar-e-finalizar-uma-venda)
+3. Execute [Exemplos Práticos](docs/SALES_EXAMPLES.md)
+4. Estude [Segurança](docs/SALES_SECURITY.md)
+
+### Comece com Products
+
+1. Leia [PRODUCTS_INDEX.md](docs/PRODUCTS_INDEX.md) - Índice com guia rápido
+2. Veja exemplos em [PRODUCTS_EXAMPLES.md](docs/PRODUCTS_EXAMPLES.md)
+3. Estude [Segurança](docs/PRODUCTS_SECURITY.md)
+
+### Comece com Clientes
+
+1. Leia [CLIENTS_INDEX.md](docs/CLIENTS_INDEX.md) - Índice com guia rápido
+2. Veja exemplos em [CLIENTS_EXAMPLES.md](docs/CLIENTS_EXAMPLES.md)
+3. Estude [Segurança](docs/CLIENTS_SECURITY.md)
+
+## 📚 Índice Completo da Documentação
+
+Para um mapa completo de toda a documentação, recursos por perfil e sequências de aprendizado, consulte:
+
+👉 **[DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)** - Índice centralizado de toda a documentação
+
+Este arquivo contém:
+- Guia por perfil (Frontend, Backend, Arquiteto, QA, etc.)
+- Sequência recomendada de aprendizado
+- Buscador rápido de informações
+- Tempo estimado para cada documento
+- Checklist de requisitos
+
+## 📞 Suporte e Contribuições
+
+- 📖 Documentação: [`/docs`](docs)
+- 🐛 Issues: GitHub Issues
+- 💡 Sugestões: Abra uma issue com label `documentation`
+- 🔧 Contribuindo: Consulte [DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md#contribuindo-com-documentação)
 
 ## Licença
 
