@@ -1,70 +1,146 @@
-# Documentação do Módulo Clients – Sumário Executivo
+# Documentação Centralizada - Guia de Navegação
 
-## Documento de Referência Rápida
+## 📋 Visão Geral da Documentação
 
-Este arquivo serve como **ponto de entrada rápido** para toda a documentação do módulo Clients. Use-o para navegar rapidamente para o documento que você precisa.
+Este documento serve como **mapa centralizado** para toda a documentação dos 3 módulos principais:
 
----
-
-## Status do Módulo
-
-| Aspecto | Status | Detalhes |
-|---------|--------|----------|
-| **Desenvolvimento** | Completado | Todas as operações CRUD implementadas |
-| **Testes** | Implementado | Testes unitários e integração |
-| **Documentação** | Completo | 6 documentos detalhados |
-| **Segurança** | Auditado | Isolamento multi-tenant garantido |
-| **Produção** | Ativo | Rodando em ambiente de produção |
+- **Clientes (CLIENTS)** - Gestão de informações de clientes
+- **Produtos (PRODUCTS)** - Catálogo e gestão de produtos
+- **Vendas (SALES)** - Gerenciamento de operações de venda
 
 ---
 
-## Documentos Disponíveis
+## 🎯 Escolha o Seu Ponto de Entrada
 
-### 1. **README Técnico** (CLIENTS_README.md)
-**Use quando**: Você precisa entender como o módulo funciona tecnicamente
+### Para Desenvolvedores Iniciantes
 
-```
-├─ Visão Geral do módulo
-├─ Modelo de Dados (tabela clients, fields, constraints)
-├─ Regras de Negócio
-├─ Arquitetura de Camadas
-├─ Operações GraphQL (Queries e Mutations)
-├─ Integrações com outros módulos
-├─ Segurança e Multi-Tenancy
-├─ Tratamento de Erros
-├─ Performance e Otimizações
-├─ Configuração e Deployment
-└─ Testes
-```
+1. Comece com [MODULES_OVERVIEW.md](MODULES_OVERVIEW.md) - Entenda os 3 módulos
+2. Escolha um módulo:
+   - [CLIENTS_INDEX.md](CLIENTS_INDEX.md) para Clientes
+   - [PRODUCTS_INDEX.md](PRODUCTS_INDEX.md) para Produtos
+   - [SALES_INDEX.md](SALES_INDEX.md) para Vendas ⭐ NOVO
+3. Execute exemplos em `*_EXAMPLES.md`
 
-**Leitura esperada**: 20-30 minutos  
-**Público**: Desenvolvedores, Arquitetos
+### Para Arquitetos/Devops
+
+1. Leia [MODULES_OVERVIEW.md](MODULES_OVERVIEW.md)
+2. Consulte documentação técnica:
+   - [CLIENTS_README.md](CLIENTS_README.md) - Modelo, operações, integrações
+   - [PRODUCTS_README.md](PRODUCTS_README.md) - Modelo, operações, integrações
+   - [SALES_README.md](SALES_README.md) - Modelo, operações, integrações
+3. Estude segurança:
+   - [CLIENTS_SECURITY.md](CLIENTS_SECURITY.md)
+   - [PRODUCTS_SECURITY.md](PRODUCTS_SECURITY.md)
+   - [SALES_SECURITY.md](SALES_SECURITY.md)
+
+### Para Líderes Técnicos
+
+1. Veja [MODULES_OVERVIEW.md](MODULES_OVERVIEW.md) - Comparação de todos os 3 módulos
+2. Revise segurança em [SALES_SECURITY.md](SALES_SECURITY.md) (novo módulo)
+3. Verifique status em [../README.md](../README.md)
 
 ---
 
-### 2. **Guia Prático** (CLIENTS_EXAMPLES.md)
-**Use quando**: Você quer exemplos prontos para usar/copiar
+## 📊 Módulos Disponíveis
 
-```
-├─ Setup e Autenticação (obtenção de JWT)
-├─ Exemplos de Criação
-│  ├─ Cliente simples
-│  ├─ Cliente com todos os campos
-│  └─ Criar múltiplos em lote
+### 1. Módulo Clientes
+
+| Documento                                          | Propósito                             | Público           |
+| -------------------------------------------------- | ------------------------------------- | ----------------- |
+| [CLIENTS_INDEX.md](CLIENTS_INDEX.md)               | 📍 Comece aqui - Índice + Quick Start | Todos             |
+| [CLIENTS_README.md](CLIENTS_README.md)             | 🔧 Documentação técnica completa      | Devs/Arquitetos   |
+| [CLIENTS_SECURITY.md](CLIENTS_SECURITY.md)         | 🔐 Segurança e multi-tenancy          | DevOps/Arquitetos |
+| [CLIENTS_EXAMPLES.md](CLIENTS_EXAMPLES.md)         | 💻 50+ exemplos práticos GraphQL      | Devs              |
+| [CLIENTS_ARCHITECTURE.md](CLIENTS_ARCHITECTURE.md) | 🏗️ Fluxos e diagramas                 | Arquitetos        |
+| [CLIENTS_QUICKSTART.md](CLIENTS_QUICKSTART.md)     | ⚡ 5 min - Começar agora              | Iniciantes        |
+
+### 2. Módulo Products
+
+| Documento                                    | Propósito                             | Público           |
+| -------------------------------------------- | ------------------------------------- | ----------------- |
+| [PRODUCTS_INDEX.md](PRODUCTS_INDEX.md)       | 📍 Comece aqui - Índice + Quick Start | Todos             |
+| [PRODUCTS_README.md](PRODUCTS_README.md)     | 🔧 Documentação técnica completa      | Devs/Arquitetos   |
+| [PRODUCTS_SECURITY.md](PRODUCTS_SECURITY.md) | 🔐 Segurança e multi-tenancy          | DevOps/Arquitetos |
+| [PRODUCTS_EXAMPLES.md](PRODUCTS_EXAMPLES.md) | 💻 50+ exemplos práticos GraphQL      | Devs              |
+
+### 3. Módulo Sales (NOVO ⭐)
+
+| Documento                              | Propósito                             | Público           |
+| -------------------------------------- | ------------------------------------- | ----------------- |
+| [SALES_INDEX.md](SALES_INDEX.md)       | 📍 Comece aqui - Índice + Quick Start | Todos             |
+| [SALES_README.md](SALES_README.md)     | 🔧 Documentação técnica completa      | Devs/Arquitetos   |
+| [SALES_SECURITY.md](SALES_SECURITY.md) | 🔐 Segurança e multi-tenancy          | DevOps/Arquitetos |
+| [SALES_EXAMPLES.md](SALES_EXAMPLES.md) | 💻 70+ exemplos práticos GraphQL      | Devs              |
+
+---
+
+## 🔗 Integrações Entre Módulos
+
+- **Clientes** → fornece dados base de clientes
+- **Products** → catálogo de produtos disponíveis para venda
+- **Sales** → combina Clientes + Products para criar vendas
+
+Veja [MODULES_OVERVIEW.md](MODULES_OVERVIEW.md) para diagrama de fluxo.
+
+---
+
+## ✅ Status Atual
+
+| Módulo   | Desenvolvimento | Documentação | Segurança   |
+| -------- | --------------- | ------------ | ----------- |
+| Clientes | ✅ Completo     | ✅ Completo  | ✅ Auditado |
+| Products | ✅ Completo     | ✅ Completo  | ✅ Auditado |
+| Sales    | ✅ Completo     | ✅ Completo  | ✅ Auditado |
+
+---
+
+## 📖 Documentos Auxiliares
+
+- [MODULES_OVERVIEW.md](MODULES_OVERVIEW.md) - Comparação dos 3 módulos
+- [REDIS_DOCKER.md](REDIS_DOCKER.md) - Configuração de Redis/Docker
+- [../README.md](../README.md) - README principal do projeto
+
+---
+
+## ⏱️ Tempo de Leitura Recomendado
+
+- **Quick Start** (5 min): CLIENTS_QUICKSTART.md
+- **Índice + Exemplos** (30 min): _\_INDEX.md + _\_EXAMPLES.md
+- **README Completo** (45-60 min): \*\_README.md
+- **Segurança** (30 min): \*\_SECURITY.md
+- **Todos os documentos** (3-4 horas): Leitura completa
+
+---
+
+## 🎓 Próximos Passos
+
+1. **Iniciantes**: Comece com [CLIENTS_QUICKSTART.md](CLIENTS_QUICKSTART.md)
+2. **Desenvolvendo**: Use [CLIENTS_EXAMPLES.md](CLIENTS_EXAMPLES.md) como referência
+3. **Em Produção**: Leia [CLIENTS_SECURITY.md](CLIENTS_SECURITY.md)
+
+---
+
+**Última atualização**: Janeiro 2025  
+**Módulos**: Clientes, Products, Sales (3/3 completos)  
+**Documentação**: Centralizada e atualizada
+│ ├─ Cliente simples
+│ ├─ Cliente com todos os campos
+│ └─ Criar múltiplos em lote
 ├─ Consultas e Buscas
-│  ├─ Listar com paginação
-│  ├─ Buscar cliente específico
-│  └─ Listar página 2, 20 registros/página
+│ ├─ Listar com paginação
+│ ├─ Buscar cliente específico
+│ └─ Listar página 2, 20 registros/página
 ├─ Atualizações
-│  ├─ Atualizar campo único
-│  ├─ Atualizar múltiplos campos
-│  └─ Script Python para lote
+│ ├─ Atualizar campo único
+│ ├─ Atualizar múltiplos campos
+│ └─ Script Python para lote
 ├─ Deleção e Inativação
 ├─ Casos de Erro Comuns (respostas reais)
 └─ Integração com outros módulos
+
 ```
 
-**Leitura esperada**: 15-20 minutos  
+**Leitura esperada**: 15-20 minutos
 **Público**: Desenvolvedores Frontend, Testers, Integradores
 
 ---
@@ -73,27 +149,29 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 **Use quando**: Você trabalha com segurança, code review ou arquitetura
 
 ```
+
 ├─ Arquitetura Multi-Tenant
 ├─ Fluxo de Autenticação e Autorização
 ├─ Filtragem de Dados por Tenant
 ├─ Validações de Segurança por Operação
-│  ├─ CREATE: Validações ao criar
-│  ├─ READ: Filtragem e acesso
-│  ├─ UPDATE: Validações ao atualizar
-│  └─ DELETE: Soft delete seguro
+│ ├─ CREATE: Validações ao criar
+│ ├─ READ: Filtragem e acesso
+│ ├─ UPDATE: Validações ao atualizar
+│ └─ DELETE: Soft delete seguro
 ├─ Mensagens de Erro Seguras
 ├─ Auditoria e Logging
 ├─ Proteção contra Ataques Comuns
-│  ├─ SQL Injection
-│  ├─ CSRF
-│  ├─ Broken Authentication
-│  ├─ Broken Authorization
-│  └─ Information Disclosure
+│ ├─ SQL Injection
+│ ├─ CSRF
+│ ├─ Broken Authentication
+│ ├─ Broken Authorization
+│ └─ Information Disclosure
 ├─ Testes de Segurança automatizados
 └─ Checklist de Deploy
+
 ```
 
-**Leitura esperada**: 30-40 minutos  
+**Leitura esperada**: 30-40 minutos
 **Público**: Arquitetos, Especialistas de Segurança
 
 ---
@@ -102,6 +180,7 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 **Use quando**: Você tem 5 minutos e quer começar agora
 
 ```
+
 ├─ Passo 1: Autenticar (JWT)
 ├─ Passo 2: Criar cliente
 ├─ Passo 3: Listar clientes
@@ -111,9 +190,10 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 ├─ Problemas comuns e soluções
 ├─ Dicas úteis
 └─ Challenge final
+
 ```
 
-**Leitura esperada**: 5 minutos  
+**Leitura esperada**: 5 minutos
 **Público**: Iniciantes, Novos membros do time
 
 ---
@@ -122,6 +202,7 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 **Use quando**: Você quer entender visualmente como tudo funciona
 
 ```
+
 ├─ Arquitetura em Camadas (diagrama ASCII)
 ├─ Fluxo de Requisição Autenticada
 ├─ Isolamento Multi-Tenant (visual)
@@ -131,9 +212,10 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 ├─ Modelo de Dados (Diagrama ER)
 ├─ Fluxo de Segurança Detalhado
 └─ Diagrama de Estados
+
 ```
 
-**Leitura esperada**: Consulta rápida  
+**Leitura esperada**: Consulta rápida
 **Público**: Todos (visuais ajudam a entender)
 
 ---
@@ -142,6 +224,7 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 **Use quando**: Você precisa navegar entre documentos
 
 ```
+
 ├─ Guia rápido por caso de uso
 ├─ Resumo do módulo
 ├─ Fluxo rápido
@@ -150,9 +233,10 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 ├─ Notas importantes
 ├─ Recursos adicionais
 └─ Checklist inicial
+
 ```
 
-**Leitura esperada**: 5 minutos  
+**Leitura esperada**: 5 minutos
 **Público**: Todos (índice de navegação)
 
 ---
@@ -357,8 +441,8 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 
 ---
 
-**Versão**: 1.0  
-**Data**: 25 de abril de 2026  
+**Versão**: 1.0
+**Data**: 25 de abril de 2026
 **Status**: Documentação Completa e Pronta para Uso
 
 ---
@@ -377,3 +461,4 @@ Este arquivo serve como **ponto de entrada rápido** para toda a documentação 
 ---
 
 **Bem-vindo ao Módulo Clients do Igniscore! Bom trabalho!**
+```
