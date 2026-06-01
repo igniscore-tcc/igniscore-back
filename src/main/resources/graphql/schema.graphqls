@@ -75,6 +75,15 @@ type Sale {
     items: [SaleItem!]!
 }
 
+type Dashboard {
+    totalClients: Int!
+    totalProducts: Int!
+    totalSales: Int!
+    monthlyRevenue: Float!
+    pendingOrders: Int!
+    expiringProducts: Int!
+}
+
 type Query {
 
     companies: [Company!]!
@@ -90,6 +99,8 @@ type Query {
     products(page : Int, size: Int): [ProductOutput!]!
 
     sales(page : Int, size: Int): [Sale!]!
+
+    dashboard: Dashboard!
 }
 
 type ClientQuery {

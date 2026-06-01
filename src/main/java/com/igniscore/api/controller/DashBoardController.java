@@ -1,0 +1,21 @@
+package com.igniscore.api.controller;
+
+import com.igniscore.api.dto.DashboardDTO;
+import com.igniscore.api.service.DashboardService;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.stereotype.Controller;
+
+@Controller
+public class DashBoardController {
+
+    private final DashboardService dashboardService;
+
+    public DashBoardController(DashboardService dashboardService) {
+        this.dashboardService = dashboardService;
+    }
+
+    @QueryMapping
+    public DashboardDTO dashboard() {
+        return dashboardService.getDashboardMetrics();
+    }
+}

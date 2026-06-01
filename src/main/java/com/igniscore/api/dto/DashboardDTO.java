@@ -1,0 +1,12 @@
+package com.igniscore.api.dto;
+
+import java.math.BigDecimal;
+
+public record DashboardDTO(
+        Long totalClients,
+        Long totalProducts,
+        Long totalSales,
+        BigDecimal monthlyRevenue,
+        Long pendingOrders,
+        Long expiringProducts
+) {}
