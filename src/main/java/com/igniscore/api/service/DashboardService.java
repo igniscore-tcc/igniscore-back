@@ -1,6 +1,7 @@
 package com.igniscore.api.service;
 
 import com.igniscore.api.dto.DashboardDTO;
+import com.igniscore.api.dto.MonthlySalesDTO;
 import com.igniscore.api.dto.TopSellingProductDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.repository.DashboardRepository;
@@ -64,6 +65,18 @@ public class DashboardService {
 
         return dashboardRepository.findTopSellingProducts(
                 company.getId()
+        );
+    }
+
+    public List<MonthlySalesDTO> getMonthlySales() {
+
+        Company company = authUserService.getCompanyOrThrow();
+
+        Integer currentYear = LocalDate.now().getYear();
+
+        return dashboardRepository.getMonthlySales(
+                company.getId(),
+                currentYear
         );
     }
 }

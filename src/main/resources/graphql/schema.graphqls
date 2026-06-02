@@ -90,6 +90,11 @@ type TopSellingProduct {
     totalSold: Int!
 }
 
+type MonthlySales {
+    month: Int!
+    total: Float!
+}
+
 type Query {
 
     companies: [Company!]!
@@ -109,6 +114,8 @@ type Query {
     dashboard: Dashboard!
 
     topSellingProducts: [TopSellingProduct!]!
+
+    monthlySales: [MonthlySales!]!
 }
 
 type ClientQuery {
