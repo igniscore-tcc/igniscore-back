@@ -75,6 +75,32 @@ type Sale {
     items: [SaleItem!]!
 }
 
+type Dashboard {
+    totalClients: Int!
+    totalProducts: Int!
+    totalSales: Int!
+    monthlyRevenue: Float!
+    pendingOrders: Int!
+    expiringProducts: Int!
+}
+
+type TopSellingProduct {
+    productId: Int!
+    productName: String!
+    totalSold: Int!
+}
+
+type MonthlySales {
+    month: Int!
+    total: Float!
+}
+
+type SalesByClient {
+    clientId: Int!
+    clientName: String!
+    totalSales: Float!
+}
+
 type Query {
 
     companies: [Company!]!
@@ -90,6 +116,14 @@ type Query {
     products(page : Int, size: Int): [ProductOutput!]!
 
     sales(page : Int, size: Int): [Sale!]!
+
+    dashboard: Dashboard!
+
+    topSellingProducts: [TopSellingProduct!]!
+
+    monthlySales: [MonthlySales!]!
+
+    salesByClient: [SalesByClient!]!
 }
 
 type ClientQuery {
