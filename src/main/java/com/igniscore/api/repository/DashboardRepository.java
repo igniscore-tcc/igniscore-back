@@ -1,6 +1,7 @@
 package com.igniscore.api.repository;
 
 import com.igniscore.api.dto.MonthlySalesDTO;
+import com.igniscore.api.dto.SalesByClientDTO;
 import com.igniscore.api.dto.TopSellingProductDTO;
 import com.igniscore.api.model.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -77,5 +78,21 @@ public interface DashboardRepository extends JpaRepository<Company, Integer> {
     List<MonthlySalesDTO> getMonthlySales(
             @Param("companyId") Integer companyId,
             @Param("year") Integer year
+    );
+
+    @Query("""
+    SELECT new com.igniscore.api.dto.SalesByClientDTO(
+        c.id,
+        c.name,
+        COALESCE(SUM(s.total), 0)
+    )
+    FROM Sale s
+    JOIN s.client c
+    WHERE s.company.id = :companyId
+    GROUP BY c.id, c.name
+    ORDER BY SUM(s.total) DESC
+    """)
+    List<SalesByClientDTO> getSalesByClient(
+            @Param("companyId") Integer companyId
     );
 }

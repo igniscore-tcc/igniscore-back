@@ -2,6 +2,7 @@ package com.igniscore.api.controller;
 
 import com.igniscore.api.dto.DashboardDTO;
 import com.igniscore.api.dto.MonthlySalesDTO;
+import com.igniscore.api.dto.SalesByClientDTO;
 import com.igniscore.api.dto.TopSellingProductDTO;
 import com.igniscore.api.service.DashboardService;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -31,5 +32,10 @@ public class DashBoardController {
     @QueryMapping
     public List<MonthlySalesDTO> monthlySales() {
         return dashboardService.getMonthlySales();
+    }
+
+    @QueryMapping
+    public List<SalesByClientDTO> salesByClient() {
+        return dashboardService.getSalesByClient();
     }
 }

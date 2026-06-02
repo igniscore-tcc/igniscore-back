@@ -95,6 +95,12 @@ type MonthlySales {
     total: Float!
 }
 
+type SalesByClient {
+    clientId: Int!
+    clientName: String!
+    totalSales: Float!
+}
+
 type Query {
 
     companies: [Company!]!
@@ -116,6 +122,8 @@ type Query {
     topSellingProducts: [TopSellingProduct!]!
 
     monthlySales: [MonthlySales!]!
+
+    salesByClient: [SalesByClient!]!
 }
 
 type ClientQuery {
