@@ -201,4 +201,20 @@ public class SaleService {
 
         return repository.findByCompany(company, true, pageable);
     }
+
+    @Transactional(readOnly = true)
+    public Page<Sale> findPerPeriod(
+            LocalDate startDate,
+            LocalDate endDate,
+            Pageable pageable
+    ) {
+        Company company = authUserService.getCompanyOrThrow();
+
+        return repository.findByCompanyAndDateBetween(
+                company,
+                startDate,
+                endDate,
+                pageable
+        );
+    }
 }

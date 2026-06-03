@@ -11,6 +11,7 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -93,5 +94,26 @@ public class SaleController {
         );
 
         return service.findAll(pageable).getContent();
+    }
+
+    @QueryMapping
+    public List<Sale> salesByPeriod(
+            @Argument Integer page,
+            @Argument Integer size,
+            @Argument LocalDate startDate,
+            @Argument LocalDate endDate
+    ) {
+
+        Pageable pageable = PageRequest.of(
+                page != null ? page : 0,
+                size != null ? size : 10,
+                Sort.by(Sort.Direction.ASC, "id")
+        );
+
+        return service.findPerPeriod(
+                startDate,
+                endDate,
+                pageable
+        ).getContent();
     }
 }
