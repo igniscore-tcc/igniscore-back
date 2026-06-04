@@ -1,5 +1,6 @@
 package com.igniscore.api.controller;
 
+import com.igniscore.api.dto.ProductQueryDTO;
 import com.igniscore.api.dto.ProductStoreDTO;
 import com.igniscore.api.dto.ProductUpdateDTO;
 import com.igniscore.api.model.Product;
@@ -91,7 +92,7 @@ public class ProductController {
      * @return list of {@link Product} entities for the requested page
      */
     @QueryMapping
-    public List<Product> products(@Argument Integer page, @Argument Integer size) {
+    public ProductQueryDTO products(@Argument Integer page, @Argument Integer size) {
 
         Pageable pageable = PageRequest.of(
                 page != null ? page : 0,
@@ -99,7 +100,7 @@ public class ProductController {
                 Sort.by(Sort.Direction.ASC, "id")
         );
 
-        return service.findAll(pageable).getContent();
+        return service.findAll(pageable);
     }
 
     /**

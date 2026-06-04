@@ -113,7 +113,7 @@ type Query {
 
     clients(page: Int, size: Int): ClientQuery!
 
-    products(page : Int, size: Int): [ProductOutput!]!
+    products(page : Int, size: Int): ProductQuery!
 
     sales(page: Int, size: Int): SaleQuery!
 
@@ -133,6 +133,14 @@ type ClientQuery {
     totalPages: Int!
 
     totalClients: Int!
+}
+
+type ProductQuery {
+    products: [Product!]!
+
+    totalPages: Int!
+
+    totalProducts: Int!
 }
 
 type SaleQuery {
