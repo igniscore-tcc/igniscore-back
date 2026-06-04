@@ -1,5 +1,6 @@
 package com.igniscore.api.service;
 
+import com.igniscore.api.dto.ProductQueryDTO;
 import com.igniscore.api.dto.ProductStoreDTO;
 import com.igniscore.api.dto.ProductUpdateDTO;
 import com.igniscore.api.model.User;
@@ -185,11 +186,17 @@ public class ProductService {
             unless = "#result == null"
     )
     @Transactional(readOnly = true)
-    public Page<Product> findAll(Pageable pageable) {
+    public ProductQueryDTO findAll(Pageable pageable) {
 
         Company company = authUserService.getCompanyOrThrow();
 
-        return repository.findByCompanyAndStatusOrderByIdAsc(company, true, pageable );
+        Page<Product> page = repository.findByCompanyAndStatusOrderByIdAsc(company, true, pageable );
+
+        return new ProductQueryDTO(
+                page.getContent(),
+                page.getTotalPages(),
+                page.getTotalElements()
+        );
     }
 
     /**
