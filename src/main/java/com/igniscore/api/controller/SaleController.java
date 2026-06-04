@@ -117,25 +117,4 @@ public class SaleController {
                 pageable
         ).getContent();
     }
-
-    @QueryMapping
-    public List<Sale> salesByPeriod(
-            @Argument Integer page,
-            @Argument Integer size,
-            @Argument LocalDate startDate,
-            @Argument LocalDate endDate
-    ) {
-
-        Pageable pageable = PageRequest.of(
-                page != null ? page : 0,
-                size != null ? size : 10,
-                Sort.by(Sort.Direction.ASC, "id")
-        );
-
-        return service.findPerPeriod(
-                startDate,
-                endDate,
-                pageable
-        ).getContent();
-    }
 }
