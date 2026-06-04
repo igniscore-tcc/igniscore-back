@@ -1,6 +1,7 @@
 package com.igniscore.api.controller;
 
 import com.igniscore.api.dto.CreateSaleDTO;
+import com.igniscore.api.dto.SaleQueryDTO;
 import com.igniscore.api.model.Sale;
 import com.igniscore.api.service.SaleService;
 import org.springframework.data.domain.PageRequest;
@@ -82,7 +83,7 @@ public class SaleController {
      * @return list of sales for the requested page
      */
     @QueryMapping
-    public List<Sale> sales(
+    public SaleQueryDTO sales(
             @Argument Integer page,
             @Argument Integer size
     ) {
@@ -93,7 +94,7 @@ public class SaleController {
                 Sort.by(Sort.Direction.ASC, "id")
         );
 
-        return service.findAll(pageable).getContent();
+        return service.findAll(pageable);
     }
 
     @QueryMapping

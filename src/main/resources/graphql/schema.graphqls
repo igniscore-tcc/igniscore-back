@@ -115,7 +115,7 @@ type Query {
 
     products(page : Int, size: Int): [ProductOutput!]!
 
-    sales(page : Int, size: Int): [Sale!]!
+    sales(page: Int, size: Int): SaleQuery!
 
     dashboard: Dashboard!
 
@@ -133,6 +133,12 @@ type ClientQuery {
     totalPages: Int!
 
     totalClients: Int!
+}
+
+type SaleQuery {
+    sales: [Sale!]!
+    totalPages: Int!
+    totalSales: Int!
 }
 
 type Mutation {

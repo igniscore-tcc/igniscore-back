@@ -2,6 +2,7 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.CreateSaleDTO;
 import com.igniscore.api.dto.CreateSaleItemDTO;
+import com.igniscore.api.dto.SaleQueryDTO;
 import com.igniscore.api.model.*;
 import com.igniscore.api.repository.ClientRepository;
 import com.igniscore.api.repository.ProductRepository;
@@ -195,11 +196,16 @@ public class SaleService {
      * @return paginated sales result
      */
     @Transactional(readOnly = true)
-    public Page<Sale> findAll(Pageable pageable) {
+    public SaleQueryDTO findAll(Pageable pageable) {
 
         Company company = authUserService.getCompanyOrThrow();
 
-        return repository.findByCompany(company, true, pageable);
+        Page<Sale> page = repository.findByCompany(company, true, pageable);
+        return new SaleQueryDTO(
+                page.getContent(),
+                page.getTotalPages(),
+                page.getTotalElements()
+        );
     }
 
     @Transactional(readOnly = true)
