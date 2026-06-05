@@ -2,8 +2,8 @@ package com.igniscore.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.igniscore.api.dto.ProductStoreDTO;
-import com.igniscore.api.dto.ProductUpdateDTO;
+import com.igniscore.api.dto.product.ProductStoreDTO;
+import com.igniscore.api.dto.product.ProductUpdateDTO;
 import jakarta.persistence.*;
 
 import java.io.Serial;

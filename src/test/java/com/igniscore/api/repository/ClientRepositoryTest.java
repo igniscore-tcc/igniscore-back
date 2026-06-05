@@ -1,11 +1,10 @@
 package com.igniscore.api.repository;
 
-import com.igniscore.api.dto.ClientRegisterDTO;
-import com.igniscore.api.dto.CreateCompanyDTO;
+import com.igniscore.api.dto.client.ClientRegisterDTO;
+import com.igniscore.api.dto.company.CreateCompanyDTO;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;

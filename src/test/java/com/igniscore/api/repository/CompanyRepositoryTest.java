@@ -1,6 +1,6 @@
 package com.igniscore.api.repository;
 
-import com.igniscore.api.dto.CreateCompanyDTO;
+import com.igniscore.api.dto.company.CreateCompanyDTO;
 import com.igniscore.api.model.Company;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;

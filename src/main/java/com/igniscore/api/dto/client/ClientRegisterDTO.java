@@ -1,4 +1,4 @@
-package com.igniscore.api.dto;
+package com.igniscore.api.dto.client;
 
 import com.igniscore.api.validation.ValidCNPJ;
 import jakarta.validation.constraints.Email;

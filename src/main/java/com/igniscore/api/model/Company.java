@@ -1,6 +1,6 @@
 package com.igniscore.api.model;
 
-import com.igniscore.api.dto.CreateCompanyDTO;
+import com.igniscore.api.dto.company.CreateCompanyDTO;
 import jakarta.persistence.*;
 
 import java.io.Serial;

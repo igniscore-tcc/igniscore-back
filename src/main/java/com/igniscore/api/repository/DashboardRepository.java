@@ -1,8 +1,8 @@
 package com.igniscore.api.repository;
 
-import com.igniscore.api.dto.MonthlySalesDTO;
-import com.igniscore.api.dto.SalesByClientDTO;
-import com.igniscore.api.dto.TopSellingProductDTO;
+import com.igniscore.api.dto.dashboard.MonthlySalesDTO;
+import com.igniscore.api.dto.dashboard.SalesByClientDTO;
+import com.igniscore.api.dto.dashboard.TopSellingProductDTO;
 import com.igniscore.api.model.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -48,7 +48,7 @@ public interface DashboardRepository extends JpaRepository<Company, Integer> {
     );
 
     @Query("""
-    SELECT new com.igniscore.api.dto.TopSellingProductDTO(
+    SELECT new com.igniscore.api.dto.dashboard.TopSellingProductDTO(
         p.id,
         p.name,
         SUM(si.quantity)
@@ -65,7 +65,7 @@ public interface DashboardRepository extends JpaRepository<Company, Integer> {
     );
 
     @Query("""
-    SELECT new com.igniscore.api.dto.MonthlySalesDTO(
+    SELECT new com.igniscore.api.dto.dashboard.MonthlySalesDTO(
         MONTH(s.date),
         COALESCE(SUM(s.total), 0)
     )
@@ -81,7 +81,7 @@ public interface DashboardRepository extends JpaRepository<Company, Integer> {
     );
 
     @Query("""
-    SELECT new com.igniscore.api.dto.SalesByClientDTO(
+    SELECT new com.igniscore.api.dto.dashboard.SalesByClientDTO(
         c.id,
         c.name,
         COALESCE(SUM(s.total), 0)

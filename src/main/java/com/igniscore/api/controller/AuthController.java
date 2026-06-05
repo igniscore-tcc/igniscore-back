@@ -1,8 +1,8 @@
 package com.igniscore.api.controller;
 
-import com.igniscore.api.dto.AutDTO;
-import com.igniscore.api.dto.RegisterDTO;
-import com.igniscore.api.dto.LoginResponseDTO;
+import com.igniscore.api.dto.auth.AutDTO;
+import com.igniscore.api.dto.auth.RegisterDTO;
+import com.igniscore.api.dto.auth.LoginResponseDTO;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.UserRepository;
 import com.igniscore.api.service.JwtService;

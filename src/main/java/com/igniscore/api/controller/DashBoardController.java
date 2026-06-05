@@ -1,9 +1,9 @@
 package com.igniscore.api.controller;
 
-import com.igniscore.api.dto.DashboardDTO;
-import com.igniscore.api.dto.MonthlySalesDTO;
-import com.igniscore.api.dto.SalesByClientDTO;
-import com.igniscore.api.dto.TopSellingProductDTO;
+import com.igniscore.api.dto.dashboard.DashboardDTO;
+import com.igniscore.api.dto.dashboard.MonthlySalesDTO;
+import com.igniscore.api.dto.dashboard.SalesByClientDTO;
+import com.igniscore.api.dto.dashboard.TopSellingProductDTO;
 import com.igniscore.api.service.DashboardService;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
