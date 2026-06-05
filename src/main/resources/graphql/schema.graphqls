@@ -126,6 +126,11 @@ type Query {
     salesByClient: [SalesByClient!]!
 
     expirations: [Expiration!]!
+
+    expirationsByPeriod(
+        startDate: Date!,
+        endDate: Date!
+    ): [Expiration!]!
 }
 
 type ClientQuery {

@@ -6,6 +6,7 @@ import com.igniscore.api.repository.ExpirationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -21,5 +22,13 @@ public class ExpirationService {
     public List<ExpirationDTO> getExpirations() {
         Company company = authenticatedUserService.getCompanyOrThrow();
         return expirationRepository.findExpirationsByCompanyId(company.getId());
+    }
+
+    public List<ExpirationDTO> getExpirationsByPeriod(
+            LocalDate startDate,
+            LocalDate endDate
+    ) {
+        Company company = authenticatedUserService.getCompanyOrThrow();
+        return expirationRepository.findExpirationsByPeriod(company.getId(), startDate, endDate);
     }
 }
