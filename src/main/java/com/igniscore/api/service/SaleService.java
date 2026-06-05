@@ -7,6 +7,8 @@ import com.igniscore.api.model.*;
 import com.igniscore.api.repository.ClientRepository;
 import com.igniscore.api.repository.ProductRepository;
 import com.igniscore.api.repository.SaleRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -107,6 +109,7 @@ public class SaleService {
      * </ul>
      */
     @Transactional
+    @CacheEvict(value = "sales", allEntries = true)
     public Sale store(CreateSaleDTO dto) {
 
         Company company = authUserService.getCompanyOrThrow();
@@ -154,6 +157,11 @@ public class SaleService {
      * @param pageable pagination configuration
      * @return paginated sales result
      */
+    @Cacheable(
+            value = "sales",
+            key = "@cacheKeyService.salesKey(#pageable)",
+            unless = "#result == null"
+    )
     @Transactional(readOnly = true)
     public SaleQueryDTO findAll(Pageable pageable) {
 
@@ -167,6 +175,11 @@ public class SaleService {
         );
     }
 
+    @Cacheable(
+            value = "sales",
+            key = "@cacheKeyService.salesKey(#pageable)",
+            unless = "#result == null"
+    )
     @Transactional(readOnly = true)
     public Page<Sale> findPerPeriod(
             LocalDate startDate,

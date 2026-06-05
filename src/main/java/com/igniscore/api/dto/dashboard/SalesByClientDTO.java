@@ -1,4 +1,4 @@
-package com.igniscore.api.dto.sale;
+package com.igniscore.api.dto.dashboard;
 
 import java.math.BigDecimal;
 

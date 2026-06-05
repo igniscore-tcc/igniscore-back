@@ -2,7 +2,7 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.dashboard.DashboardDTO;
 import com.igniscore.api.dto.dashboard.MonthlySalesDTO;
-import com.igniscore.api.dto.sale.SalesByClientDTO;
+import com.igniscore.api.dto.dashboard.SalesByClientDTO;
 import com.igniscore.api.dto.dashboard.TopSellingProductDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.repository.DashboardRepository;
