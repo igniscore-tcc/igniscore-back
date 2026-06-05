@@ -131,6 +131,10 @@ type Query {
         startDate: Date!,
         endDate: Date!
     ): [Expiration!]!
+
+    upcomingExpirations(
+        days: Int!
+    ): [Expiration!]!
 }
 
 type ClientQuery {

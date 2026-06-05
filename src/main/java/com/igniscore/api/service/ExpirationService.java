@@ -31,4 +31,15 @@ public class ExpirationService {
         Company company = authenticatedUserService.getCompanyOrThrow();
         return expirationRepository.findExpirationsByPeriod(company.getId(), startDate, endDate);
     }
+
+    public List<ExpirationDTO> getUpcomingExpirations(
+            Integer days
+    ) {
+        Company company = authenticatedUserService.getCompanyOrThrow();
+
+        LocalDate today = LocalDate.now();
+        LocalDate endDate = today.plusDays(days);
+
+        return expirationRepository.findUpcomingExpirations(company.getId(), today, endDate);
+    }
 }

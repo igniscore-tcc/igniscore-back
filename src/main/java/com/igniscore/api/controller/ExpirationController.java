@@ -30,4 +30,11 @@ public class ExpirationController {
     public List<ExpirationDTO> expirationsByPeriod(@Argument LocalDate startDate, @Argument LocalDate endDate) {
         return expirationService.getExpirationsByPeriod(startDate, endDate);
     }
+
+    @QueryMapping
+    public List<ExpirationDTO> upcomingExpirations(
+            @Argument Integer days
+    ) {
+        return expirationService.getUpcomingExpirations(days);
+    }
 }
