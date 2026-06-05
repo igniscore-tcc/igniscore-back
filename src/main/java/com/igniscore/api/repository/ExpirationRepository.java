@@ -67,4 +67,23 @@ public interface ExpirationRepository extends JpaRepository<Company, Integer> {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+
+    @Query("""
+    SELECT new com.igniscore.api.dto.ExpirationDTO(
+        s.id,
+        c.name,
+        s.date,
+        s.dueDate,
+        s.total
+    )
+    FROM Sale s
+    JOIN s.client c
+    WHERE s.company.id = :companyId
+      AND c.id = :clientId
+    ORDER BY s.dueDate ASC
+    """)
+    List<ExpirationDTO> findExpirationsByClient(
+            Integer companyId,
+            Integer clientId
+    );
 }

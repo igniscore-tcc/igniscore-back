@@ -135,6 +135,10 @@ type Query {
     upcomingExpirations(
         days: Int!
     ): [Expiration!]!
+
+    expirationsByClient(
+        clientId: Int!
+    ): [Expiration!]!
 }
 
 type ClientQuery {

@@ -42,4 +42,11 @@ public class ExpirationService {
 
         return expirationRepository.findUpcomingExpirations(company.getId(), today, endDate);
     }
+
+    public List<ExpirationDTO> getExpirationsByClient(
+            Integer clientId
+    ) {
+        Company company = authenticatedUserService.getCompanyOrThrow();
+        return expirationRepository.findExpirationsByClient(company.getId(), clientId);
+    }
 }

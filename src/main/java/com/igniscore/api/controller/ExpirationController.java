@@ -37,4 +37,11 @@ public class ExpirationController {
     ) {
         return expirationService.getUpcomingExpirations(days);
     }
+
+    @QueryMapping
+    public List<ExpirationDTO> expirationsByClient(
+            @Argument Integer clientId
+    ) {
+        return expirationService.getExpirationsByClient(clientId);
+    }
 }
