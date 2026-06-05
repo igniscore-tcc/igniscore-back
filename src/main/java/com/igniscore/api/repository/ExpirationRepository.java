@@ -1,6 +1,6 @@
 package com.igniscore.api.repository;
 
-import com.igniscore.api.dto.ExpirationDTO;
+import com.igniscore.api.dto.ExpirationProjectionDTO;
 import com.igniscore.api.model.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +12,7 @@ import java.util.List;
 public interface ExpirationRepository extends JpaRepository<Company, Integer> {
 
     @Query("""
-        SELECT new com.igniscore.api.dto.ExpirationDTO(
+        SELECT new com.igniscore.api.dto.ExpirationProjectionDTO(
             s.id,
             c.name,
             s.date,
@@ -24,12 +24,12 @@ public interface ExpirationRepository extends JpaRepository<Company, Integer> {
         WHERE s.company.id = :companyId
         ORDER BY s.dueDate ASC
     """)
-    List<ExpirationDTO> findExpirationsByCompanyId(
+    List<ExpirationProjectionDTO> findExpirationsByCompanyId(
             @Param("companyId") Integer companyId
     );
 
     @Query("""
-    SELECT new com.igniscore.api.dto.ExpirationDTO(
+    SELECT new com.igniscore.api.dto.ExpirationProjectionDTO(
         s.id,
         c.name,
         s.date,
@@ -42,14 +42,14 @@ public interface ExpirationRepository extends JpaRepository<Company, Integer> {
       AND s.dueDate BETWEEN :startDate AND :endDate
     ORDER BY s.dueDate ASC
     """)
-    List<ExpirationDTO> findExpirationsByPeriod(
+    List<ExpirationProjectionDTO> findExpirationsByPeriod(
             @Param("companyId") Integer companyId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
 
     @Query("""
-    SELECT new com.igniscore.api.dto.ExpirationDTO(
+    SELECT new com.igniscore.api.dto.ExpirationProjectionDTO(
         s.id,
         c.name,
         s.date,
@@ -62,14 +62,14 @@ public interface ExpirationRepository extends JpaRepository<Company, Integer> {
       AND s.dueDate BETWEEN :startDate AND :endDate
     ORDER BY s.dueDate ASC
     """)
-    List<ExpirationDTO> findUpcomingExpirations(
+    List<ExpirationProjectionDTO> findUpcomingExpirations(
             @Param("companyId") Integer companyId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
 
     @Query("""
-    SELECT new com.igniscore.api.dto.ExpirationDTO(
+    SELECT new com.igniscore.api.dto.ExpirationProjectionDTO(
         s.id,
         c.name,
         s.date,
@@ -82,7 +82,7 @@ public interface ExpirationRepository extends JpaRepository<Company, Integer> {
       AND c.id = :clientId
     ORDER BY s.dueDate ASC
     """)
-    List<ExpirationDTO> findExpirationsByClient(
+    List<ExpirationProjectionDTO> findExpirationsByClient(
             Integer companyId,
             Integer clientId
     );

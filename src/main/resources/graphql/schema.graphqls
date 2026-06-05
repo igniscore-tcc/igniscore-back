@@ -170,6 +170,7 @@ type Expiration {
     saleDate: Date!
     dueDate: Date!
     totalSale: BigDecimal!
+    status: ExpirationStatus!
 }
 
 type Mutation {
@@ -294,4 +295,10 @@ enum SaleStatus {
     PENDING
     PAID
     CANCELED
+}
+
+enum ExpirationStatus {
+    VENCIDO
+    PROXIMO
+    NORMAL
 }
