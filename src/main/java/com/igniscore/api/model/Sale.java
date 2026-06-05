@@ -2,6 +2,8 @@ package com.igniscore.api.model;
 
 import jakarta.persistence.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,7 +35,10 @@ import java.util.List;
  */
 @Entity
 @Table(name = "sales")
-public class Sale {
+public class Sale implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * Unique identifier of the sale.

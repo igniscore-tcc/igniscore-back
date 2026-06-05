@@ -1,8 +1,8 @@
 package com.igniscore.api.service;
 
-import com.igniscore.api.dto.ExpirationDTO;
-import com.igniscore.api.dto.ExpirationProjectionDTO;
-import com.igniscore.api.dto.ExpirationStatus;
+import com.igniscore.api.dto.expiration.ExpirationDTO;
+import com.igniscore.api.dto.expiration.ExpirationProjectionDTO;
+import com.igniscore.api.dto.expiration.ExpirationStatus;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.repository.ExpirationRepository;
 import org.springframework.stereotype.Service;

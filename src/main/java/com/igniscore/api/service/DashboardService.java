@@ -1,9 +1,9 @@
 package com.igniscore.api.service;
 
-import com.igniscore.api.dto.DashboardDTO;
-import com.igniscore.api.dto.MonthlySalesDTO;
-import com.igniscore.api.dto.SalesByClientDTO;
-import com.igniscore.api.dto.TopSellingProductDTO;
+import com.igniscore.api.dto.dashboard.DashboardDTO;
+import com.igniscore.api.dto.dashboard.MonthlySalesDTO;
+import com.igniscore.api.dto.dashboard.SalesByClientDTO;
+import com.igniscore.api.dto.dashboard.TopSellingProductDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.repository.DashboardRepository;
 import org.springframework.stereotype.Service;

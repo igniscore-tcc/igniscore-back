@@ -1,12 +1,13 @@
 package com.igniscore.api.controller;
 
-import com.igniscore.api.dto.CreateSaleDTO;
-import com.igniscore.api.dto.SaleQueryDTO;
+import com.igniscore.api.dto.sale.CreateSaleDTO;
+import com.igniscore.api.dto.sale.SaleQueryDTO;
 import com.igniscore.api.model.Sale;
 import com.igniscore.api.service.SaleService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -83,6 +84,7 @@ public class SaleController {
      * @return list of sales for the requested page
      */
     @QueryMapping
+    @EntityGraph(attributePaths = {"client", "items"})
     public SaleQueryDTO sales(
             @Argument Integer page,
             @Argument Integer size

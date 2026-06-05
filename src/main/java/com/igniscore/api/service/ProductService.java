@@ -1,8 +1,8 @@
 package com.igniscore.api.service;
 
-import com.igniscore.api.dto.ProductQueryDTO;
-import com.igniscore.api.dto.ProductStoreDTO;
-import com.igniscore.api.dto.ProductUpdateDTO;
+import com.igniscore.api.dto.product.ProductQueryDTO;
+import com.igniscore.api.dto.product.ProductStoreDTO;
+import com.igniscore.api.dto.product.ProductUpdateDTO;
 import com.igniscore.api.model.User;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.Product;

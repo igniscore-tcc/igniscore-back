@@ -1,4 +1,4 @@
-package com.igniscore.api.dto;
+package com.igniscore.api.dto.auth;
 
 /**
  * Data Transfer Object (DTO) representing the response returned after

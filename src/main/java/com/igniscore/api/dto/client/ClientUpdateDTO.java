@@ -1,8 +1,7 @@
-package com.igniscore.api.dto;
+package com.igniscore.api.dto.client;
 
 import com.igniscore.api.validation.ValidCNPJ;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.AssertTrue;
 
 /**
  * Data Transfer Object (DTO) used for client update operations.

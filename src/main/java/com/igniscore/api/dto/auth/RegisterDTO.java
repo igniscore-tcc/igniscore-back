@@ -1,4 +1,4 @@
-package com.igniscore.api.dto;
+package com.igniscore.api.dto.auth;
 
 import com.igniscore.api.model.UserRole;
 
