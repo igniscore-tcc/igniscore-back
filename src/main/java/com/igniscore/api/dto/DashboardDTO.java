@@ -8,5 +8,8 @@ public record DashboardDTO(
         Long totalSales,
         BigDecimal monthlyRevenue,
         Long pendingOrders,
-        Long expiringProducts
+        Long expiringProducts,
+        Long currentMonthExpirations,
+        Long upcomingExpirations,
+        Long expiredExpirations
 ) {}

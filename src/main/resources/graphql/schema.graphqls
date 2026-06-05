@@ -82,6 +82,9 @@ type Dashboard {
     monthlyRevenue: Float!
     pendingOrders: Int!
     expiringProducts: Int!
+    currentMonthExpirations: Int!
+    upcomingExpirations: Int!
+    expiredExpirations: Int!
 }
 
 type TopSellingProduct {
@@ -124,6 +127,21 @@ type Query {
     monthlySales: [MonthlySales!]!
 
     salesByClient: [SalesByClient!]!
+
+    expirations: [Expiration!]!
+
+    expirationsByPeriod(
+        startDate: Date!,
+        endDate: Date!
+    ): [Expiration!]!
+
+    upcomingExpirations(
+        days: Int!
+    ): [Expiration!]!
+
+    expirationsByClient(
+        clientId: Int!
+    ): [Expiration!]!
 }
 
 type ClientQuery {
@@ -147,6 +165,15 @@ type SaleQuery {
     sales: [Sale!]!
     totalPages: Int!
     totalSales: Int!
+}
+
+type Expiration {
+    saleId: Int!
+    clientName: String!
+    saleDate: Date!
+    dueDate: Date!
+    totalSale: BigDecimal!
+    status: ExpirationStatus!
 }
 
 type Mutation {
@@ -271,4 +298,10 @@ enum SaleStatus {
     PENDING
     PAID
     CANCELED
+}
+
+enum ExpirationStatus {
+    VENCIDO
+    PROXIMO
+    NORMAL
 }
