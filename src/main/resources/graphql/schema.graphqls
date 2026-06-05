@@ -124,6 +124,8 @@ type Query {
     monthlySales: [MonthlySales!]!
 
     salesByClient: [SalesByClient!]!
+
+    expirations: [Expiration!]!
 }
 
 type ClientQuery {
@@ -147,6 +149,14 @@ type SaleQuery {
     sales: [Sale!]!
     totalPages: Int!
     totalSales: Int!
+}
+
+type Expiration {
+    saleId: Int!
+    clientName: String!
+    saleDate: Date!
+    dueDate: Date!
+    totalSale: BigDecimal!
 }
 
 type Mutation {
