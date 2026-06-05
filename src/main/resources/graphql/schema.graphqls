@@ -84,6 +84,7 @@ type Dashboard {
     expiringProducts: Int!
     currentMonthExpirations: Int!
     upcomingExpirations: Int!
+    expiredExpirations: Int!
 }
 
 type TopSellingProduct {

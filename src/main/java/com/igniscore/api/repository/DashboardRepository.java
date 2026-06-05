@@ -119,4 +119,15 @@ public interface DashboardRepository extends JpaRepository<Company, Integer> {
             @Param("today") LocalDate today,
             @Param("limitDate") LocalDate limitDate
     );
+
+    @Query("""
+    SELECT COUNT(s)
+    FROM Sale s
+    WHERE s.company.id = :companyId
+      AND s.dueDate < :today
+    """)
+    Long countExpiredExpirations(
+            @Param("companyId") Integer companyId,
+            @Param("today") LocalDate today
+    );
 }

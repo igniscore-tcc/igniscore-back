@@ -67,6 +67,12 @@ public class DashboardService {
                         next30Days
                 );
 
+        Long expiredExpirations =
+                dashboardRepository.countExpiredExpirations(
+                        companyId,
+                        today
+                );
+
         return new DashboardDTO(
                 totalClients,
                 totalProducts,
@@ -75,7 +81,8 @@ public class DashboardService {
                 0L,
                 0L,
                 currentMonthExpirations,
-                upcomingExpirations
+                upcomingExpirations,
+                expiredExpirations
         );
     }
 

@@ -10,5 +10,6 @@ public record DashboardDTO(
         Long pendingOrders,
         Long expiringProducts,
         Long currentMonthExpirations,
-        Long upcomingExpirations
+        Long upcomingExpirations,
+        Long expiredExpirations
 ) {}
