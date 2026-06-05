@@ -12,7 +12,7 @@ import java.util.List;
 public interface ExpirationRepository extends JpaRepository<Company, Integer> {
 
     @Query("""
-        SELECT new com.igniscore.api.dto.ExpirationProjectionDTO(
+        SELECT new com.igniscore.api.dto.expiration.ExpirationProjectionDTO(
             s.id,
             c.name,
             s.date,
@@ -29,7 +29,7 @@ public interface ExpirationRepository extends JpaRepository<Company, Integer> {
     );
 
     @Query("""
-    SELECT new com.igniscore.api.dto.ExpirationProjectionDTO(
+    SELECT new com.igniscore.api.dto.expiration.ExpirationProjectionDTO(
         s.id,
         c.name,
         s.date,
@@ -49,7 +49,7 @@ public interface ExpirationRepository extends JpaRepository<Company, Integer> {
     );
 
     @Query("""
-    SELECT new com.igniscore.api.dto.ExpirationProjectionDTO(
+    SELECT new com.igniscore.api.dto.expiration.ExpirationProjectionDTO(
         s.id,
         c.name,
         s.date,
@@ -69,7 +69,7 @@ public interface ExpirationRepository extends JpaRepository<Company, Integer> {
     );
 
     @Query("""
-    SELECT new com.igniscore.api.dto.ExpirationProjectionDTO(
+    SELECT new com.igniscore.api.dto.expiration.ExpirationProjectionDTO(
         s.id,
         c.name,
         s.date,
