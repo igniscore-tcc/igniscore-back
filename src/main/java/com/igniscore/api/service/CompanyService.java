@@ -1,6 +1,6 @@
 package com.igniscore.api.service;
 
-import com.igniscore.api.dto.CreateCompanyDTO;
+import com.igniscore.api.dto.company.CreateCompanyDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.CompanyRepository;

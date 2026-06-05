@@ -1,8 +1,8 @@
 package com.igniscore.api.repository;
 
-import com.igniscore.api.dto.MonthlySalesDTO;
-import com.igniscore.api.dto.SalesByClientDTO;
-import com.igniscore.api.dto.TopSellingProductDTO;
+import com.igniscore.api.dto.dashboard.MonthlySalesDTO;
+import com.igniscore.api.dto.sale.SalesByClientDTO;
+import com.igniscore.api.dto.dashboard.TopSellingProductDTO;
 import com.igniscore.api.model.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

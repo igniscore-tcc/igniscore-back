@@ -1,6 +1,6 @@
 package com.igniscore.api.controller;
 
-import com.igniscore.api.dto.CreateCompanyDTO;
+import com.igniscore.api.dto.company.CreateCompanyDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.service.CompanyService;
 import jakarta.validation.Valid;

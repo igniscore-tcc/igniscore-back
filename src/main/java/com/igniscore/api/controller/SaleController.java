@@ -1,7 +1,7 @@
 package com.igniscore.api.controller;
 
-import com.igniscore.api.dto.CreateSaleDTO;
-import com.igniscore.api.dto.SaleQueryDTO;
+import com.igniscore.api.dto.sale.CreateSaleDTO;
+import com.igniscore.api.dto.sale.SaleQueryDTO;
 import com.igniscore.api.model.Sale;
 import com.igniscore.api.service.SaleService;
 import org.springframework.data.domain.PageRequest;

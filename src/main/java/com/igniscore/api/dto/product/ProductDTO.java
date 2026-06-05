@@ -1,5 +1,6 @@
-package com.igniscore.api.dto;
+package com.igniscore.api.dto.product;
 
+import com.igniscore.api.dto.company.CompanyDTO;
 import com.igniscore.api.model.ProductType;
 
 import java.math.BigDecimal;

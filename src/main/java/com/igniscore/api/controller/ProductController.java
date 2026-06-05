@@ -1,8 +1,8 @@
 package com.igniscore.api.controller;
 
-import com.igniscore.api.dto.ProductQueryDTO;
-import com.igniscore.api.dto.ProductStoreDTO;
-import com.igniscore.api.dto.ProductUpdateDTO;
+import com.igniscore.api.dto.product.ProductQueryDTO;
+import com.igniscore.api.dto.product.ProductStoreDTO;
+import com.igniscore.api.dto.product.ProductUpdateDTO;
 import com.igniscore.api.model.Product;
 import com.igniscore.api.service.ProductService;
 import jakarta.validation.Valid;
@@ -13,8 +13,6 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
-
-import java.util.List;
 
 /**
  * GraphQL controller responsible for handling product-related operations.

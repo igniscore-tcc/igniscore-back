@@ -1,4 +1,4 @@
-package com.igniscore.api.dto;
+package com.igniscore.api.dto.expiration;
 
 public enum ExpirationStatus {
     VENCIDO,

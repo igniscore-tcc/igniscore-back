@@ -1,8 +1,8 @@
 package com.igniscore.api.service;
 
-import com.igniscore.api.dto.ClientQueryDTO;
-import com.igniscore.api.dto.ClientRegisterDTO;
-import com.igniscore.api.dto.ClientUpdateDTO;
+import com.igniscore.api.dto.client.ClientQueryDTO;
+import com.igniscore.api.dto.client.ClientRegisterDTO;
+import com.igniscore.api.dto.client.ClientUpdateDTO;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;

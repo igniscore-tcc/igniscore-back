@@ -1,6 +1,6 @@
 package com.igniscore.api.controller;
 
-import com.igniscore.api.dto.ExpirationDTO;
+import com.igniscore.api.dto.expiration.ExpirationDTO;
 import com.igniscore.api.service.ExpirationService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;

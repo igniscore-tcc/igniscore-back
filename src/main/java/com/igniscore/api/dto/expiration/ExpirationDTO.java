@@ -1,4 +1,4 @@
-package com.igniscore.api.dto;
+package com.igniscore.api.dto.expiration;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

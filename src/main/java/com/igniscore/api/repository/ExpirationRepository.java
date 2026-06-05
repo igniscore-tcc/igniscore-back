@@ -1,6 +1,6 @@
 package com.igniscore.api.repository;
 
-import com.igniscore.api.dto.ExpirationProjectionDTO;
+import com.igniscore.api.dto.expiration.ExpirationProjectionDTO;
 import com.igniscore.api.model.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

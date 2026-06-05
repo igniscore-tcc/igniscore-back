@@ -1,4 +1,4 @@
-package com.igniscore.api.dto;
+package com.igniscore.api.dto.dashboard;
 
 public record TopSellingProductDTO(
         Integer productId,

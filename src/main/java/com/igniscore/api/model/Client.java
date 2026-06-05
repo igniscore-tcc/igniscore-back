@@ -1,8 +1,8 @@
 package com.igniscore.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.igniscore.api.dto.ClientRegisterDTO;
-import com.igniscore.api.dto.ClientUpdateDTO;
+import com.igniscore.api.dto.client.ClientRegisterDTO;
+import com.igniscore.api.dto.client.ClientUpdateDTO;
 import jakarta.persistence.*;
 import jakarta.persistence.Column;
 import org.hibernate.annotations.Generated;
