@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Service responsible for handling business rules
@@ -107,76 +111,31 @@ public class SaleService {
 
         Company company = authUserService.getCompanyOrThrow();
 
-        Client client = clientRepository.findById(dto.getClientId())
-                .orElseThrow(() ->
-                        new RuntimeException("Cliente não encontrado"));
-
-        /*
-         * Prevents access to clients belonging
-         * to another company.
-         */
-        if (!client.getCompany().getId().equals(company.getId())) {
-            throw new RuntimeException(
-                    "Cliente não pertence à empresa"
-            );
-        }
-
-        Sale sale = new Sale();
-
-        sale.setCompany(company);
-        sale.setClient(client);
-        sale.setPaymentMethod(dto.getPaymentMethod());
-
-        /*
-         * Sets creation and due dates.
-         * Due date is currently initialized
-         * with the same value as the creation date.
-         */
-        sale.setDate(LocalDate.now());
-        sale.setDueDate(LocalDate.now());
-
-        /*
-         * Newly created sales start as pending.
-         */
-        sale.setStatus(SaleStatus.PENDING);
-
-        /*
-         * Processes all sale items sent in the request.
-         */
-        for (CreateSaleItemDTO itemDTO : dto.getItems()) {
-
-            Product product = productRepository
-                    .findById(itemDTO.getProductId())
-                    .orElseThrow(() ->
-                            new RuntimeException(
-                                    "Produto não encontrado"
-                            ));
-
-            /*
-             * Prevents access to products belonging
-             * to another company.
-             */
-            if (!product.getCompany().getId().equals(company.getId())) {
-                throw new RuntimeException(
-                        "Produto não pertence à empresa"
+        Client client =
+                getClientForCompany(
+                        dto.getClientId(),
+                        company
                 );
-            }
 
-            /*
-             * Creates a sale item instance using
-             * product data and pricing information.
-             */
-            SaleItem item = new SaleItem(
-                    product,
-                    itemDTO.getQuantity(),
-                    itemDTO.getUnitPrice()
-            );
+        Sale sale = createSale(
+                company,
+                client,
+                dto.getPaymentMethod()
+        );
 
-            /*
-             * Associates the item with the sale.
-             */
-            sale.addItem(item);
-        }
+        Map<Integer, Product> products =
+                loadAndValidateProducts(dto.getItems());
+
+        validateProductsOwnership(
+                products,
+                company
+        );
+
+        addItemsToSale(
+                sale,
+                dto.getItems(),
+                products
+        );
 
         /*
          * Persists the sale and all associated items.
@@ -222,5 +181,97 @@ public class SaleService {
                 endDate,
                 pageable
         );
+    }
+
+    private Map<Integer, Product> loadAndValidateProducts(
+            List<CreateSaleItemDTO> items
+    ) {
+
+        List<Integer> productIds = items.stream()
+                .map(CreateSaleItemDTO::getProductId)
+                .distinct()
+                .toList();
+
+        Map<Integer, Product> products =
+                productRepository.findAllById(productIds)
+                        .stream()
+                        .collect(
+                                Collectors.toMap(
+                                        Product::getId,
+                                        Function.identity()
+                                )
+                        );
+
+        if (products.size() != productIds.size()) {
+            throw new RuntimeException(
+                    "Um ou mais produtos não foram encontrados"
+            );
+        }
+
+        return products;
+    }
+
+    private void validateProductsOwnership(
+            Map<Integer, Product> products,
+            Company company
+    ) {
+
+        for (Product product : products.values()) {
+
+            if (!product.getCompany().getId().equals(company.getId())) {
+                throw new RuntimeException(
+                        "Produto não pertence à empresa"
+                );
+            }
+        }
+    }
+
+    private Client getClientForCompany(
+            Integer clientId,
+            Company company
+    ) {
+
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() ->
+                        new RuntimeException("Cliente não encontrado"));
+
+        if (!client.getCompany().getId().equals(company.getId())) {
+            throw new RuntimeException(
+                    "Cliente não pertence à empresa"
+            );
+        }
+
+        return client;
+    }
+
+    private void addItemsToSale(
+            Sale sale,
+            List<CreateSaleItemDTO> items,
+            Map<Integer, Product> products
+    ) {
+
+        for (CreateSaleItemDTO itemDTO : items) {
+
+            Product product =
+                    products.get(itemDTO.getProductId());
+
+            SaleItem item = new SaleItem(
+                    product,
+                    itemDTO.getQuantity(),
+                    itemDTO.getUnitPrice()
+            );
+
+            sale.addItem(item);
+        }
+    }
+
+    private Sale createSale(
+            Company company,
+            Client client,
+            PaymentMethod paymentMethod
+    ) {
+        LocalDate today = LocalDate.now();
+
+        return new Sale(today, SaleStatus.PENDING, today.plusYears(1), company, client, paymentMethod);
     }
 }

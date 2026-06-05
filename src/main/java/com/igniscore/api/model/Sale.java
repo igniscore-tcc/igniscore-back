@@ -223,6 +223,18 @@ public class Sale {
         this.total = totalWithoutDiscount.subtract(discount);
     }
 
+    public Sale() {
+    }
+
+    public Sale(LocalDate date, SaleStatus status, LocalDate dueDate, Company company, Client client, PaymentMethod paymentMethod) {
+        this.date = date;
+        this.status = status;
+        this.dueDate = dueDate;
+        this.company = company;
+        this.client = client;
+        this.paymentMethod = paymentMethod;
+    }
+
     /**
      * Returns the sale identifier.
      *
