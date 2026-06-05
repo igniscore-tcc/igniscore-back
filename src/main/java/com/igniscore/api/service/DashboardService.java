@@ -57,6 +57,16 @@ public class DashboardService {
                         endDate
                 );
 
+        LocalDate today = LocalDate.now();
+        LocalDate next30Days = today.plusDays(30);
+
+        Long upcomingExpirations =
+                dashboardRepository.countUpcomingExpirations(
+                        companyId,
+                        today,
+                        next30Days
+                );
+
         return new DashboardDTO(
                 totalClients,
                 totalProducts,
@@ -64,7 +74,8 @@ public class DashboardService {
                 monthlyRevenue,
                 0L,
                 0L,
-                currentMonthExpirations
+                currentMonthExpirations,
+                upcomingExpirations
         );
     }
 
