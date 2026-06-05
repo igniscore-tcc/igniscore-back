@@ -82,6 +82,7 @@ type Dashboard {
     monthlyRevenue: Float!
     pendingOrders: Int!
     expiringProducts: Int!
+    currentMonthExpirations: Int!
 }
 
 type TopSellingProduct {

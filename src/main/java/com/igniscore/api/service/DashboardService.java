@@ -50,13 +50,21 @@ public class DashboardService {
                         endDate
                 );
 
+        Long currentMonthExpirations =
+                dashboardRepository.countCurrentMonthExpirations(
+                        companyId,
+                        startDate,
+                        endDate
+                );
+
         return new DashboardDTO(
                 totalClients,
                 totalProducts,
                 totalSales,
                 monthlyRevenue,
                 0L,
-                0L
+                0L,
+                currentMonthExpirations
         );
     }
 

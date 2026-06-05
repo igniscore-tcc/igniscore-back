@@ -95,4 +95,16 @@ public interface DashboardRepository extends JpaRepository<Company, Integer> {
     List<SalesByClientDTO> getSalesByClient(
             @Param("companyId") Integer companyId
     );
+
+    @Query("""
+    SELECT COUNT(s)
+    FROM Sale s
+    WHERE s.company.id = :companyId
+      AND s.dueDate BETWEEN :startDate AND :endDate
+    """)
+    Long countCurrentMonthExpirations(
+            @Param("companyId") Integer companyId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }
