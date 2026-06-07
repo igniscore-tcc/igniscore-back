@@ -1,256 +1,264 @@
-# README Técnico – Módulo Clients (API GraphQL / Spring Boot)
-
-## Visão Geral
-
-O módulo **clients** é responsável pela gestão de clientes vinculados às empresas (tenants) da plataforma Igniscore.
-
-Cada cliente pertence obrigatoriamente a uma empresa, garantindo isolamento completo de dados em ambiente multi-tenant.
-
-O módulo permite operações de cadastro, consulta e atualização de clientes via API GraphQL, servindo como base para módulos como vendas e locações.
-
-### Objetivos
-
-- Centralizar o gerenciamento de clientes por empresa
-- Garantir isolamento de dados entre tenants
-- Disponibilizar operações CRUD via GraphQL
-- Manter integridade e consistência dos dados
-- Servir como entidade base para módulos transacionais
+Abaixo está o **README do módulo Products reestruturado e padronizado** no mesmo nível do exemplo do Clients, com linguagem mais consistente, menos redundância e organização mais “clean” para documentação técnica.
 
 ---
 
-## Modelo de Dados
+# README Técnico – Módulo Products (API GraphQL / Spring Boot)
 
-### Tabela `clients`
+## Visão Geral
 
+O módulo **Products** é responsável pela gestão de produtos e serviços vinculados às empresas que utilizam a plataforma Igniscore.
 
-| Campo         | Tipo         | Constraint         | Descrição                    |
-|---------------|--------------|--------------------|------------------------------|
-| pk_id_client  | INT          | PK, Auto-increment | Identificador único          |
-| name_client   | VARCHAR(100) | NOT NULL           | Nome do cliente              |
-| cnpj_client   | VARCHAR(18)  | NOT NULL           | CNPJ                         |
-| email_client  | VARCHAR(255) | NOT NULL           | Email principal              |
-| phone_client  | VARCHAR(20)  | -                  | Telefone                     |
-| number_client | INT          | NOT NULL           | Número sequencial por tenant |
-| ie_client     | VARCHAR(14)  | -                  | Inscrição Estadual           |
-| uf_ie_client  | CHAR(2)      | -                  | UF da IE                     |
-| cpf_client    | VARCHAR(14)  | -                  | CPF                          |
-| obs_client    | TEXT         | -                  | Observações                  |
-| fk_id_company | INT          | FK, NOT NULL       | Empresa proprietária         |
+Cada produto pertence obrigatoriamente a uma empresa, e todas as operações respeitam o contexto multi-tenant da aplicação, garantindo isolamento completo de dados entre organizações.
 
-### Constraints
+O módulo fornece operações de cadastro, atualização e consulta de produtos por API GraphQL, sendo utilizado diretamente por módulos de vendas e locações.
+
+---
+
+## Objetivos
+
+* Centralizar a gestão de produtos por empresa
+* Garantir isolamento de dados entre tenants
+* Disponibilizar operações de CRUD via GraphQL
+* Manter integridade e rastreabilidade dos produtos
+* Suportar integração com vendas e locações
+
+---
+
+# Modelo de Dados
+
+## Tabela `products`
+
+| Campo         | Tipo          | Descrição              |
+|---------------|---------------|------------------------|
+| pk_id_prod    | INT           | Identificador único    |
+| name_prod     | VARCHAR(150)  | Nome do produto        |
+| type_prod     | VARCHAR(50)   | Tipo do produto (enum) |
+| validity_prod | DATE          | Data de validade       |
+| lot_prod      | VARCHAR(50)   | Lote do produto        |
+| price_prod    | DECIMAL(10,2) | Preço padrão de venda  |
+| status        | BOOLEAN       | Status (ativo/inativo) |
+| fk_id_company | INT           | Empresa proprietária   |
+| created_at    | TIMESTAMP     | Data de criação        |
+| updated_at    | TIMESTAMP     | Última atualização     |
+
+---
+
+## Constraints
 
 ```sql
-ALTER TABLE clients
-ADD CONSTRAINT fk_clients_company
+ALTER TABLE products
+ADD CONSTRAINT fk_products_company
 FOREIGN KEY (fk_id_company)
 REFERENCES companies(pk_id_company)
 ON DELETE CASCADE;
 ```
 
-```sql
-ALTER TABLE clients
-ADD CONSTRAINT uq_clients_company_number
-UNIQUE (fk_id_company, number_client);
+---
+
+# Enum ProductType
+
+| Tipo         | Descrição                                |
+|--------------|------------------------------------------|
+| EXTINGUISHER | Extintores de incêndio                   |
+| SERVICE      | Serviços (manutenção, inspeção, recarga) |
+| CONSUMABLE   | Materiais consumíveis                    |
+| ACCESSORY    | Acessórios                               |
+| HOSE         | Mangueiras                               |
+| DETECTOR     | Detectores de fumaça e calor             |
+| SPRINKLER    | Sistemas de sprinklers                   |
+| CENTRAL      | Centrais de alarme                       |
+| LIGHTING     | Iluminação de emergência                 |
+| DOOR         | Portas corta-fogo                        |
+| HYDRANT      | Hidrantes                                |
+
+---
+
+# Regras de Negócio
+
+## Multi-Tenant
+
+* Cada produto pertence a apenas uma empresa
+* Utilizadores acessam apenas produtos da própria empresa
+* Produtos de empresas diferentes podem ter dados iguais
+* O isolamento é garantido por `fk_id_company`
+
+---
+
+## Ciclo de Vida
+
+* **Criação:** produto nasce ativo por padrão
+* **Atualização:** ‘PATCH’ semântico (campos parciais)
+* **Inativação:** soft delete via status = false
+* **Reativação:** permitida via ‘update’
+
+---
+
+## Regras de Domínio
+
+* Nome pode ser duplicado
+* Lote é obrigatório
+* Validade é obrigatória
+* Preço pode ser zero
+* Produtos inativos não participam de vendas ou locações
+* Produtos não são removidos fisicamente
+
+---
+
+# Arquitetura
+
+```text
+GraphQL
+   │
+   ▼
+ProductController
+   │
+   ▼
+ProductService
+   │
+   ▼
+ProductRepository
+   │
+   ▼
+JPA Entity (Product)
 ```
 
 ---
 
-## Regras de Negócio
+# Estrutura do Projeto
 
-### Multi-Tenancy
-
-- Cada cliente pertence a uma única empresa
-- Acesso restrito à empresa autenticada
-- Clientes podem existir com dados semelhantes entre empresas
-- `number_client` é único por tenant
-
-### Cadastro
-
-Campos obrigatórios:
-
-- name
-- cnpj
-- email
-
-Campos opcionais:
-
-- phone
-- ie
-- uf_ie
-- cpf
-- obs
-
-### Atualização
-
-- Atualização parcial (‘PATCH’ semântico)
-- Apenas campos enviados são modificados
-- Validações aplicadas em tempo de execução
-
-### Validações
-
-- Email deve ter formato válido
-- CNPJ deve ser válido
-- CPF válido quando informado
-- IE consistente com UF quando informado
-- Nome não pode ser vazio
-
----
-
-## Arquitetura
-
-```
-GraphQL Controller
-        ↓
-   ClientService
-        ↓
- ClientRepository
-        ↓
-      MySQL
-```
-
----
-
-## Estrutura do Projeto
-
-```
+```text
 src/main/java/com/igniscore/api
 
 ├── controller
-│   └── ClientController.java
+│   └── ProductController.java
 
 ├── service
-│   └── ClientService.java
+│   └── ProductService.java
 
 ├── repository
-│   └── ClientRepository.java
+│   └── ProductRepository.java
 
 ├── dto
-│   ├── ClientRegisterDTO.java
-│   └── ClientUpdateDTO.java
+│   ├── ProductDTO.java
+│   └── ProductUpdateDTO.java
 
 ├── model
-│   └── Client.java
+│   └── Product.java
 ```
 
 ---
 
-## Operações GraphQL
+# Operações Disponíveis
 
-### Query – Listar Clientes
+## Query – Listar Produtos
 
 ```graphql
 query {
-  clients(page: 0, size: 10) {
-    clients {
+  products(page: 0, size: 10) {
+    id
+    name
+    type
+    validity
+    lot
+    price
+    status
+    company {
       id
-      number
       name
-      email
-      phone
-      cpf
-      cnpj
     }
-    totalPages
-    totalClients
   }
 }
 ```
 
 ---
 
-### Query – Cliente por ‘ID’
-
-```graphql
-query {
-  clientById(id: 1) {
-    id
-    name
-    cnpj
-    email
-    phone
-    number
-  }
-}
-```
-
----
-
-### Mutation – Criar Cliente
+## Mutation – Atualizar Produto
 
 ```graphql
 mutation {
-  storeClient(
+  updateProduct(
+    id: 1,
     input: {
-      name: "Cliente XYZ"
-      cnpj: "12.345.678/0001-99"
-      email: "contato@cliente.com"
-      phone: "(11) 99999-9999"
+      price: 180.00
+      status: true
     }
   ) {
     id
     name
-    cnpj
-    email
+    price
+    status
   }
 }
 ```
 
 ---
 
-### Mutation – Atualizar Cliente
+## Mutation – Inativar Produto
 
 ```graphql
 mutation {
-  updateClient(
-    input: {
-      id: 1
-      phone: "(11) 98888-8888"
-    }
-  ) {
+    deleteProduct(id: 1) {
     id
     name
-    phone
+    status
   }
 }
 ```
 
 ---
 
-## Segurança e Multi-Tenancy
+# Segurança
 
-Todas as operações aplicam isolamento por empresa:
+## Regra Principal
+
+Todas as operações são filtradas por empresa:
 
 ```sql
 WHERE fk_id_company = :authenticatedCompanyId
 ```
 
-### Regra Base
+---
 
-- Nenhum cliente é acessível fora do tenant
-- Validação ocorre na camada de serviço
-- Empresa é derivada do JWT
+## Controle de Acesso
+
+* JWT obrigatório
+* Empresa extraída do token
+* Validação de ownership em todas as operações
+* Nenhum acesso cross-tenant permitido
 
 ---
 
-## Tratamento de Erros
+## Exemplo de Validação
 
-| Código           | Descrição                    |
-|------------------|------------------------------|
-| CLIENT_NOT_FOUND | Cliente não encontrado       |
-| INVALID_CNPJ     | CNPJ inválido                |
-| INVALID_EMAIL    | Email inválido               |
-| UNAUTHORIZED     | Acesso negado ao tenant      |
-| DUPLICATE_CLIENT | Cliente duplicado na empresa |
+```java
+if (!product.getCompany().getId().equals(companyId)) {
+    throw new AccessDeniedException("Product not found");
+}
+```
 
-### Exemplo
+---
+
+# Tratamento de Erros
+
+| Código            | Descrição              |
+|-------------------|------------------------|
+| PRODUCT_NOT_FOUND | Produto não encontrado |
+| INVALID_TYPE      | Tipo inválido          |
+| INVALID_DATE      | Data inválida          |
+| UNAUTHORIZED      | Acesso negado          |
+| INVALID_COMPANY   | Empresa inválida       |
+
+---
+
+## Exemplo
 
 ```json
 {
   "errors": [
     {
-      "message": "Invalid CNPJ",
+      "message": "Product not found",
       "extensions": {
-        "code": "INVALID_CNPJ"
+        "code": "PRODUCT_NOT_FOUND"
       }
     }
   ]
@@ -259,64 +267,74 @@ WHERE fk_id_company = :authenticatedCompanyId
 
 ---
 
-## Índices Recomendados
+# Índices Recomendados
 
 ```sql
-CREATE INDEX idx_clients_company
-ON clients(fk_id_company);
+CREATE INDEX idx_products_company
+ON products(fk_id_company);
+```
 
-CREATE INDEX idx_clients_cnpj
-ON clients(cnpj_client);
+```sql
+CREATE INDEX idx_products_status
+ON products(status);
+```
 
-CREATE INDEX idx_clients_email
-ON clients(email_client);
+```sql
+CREATE INDEX idx_products_company_status
+ON products(fk_id_company, status);
 ```
 
 ---
 
-## Testes
+# Testes
 
-### Unitários
+## Unitários
 
-- ClientService
-- Validação de CNPJ/Email
-- Regras de multi-tenancy
+* ProductService
+* Regras de negócio
+* Validações de domínio
 
-### Integração
+## Integração
 
-- GraphQL queries/mutations
-- Autenticação JWT
-- Isolamento de dados
-
-```bash
-mvn test
-```
+* GraphQL queries e mutations
+* Fluxo completo CRUD
+* Isolamento multi-tenant
 
 ---
 
-## Dependências
+# Dependências
 
 ```xml
-spring-boot-starter-graphql
-spring-boot-starter-data-jpa
-mysql-connector-j
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-graphql</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
 ```
 
 ---
 
-## Status do Módulo
+# Status
 
-| Item          | Status |
-|---------------|--------|
-| CRUD Clientes | ✅      |
-| Multi-Tenancy | ✅      |
-| Validações    | ✅      |
-| Soft Delete   | ✅      |
-| Auditoria     | ✅      |
+| Item                 | Status |
+|----------------------|--------|
+| Cadastro de produtos | ✅      |
+| Atualização          | ✅      |
+| Consulta por ID      | ✅      |
+| Consulta paginada    | ✅      |
+| Multi-tenancy        | ✅      |
+| Soft delete          | ✅      |
+| Auditoria            | ✅      |
+| Histórico            | ❌      |
+| Bulk operations      | ❌      |
 
 ---
 
-**Projeto:** Igniscore API  
-**Módulo:** Clients  
-**Tecnologias:** Spring Boot, GraphQL, JPA, MySQL  
-**Status:** Produção
+**Projeto:** Igniscore API
+**Módulo:** Products
+**Tecnologias:** Spring Boot, GraphQL, JPA/Hibernate
+**Status do Documento:** Padronizado com módulo Clients
