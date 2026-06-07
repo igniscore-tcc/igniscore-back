@@ -198,7 +198,7 @@ docs/
 | -------------------------------------------------------- | ------------------------------ | ------ |
 | [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)         | Este documento - mapa completo | 5 min  |
 | [MODULES_OVERVIEW.md](MODULES_OVERVIEW.md)               | Comparação dos 3 módulos       | 15 min |
-| [README_CLIENTS_OVERVIEW.md](README_CLIENTS_OVERVIEW.md) | Navegação centralizada         | 10 min |
+| [README_CLIENTS_OVERVIEW.md](clients/README_CLIENTS_OVERVIEW.md) | Navegação centralizada         | 10 min |
 
 ### Quick Start
 
