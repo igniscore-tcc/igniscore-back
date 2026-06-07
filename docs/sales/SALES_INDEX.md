@@ -8,7 +8,7 @@ Este é um índice centralizado da documentação do módulo **Sales** do projet
 
 ## Documentos Disponíveis
 
-### 1. [README Técnico – Módulo Sales](./SALES_README.md)
+### 1. [README Técnico – Módulo Sales](SALES_README.md)
 
 **Tipo**: Documentação Técnica Completa  
 **Público Alvo**: Desenvolvedores, Arquitetos, Product Managers
@@ -29,15 +29,15 @@ Documentação técnica abrangente cobrindo:
 
 **Seções Principais**:
 
-- [Modelo de Dados](./SALES_README.md#modelo-de-dados)
-- [Enums](./SALES_README.md#enums)
-- [Operações GraphQL](./SALES_README.md#operações-disponíveis-graphql)
-- [Integrações](./SALES_README.md#integrações)
-- [Segurança](./SALES_README.md#segurança-e-multi-tenancy)
+- [Modelo de Dados](SALES_README.md#modelo-de-dados)
+- [Enums](SALES_README.md#enums)
+- [Operações GraphQL](SALES_README.md#operações-disponíveis-graphql)
+- [Integrações](SALES_README.md#integrações)
+- [Segurança](SALES_README.md#segurança-e-multi-tenancy)
 
 ---
 
-### 2. [Guia Prático – Exemplos de Uso](./SALES_EXAMPLES.md)
+### 2. [Guia Prático – Exemplos de Uso](SALES_EXAMPLES.md)
 
 **Tipo**: Guia de Referência com Exemplos  
 **Público Alvo**: Desenvolvedores Frontend, Testers, Integradores
@@ -57,15 +57,15 @@ Exemplos práticos e prontos para usar cobrindo:
 
 **Seções Principais**:
 
-- [Setup e Autenticação](./SALES_EXAMPLES.md#setup-e-autenticação)
-- [Criação de Vendas](./SALES_EXAMPLES.md#criação-de-vendas)
-- [Operações com Itens](./SALES_EXAMPLES.md#operações-com-itens)
-- [Consultas e Buscas](./SALES_EXAMPLES.md#consultas-e-buscas)
-- [Casos de Erro](./SALES_EXAMPLES.md#casos-de-erro-comuns)
+- [Setup e Autenticação](SALES_EXAMPLES.md#setup-e-autenticação)
+- [Criação de Vendas](SALES_EXAMPLES.md#criação-de-vendas)
+- [Operações com Itens](SALES_EXAMPLES.md#operações-com-itens)
+- [Consultas e Buscas](SALES_EXAMPLES.md#consultas-e-buscas)
+- [Casos de Erro](SALES_EXAMPLES.md#casos-de-erro-comuns)
 
 ---
 
-### 3. [Guia de Segurança e Multi-Tenancy](./SALES_SECURITY.md)
+### 3. [Guia de Segurança e Multi-Tenancy](SALES_SECURITY.md)
 
 **Tipo**: Documentação de Segurança  
 **Público Alvo**: Arquitetos, Especialistas de Segurança, Code Reviewers
@@ -84,12 +84,12 @@ Documentação detalhada sobre segurança, isolamento de dados e conformidade:
 
 **Seções Principais**:
 
-- [Arquitetura Multi-Tenant](./SALES_SECURITY.md#1-arquitetura-multi-tenant)
-- [Fluxo de Autenticação](./SALES_SECURITY.md#2-fluxo-de-autenticação-e-autorização)
-- [Filtragem por Tenant](./SALES_SECURITY.md#3-filtragem-de-dados-por-tenant)
-- [Validações por Operação](./SALES_SECURITY.md#4-validações-de-segurança-por-operação)
-- [Proteção contra Ataques](./SALES_SECURITY.md#7-proteção-contra-ataques-comuns)
-- [Testes de Segurança](./SALES_SECURITY.md#8-testes-de-segurança)
+- [Arquitetura Multi-Tenant](SALES_SECURITY.md#1-arquitetura-multi-tenant)
+- [Fluxo de Autenticação](SALES_SECURITY.md#2-fluxo-de-autenticação-e-autorização)
+- [Filtragem por Tenant](SALES_SECURITY.md#3-filtragem-de-dados-por-tenant)
+- [Validações por Operação](SALES_SECURITY.md#4-validações-de-segurança-por-operação)
+- [Proteção contra Ataques](SALES_SECURITY.md#7-proteção-contra-ataques-comuns)
+- [Testes de Segurança](SALES_SECURITY.md#8-testes-de-segurança)
 
 ---
 
@@ -97,44 +97,44 @@ Documentação detalhada sobre segurança, isolamento de dados e conformidade:
 
 ### Para Front-End Developer
 
-1. Leia [Setup e Autenticação](./SALES_EXAMPLES.md#setup-e-autenticação)
-2. Veja [Exemplos de Criação de Vendas](./SALES_EXAMPLES.md#criação-de-vendas)
-3. Explore [Operações com Itens](./SALES_EXAMPLES.md#operações-com-itens)
-4. Consulte [Casos de Erro](./SALES_EXAMPLES.md#casos-de-erro-comuns)
+1. Leia [Setup e Autenticação](SALES_EXAMPLES.md#setup-e-autenticação)
+2. Veja [Exemplos de Criação de Vendas](SALES_EXAMPLES.md#criação-de-vendas)
+3. Explore [Operações com Itens](SALES_EXAMPLES.md#operações-com-itens)
+4. Consulte [Casos de Erro](SALES_EXAMPLES.md#casos-de-erro-comuns)
 
 ### Para Back-End Developer
 
-1. Comece com [Visão Geral](./SALES_README.md#visão-geral)
-2. Estude [Modelo de Dados](./SALES_README.md#modelo-de-dados)
-3. Entenda os [Enums](./SALES_README.md#enums)
-4. Analise [Arquitetura da Camada](./SALES_README.md#arquitetura-da-camada-de-sales)
-5. Estude [Operações GraphQL](./SALES_README.md#operações-disponíveis-graphql)
-6. Verifique [Segurança](./SALES_SECURITY.md)
+1. Comece com [Visão Geral](SALES_README.md#visão-geral)
+2. Estude [Modelo de Dados](SALES_README.md#modelo-de-dados)
+3. Entenda os [Enums](SALES_README.md#enums)
+4. Analise [Arquitetura da Camada](SALES_README.md#arquitetura-da-camada-de-sales)
+5. Estude [Operações GraphQL](SALES_README.md#operações-disponíveis-graphql)
+6. Verifique [Segurança](SALES_SECURITY.md)
 
 ### Para QA / Tester
 
-1. Leia [Operações Disponíveis](./SALES_README.md#operações-disponíveis-graphql)
-2. Execute [Exemplos de Teste](./SALES_EXAMPLES.md)
-3. Teste [Casos de Erro](./SALES_EXAMPLES.md#casos-de-erro-comuns)
-4. Valide [Isolamento Multi-Tenant](./SALES_SECURITY.md#8-testes-de-segurança)
-5. Teste [Fluxo Completo](./SALES_EXAMPLES.md#fluxo-completo-criar-venda-com-itens-e-completar)
+1. Leia [Operações Disponíveis](SALES_README.md#operações-disponíveis-graphql)
+2. Execute [Exemplos de Teste](SALES_EXAMPLES.md)
+3. Teste [Casos de Erro](SALES_EXAMPLES.md#casos-de-erro-comuns)
+4. Valide [Isolamento Multi-Tenant](SALES_SECURITY.md#8-testes-de-segurança)
+5. Teste [Fluxo Completo](SALES_EXAMPLES.md#fluxo-completo-criar-venda-com-itens-e-completar)
 
 ### Para Product Manager / Business Analyst
 
-1. Leia [Visão Geral](./SALES_README.md#visão-geral)
-2. Entenda [Modelo de Dados](./SALES_README.md#modelo-de-dados)
-3. Conheça [Enums](./SALES_README.md#enums)
-4. Explore [Regras de Negócio](./SALES_README.md#regras-de-negócio)
-5. Conheça [Operações Disponíveis](./SALES_README.md#operações-disponíveis-graphql)
+1. Leia [Visão Geral](SALES_README.md#visão-geral)
+2. Entenda [Modelo de Dados](SALES_README.md#modelo-de-dados)
+3. Conheça [Enums](SALES_README.md#enums)
+4. Explore [Regras de Negócio](SALES_README.md#regras-de-negócio)
+5. Conheça [Operações Disponíveis](SALES_README.md#operações-disponíveis-graphql)
 
 ### Para Security Architect
 
-1. Comece com [Arquitetura Multi-Tenant](./SALES_SECURITY.md#1-arquitetura-multi-tenant)
-2. Estude [Fluxo de Autenticação](./SALES_SECURITY.md#2-fluxo-de-autenticação-e-autorização)
-3. Analise [Filtragem por Tenant](./SALES_SECURITY.md#3-filtragem-de-dados-por-tenant)
-4. Revise [Validações de Segurança](./SALES_SECURITY.md#4-validações-de-segurança-por-operação)
-5. Estude [Testes de Segurança](./SALES_SECURITY.md#8-testes-de-segurança)
-6. Acompanhe [Checklist de Deploy](./SALES_SECURITY.md#9-checklist-de-deploy)
+1. Comece com [Arquitetura Multi-Tenant](SALES_SECURITY.md#1-arquitetura-multi-tenant)
+2. Estude [Fluxo de Autenticação](SALES_SECURITY.md#2-fluxo-de-autenticação-e-autorização)
+3. Analise [Filtragem por Tenant](SALES_SECURITY.md#3-filtragem-de-dados-por-tenant)
+4. Revise [Validações de Segurança](SALES_SECURITY.md#4-validações-de-segurança-por-operação)
+5. Estude [Testes de Segurança](SALES_SECURITY.md#8-testes-de-segurança)
+6. Acompanhe [Checklist de Deploy](SALES_SECURITY.md#9-checklist-de-deploy)
 
 ---
 
@@ -241,7 +241,7 @@ mutation {
 }
 ```
 
-**Para exemplos completos, veja**: [Exemplos de Uso](./SALES_EXAMPLES.md)
+**Para exemplos completos, veja**: [Exemplos de Uso](SALES_EXAMPLES.md)
 
 ---
 
@@ -335,11 +335,11 @@ mutation {
 
 Novo desenvolvedor no módulo Sales? Siga este checklist:
 
-- [ ] Leia [Visão Geral do Módulo](./SALES_README.md#visão-geral)
-- [ ] Estude o [Modelo de Dados](./SALES_README.md#modelo-de-dados)
-- [ ] Entenda os [Enums](./SALES_README.md#enums)
-- [ ] Explore as [Regras de Negócio](./SALES_README.md#regras-de-negócio)
-- [ ] Analise a [Arquitetura de Camadas](./SALES_README.md#arquitetura-da-camada-de-sales)
+- [ ] Leia [Visão Geral do Módulo](SALES_README.md#visão-geral)
+- [ ] Estude o [Modelo de Dados](SALES_README.md#modelo-de-dados)
+- [ ] Entenda os [Enums](SALES_README.md#enums)
+- [ ] Explore as [Regras de Negócio](SALES_README.md#regras-de-negócio)
+- [ ] Analise a [Arquitetura de Camadas](SALES_README.md#arquitetura-da-camada-de-sales)
 - [ ] Estude as seguintes classes:
   - [ ] `Sale.java` (entity principal)
   - [ ] `SaleItem.java` (items da venda)
@@ -347,10 +347,10 @@ Novo desenvolvedor no módulo Sales? Siga este checklist:
   - [ ] `SaleRepository.java` (data access)
   - [ ] `SaleService.java` (business logic)
   - [ ] `SaleController.java` (API GraphQL)
-- [ ] Execute os [Exemplos de Teste](./SALES_EXAMPLES.md)
-- [ ] Leia a seção de [Segurança](./SALES_SECURITY.md)
-- [ ] Teste [Casos de Erro](./SALES_EXAMPLES.md#casos-de-erro-comuns)
-- [ ] Execute um [Fluxo Completo](./SALES_EXAMPLES.md#fluxo-completo-criar-venda-com-itens-e-completar)
+- [ ] Execute os [Exemplos de Teste](SALES_EXAMPLES.md)
+- [ ] Leia a seção de [Segurança](SALES_SECURITY.md)
+- [ ] Teste [Casos de Erro](SALES_EXAMPLES.md#casos-de-erro-comuns)
+- [ ] Execute um [Fluxo Completo](SALES_EXAMPLES.md#fluxo-completo-criar-venda-com-itens-e-completar)
 
 ---
 
@@ -398,4 +398,4 @@ Novo desenvolvedor no módulo Sales? Siga este checklist:
 **Data**: 1º de junho de 2026  
 **Status**: Completo e em Produção
 
-Para dúvidas ou contribuições, consulte o [README técnico principal](./SALES_README.md).
+Para dúvidas ou contribuições, consulte o [README técnico principal](SALES_README.md).

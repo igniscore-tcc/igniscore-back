@@ -16,27 +16,27 @@ Este documento serve como **mapa centralizado** para toda a documentação dos 3
 
 1. Comece com [MODULES_OVERVIEW.md](MODULES_OVERVIEW.md) - Entenda os 3 módulos
 2. Escolha um módulo:
-   - [CLIENTS_INDEX.md](CLIENTS_INDEX.md) para Clientes
-   - [PRODUCTS_INDEX.md](PRODUCTS_INDEX.md) para Produtos
-   - [SALES_INDEX.md](SALES_INDEX.md) para Vendas ⭐ NOVO
+   - [CLIENTS_INDEX.md](clients/CLIENTS_INDEX.md) para Clientes
+   - [PRODUCTS_INDEX.md](products/PRODUCTS_INDEX.md) para Produtos
+   - [SALES_INDEX.md](sales/SALES_INDEX.md) para Vendas ⭐ NOVO
 3. Execute exemplos em `*_EXAMPLES.md`
 
 ### Para Arquitetos/Devops
 
 1. Leia [MODULES_OVERVIEW.md](MODULES_OVERVIEW.md)
 2. Consulte documentação técnica:
-   - [CLIENTS_README.md](CLIENTS_README.md) - Modelo, operações, integrações
-   - [PRODUCTS_README.md](PRODUCTS_README.md) - Modelo, operações, integrações
-   - [SALES_README.md](SALES_README.md) - Modelo, operações, integrações
+   - [CLIENTS_README.md](clients/CLIENTS_README.md) - Modelo, operações, integrações
+   - [PRODUCTS_README.md](products/PRODUCTS_README.md) - Modelo, operações, integrações
+   - [SALES_README.md](sales/SALES_README.md) - Modelo, operações, integrações
 3. Estude segurança:
-   - [CLIENTS_SECURITY.md](CLIENTS_SECURITY.md)
-   - [PRODUCTS_SECURITY.md](PRODUCTS_SECURITY.md)
-   - [SALES_SECURITY.md](SALES_SECURITY.md)
+   - [CLIENTS_SECURITY.md](clients/CLIENTS_SECURITY.md)
+   - [PRODUCTS_SECURITY.md](products/PRODUCTS_SECURITY.md)
+   - [SALES_SECURITY.md](sales/SALES_SECURITY.md)
 
 ### Para Líderes Técnicos
 
 1. Veja [MODULES_OVERVIEW.md](MODULES_OVERVIEW.md) - Comparação de todos os 3 módulos
-2. Revise segurança em [SALES_SECURITY.md](SALES_SECURITY.md) (novo módulo)
+2. Revise segurança em [SALES_SECURITY.md](sales/SALES_SECURITY.md) (novo módulo)
 3. Verifique status em [../README.md](../README.md)
 
 ---
@@ -47,30 +47,30 @@ Este documento serve como **mapa centralizado** para toda a documentação dos 3
 
 | Documento                                          | Propósito                             | Público           |
 | -------------------------------------------------- | ------------------------------------- | ----------------- |
-| [CLIENTS_INDEX.md](CLIENTS_INDEX.md)               | 📍 Comece aqui - Índice + Quick Start | Todos             |
-| [CLIENTS_README.md](CLIENTS_README.md)             | 🔧 Documentação técnica completa      | Devs/Arquitetos   |
-| [CLIENTS_SECURITY.md](CLIENTS_SECURITY.md)         | 🔐 Segurança e multi-tenancy          | DevOps/Arquitetos |
-| [CLIENTS_EXAMPLES.md](CLIENTS_EXAMPLES.md)         | 💻 50+ exemplos práticos GraphQL      | Devs              |
-| [CLIENTS_ARCHITECTURE.md](CLIENTS_ARCHITECTURE.md) | 🏗️ Fluxos e diagramas                 | Arquitetos        |
-| [CLIENTS_QUICKSTART.md](CLIENTS_QUICKSTART.md)     | ⚡ 5 min - Começar agora              | Iniciantes        |
+| [CLIENTS_INDEX.md](clients/CLIENTS_INDEX.md)               | 📍 Comece aqui - Índice + Quick Start | Todos             |
+| [CLIENTS_README.md](clients/CLIENTS_README.md)             | 🔧 Documentação técnica completa      | Devs/Arquitetos   |
+| [CLIENTS_SECURITY.md](clients/CLIENTS_SECURITY.md)         | 🔐 Segurança e multi-tenancy          | DevOps/Arquitetos |
+| [CLIENTS_EXAMPLES.md](clients/CLIENTS_EXAMPLES.md)         | 💻 50+ exemplos práticos GraphQL      | Devs              |
+| [CLIENTS_ARCHITECTURE.md](clients/CLIENTS_ARCHITECTURE.md) | 🏗️ Fluxos e diagramas                 | Arquitetos        |
+| [CLIENTS_QUICKSTART.md](clients/CLIENTS_QUICKSTART.md)     | ⚡ 5 min - Começar agora              | Iniciantes        |
 
 ### 2. Módulo Products
 
 | Documento                                    | Propósito                             | Público           |
 | -------------------------------------------- | ------------------------------------- | ----------------- |
-| [PRODUCTS_INDEX.md](PRODUCTS_INDEX.md)       | 📍 Comece aqui - Índice + Quick Start | Todos             |
-| [PRODUCTS_README.md](PRODUCTS_README.md)     | 🔧 Documentação técnica completa      | Devs/Arquitetos   |
-| [PRODUCTS_SECURITY.md](PRODUCTS_SECURITY.md) | 🔐 Segurança e multi-tenancy          | DevOps/Arquitetos |
-| [PRODUCTS_EXAMPLES.md](PRODUCTS_EXAMPLES.md) | 💻 50+ exemplos práticos GraphQL      | Devs              |
+| [PRODUCTS_INDEX.md](products/PRODUCTS_INDEX.md)       | 📍 Comece aqui - Índice + Quick Start | Todos             |
+| [PRODUCTS_README.md](products/PRODUCTS_README.md)     | 🔧 Documentação técnica completa      | Devs/Arquitetos   |
+| [PRODUCTS_SECURITY.md](products/PRODUCTS_SECURITY.md) | 🔐 Segurança e multi-tenancy          | DevOps/Arquitetos |
+| [PRODUCTS_EXAMPLES.md](products/PRODUCTS_EXAMPLES.md) | 💻 50+ exemplos práticos GraphQL      | Devs              |
 
 ### 3. Módulo Sales (NOVO ⭐)
 
 | Documento                              | Propósito                             | Público           |
 | -------------------------------------- | ------------------------------------- | ----------------- |
-| [SALES_INDEX.md](SALES_INDEX.md)       | 📍 Comece aqui - Índice + Quick Start | Todos             |
-| [SALES_README.md](SALES_README.md)     | 🔧 Documentação técnica completa      | Devs/Arquitetos   |
-| [SALES_SECURITY.md](SALES_SECURITY.md) | 🔐 Segurança e multi-tenancy          | DevOps/Arquitetos |
-| [SALES_EXAMPLES.md](SALES_EXAMPLES.md) | 💻 70+ exemplos práticos GraphQL      | Devs              |
+| [SALES_INDEX.md](sales/SALES_INDEX.md)       | 📍 Comece aqui - Índice + Quick Start | Todos             |
+| [SALES_README.md](sales/SALES_README.md)     | 🔧 Documentação técnica completa      | Devs/Arquitetos   |
+| [SALES_SECURITY.md](sales/SALES_SECURITY.md) | 🔐 Segurança e multi-tenancy          | DevOps/Arquitetos |
+| [SALES_EXAMPLES.md](sales/SALES_EXAMPLES.md) | 💻 70+ exemplos práticos GraphQL      | Devs              |
 
 ---
 
@@ -114,9 +114,9 @@ Veja [MODULES_OVERVIEW.md](MODULES_OVERVIEW.md) para diagrama de fluxo.
 
 ## 🎓 Próximos Passos
 
-1. **Iniciantes**: Comece com [CLIENTS_QUICKSTART.md](CLIENTS_QUICKSTART.md)
-2. **Desenvolvendo**: Use [CLIENTS_EXAMPLES.md](CLIENTS_EXAMPLES.md) como referência
-3. **Em Produção**: Leia [CLIENTS_SECURITY.md](CLIENTS_SECURITY.md)
+1. **Iniciantes**: Comece com [CLIENTS_QUICKSTART.md](clients/CLIENTS_QUICKSTART.md)
+2. **Desenvolvendo**: Use [CLIENTS_EXAMPLES.md](clients/CLIENTS_EXAMPLES.md) como referência
+3. **Em Produção**: Leia [CLIENTS_SECURITY.md](clients/CLIENTS_SECURITY.md)
 
 ---
 

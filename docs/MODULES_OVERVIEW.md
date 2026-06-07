@@ -12,10 +12,10 @@ Gerenciamento de clientes pertencentes às empresas (tenants).
 
 ### 📄 Documentação
 
-- **[CLIENTS_INDEX.md](./CLIENTS_INDEX.md)** - Índice centralizado ⭐ *COMECE AQUI*
-- **[CLIENTS_README.md](./CLIENTS_README.md)** - Documentação técnica completa
-- **[CLIENTS_SECURITY.md](./CLIENTS_SECURITY.md)** - Segurança e multi-tenancy
-- **[CLIENTS_EXAMPLES.md](./CLIENTS_EXAMPLES.md)** - Exemplos práticos
+- **[CLIENTS_INDEX.md](clients/CLIENTS_INDEX.md)** - Índice centralizado ⭐ *COMECE AQUI*
+- **[CLIENTS_README.md](clients/CLIENTS_README.md)** - Documentação técnica completa
+- **[CLIENTS_SECURITY.md](clients/CLIENTS_SECURITY.md)** - Segurança e multi-tenancy
+- **[CLIENTS_EXAMPLES.md](clients/CLIENTS_EXAMPLES.md)** - Exemplos práticos
 
 ### 🎯 Casos de Uso
 
@@ -39,10 +39,10 @@ Gerenciamento de produtos e serviços das empresas.
 
 ### 📄 Documentação
 
-- **[PRODUCTS_INDEX.md](./PRODUCTS_INDEX.md)** - Índice centralizado ⭐ *COMECE AQUI*
-- **[PRODUCTS_README.md](./PRODUCTS_README.md)** - Documentação técnica completa
-- **[PRODUCTS_SECURITY.md](./PRODUCTS_SECURITY.md)** - Segurança e multi-tenancy
-- **[PRODUCTS_EXAMPLES.md](./PRODUCTS_EXAMPLES.md)** - Exemplos práticos
+- **[PRODUCTS_INDEX.md](products/PRODUCTS_INDEX.md)** - Índice centralizado ⭐ *COMECE AQUI*
+- **[PRODUCTS_README.md](products/PRODUCTS_README.md)** - Documentação técnica completa
+- **[PRODUCTS_SECURITY.md](products/PRODUCTS_SECURITY.md)** - Segurança e multi-tenancy
+- **[PRODUCTS_EXAMPLES.md](products/PRODUCTS_EXAMPLES.md)** - Exemplos práticos
 
 ### 🎯 Casos de Uso
 
@@ -66,10 +66,10 @@ Gerenciamento de vendas e transações.
 
 ### 📄 Documentação
 
-- **[SALES_INDEX.md](./SALES_INDEX.md)** - Índice centralizado ⭐ *COMECE AQUI*
-- **[SALES_README.md](./SALES_README.md)** - Documentação técnica completa
-- **[SALES_SECURITY.md](./SALES_SECURITY.md)** - Segurança e multi-tenancy
-- **[SALES_EXAMPLES.md](./SALES_EXAMPLES.md)** - Exemplos práticos
+- **[SALES_INDEX.md](sales/SALES_INDEX.md)** - Índice centralizado ⭐ *COMECE AQUI*
+- **[SALES_README.md](sales/SALES_README.md)** - Documentação técnica completa
+- **[SALES_SECURITY.md](sales/SALES_SECURITY.md)** - Segurança e multi-tenancy
+- **[SALES_EXAMPLES.md](sales/SALES_EXAMPLES.md)** - Exemplos práticos
 
 ### 🎯 Casos de Uso
 
@@ -109,9 +109,9 @@ Gerenciamento de vendas e transações.
 
 ### 👨‍💻 Para Front-End Developer
 
-1. Leia [CLIENTS_INDEX.md](./CLIENTS_INDEX.md) → Setup e Autenticação
-2. Leia [PRODUCTS_INDEX.md](./PRODUCTS_INDEX.md) → Exemplos de Criação
-3. Leia [SALES_INDEX.md](./SALES_INDEX.md) → Fluxo Rápido
+1. Leia [CLIENTS_INDEX.md](clients/CLIENTS_INDEX.md) → Setup e Autenticação
+2. Leia [PRODUCTS_INDEX.md](products/PRODUCTS_INDEX.md) → Exemplos de Criação
+3. Leia [SALES_INDEX.md](sales/SALES_INDEX.md) → Fluxo Rápido
 4. Estude os exemplos em EXAMPLES.md
 
 ### 👨‍🔬 Para Back-End Developer
@@ -260,24 +260,24 @@ Cada módulo segue a mesma estrutura:
 ## 🔗 Links Rápidos
 
 ### Índices Centralizados
-- [Clientes](./CLIENTS_INDEX.md)
-- [Produtos](./PRODUCTS_INDEX.md)
-- [Vendas](./SALES_INDEX.md)
+- [Clientes](clients/CLIENTS_INDEX.md)
+- [Produtos](products/PRODUCTS_INDEX.md)
+- [Vendas](sales/SALES_INDEX.md)
 
 ### Documentação Técnica
-- [Clients README](./CLIENTS_README.md)
-- [Products README](./PRODUCTS_README.md)
-- [Sales README](./SALES_README.md)
+- [Clients README](clients/CLIENTS_README.md)
+- [Products README](products/PRODUCTS_README.md)
+- [Sales README](sales/SALES_README.md)
 
 ### Segurança
-- [Clients Security](./CLIENTS_SECURITY.md)
-- [Products Security](./PRODUCTS_SECURITY.md)
-- [Sales Security](./SALES_SECURITY.md)
+- [Clients Security](clients/CLIENTS_SECURITY.md)
+- [Products Security](products/PRODUCTS_SECURITY.md)
+- [Sales Security](sales/SALES_SECURITY.md)
 
 ### Exemplos Práticos
-- [Clients Examples](./CLIENTS_EXAMPLES.md)
-- [Products Examples](./PRODUCTS_EXAMPLES.md)
-- [Sales Examples](./SALES_EXAMPLES.md)
+- [Clients Examples](clients/CLIENTS_EXAMPLES.md)
+- [Products Examples](products/PRODUCTS_EXAMPLES.md)
+- [Sales Examples](sales/SALES_EXAMPLES.md)
 
 ---
 

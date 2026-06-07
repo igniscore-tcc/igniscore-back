@@ -958,4 +958,4 @@ Vulnerabilidade encontrada? Entre em contato com:
 **Data**: 1º de junho de 2026  
 **Status**: Produção
 
-Para dúvidas sobre segurança, consulte o [README técnico](./SALES_README.md).
+Para dúvidas sobre segurança, consulte o [README técnico](SALES_README.md).

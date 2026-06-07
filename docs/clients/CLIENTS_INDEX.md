@@ -8,7 +8,7 @@ Este é um índice centralizado da documentação do módulo **Clients** do proj
 
 ## Documentos Disponíveis
 
-### 1. [README Técnico – Módulo Clients](./CLIENTS_README.md)
+### 1. [README Técnico – Módulo Clients](CLIENTS_README.md)
 **Tipo**: Documentação Técnica Completa  
 **Público Alvo**: Desenvolvedores, Arquitetos, Product Managers
 
@@ -25,14 +25,14 @@ Documentação técnica abrangente cobrindo:
 - Testes
 
 **Seções Principais**:
-- [Modelo de Dados](./CLIENTS_README.md#modelo-de-dados)
-- [Operações GraphQL](./CLIENTS_README.md#operações-disponíveis-graphql)
-- [Integrações](./CLIENTS_README.md#integrações)
-- [Segurança](./CLIENTS_README.md#segurança-e-multi-tenancy)
+- [Modelo de Dados](CLIENTS_README.md#modelo-de-dados)
+- [Operações GraphQL](CLIENTS_README.md#operações-disponíveis-graphql)
+- [Integrações](CLIENTS_README.md#integrações)
+- [Segurança](CLIENTS_README.md#segurança-e-multi-tenancy)
 
 ---
 
-### 2. [Guia Prático – Exemplos de Uso](./CLIENTS_EXAMPLES.md)
+### 2. [Guia Prático – Exemplos de Uso](CLIENTS_EXAMPLES.md)
 **Tipo**: Guia de Referência com Exemplos  
 **Público Alvo**: Desenvolvedores Frontend, Testers, Integradores
 
@@ -47,14 +47,14 @@ Exemplos práticos e prontos para usar cobrindo:
 - Dicas de performance
 
 **Seções Principais**:
-- [Exemplos de Criação](./CLIENTS_EXAMPLES.md#criação-de-clientes)
-- [Exemplos de Consulta](./CLIENTS_EXAMPLES.md#consultas-e-buscas)
-- [Casos de Erro](./CLIENTS_EXAMPLES.md#casos-de-erro-comuns)
-- [Integração com Sales/Contacts/Addresses](./CLIENTS_EXAMPLES.md#integração-com-outros-módulos)
+- [Exemplos de Criação](CLIENTS_EXAMPLES.md#criação-de-clientes)
+- [Exemplos de Consulta](CLIENTS_EXAMPLES.md#consultas-e-buscas)
+- [Casos de Erro](CLIENTS_EXAMPLES.md#casos-de-erro-comuns)
+- [Integração com Sales/Contacts/Addresses](CLIENTS_EXAMPLES.md#integração-com-outros-módulos)
 
 ---
 
-### 3. [Guia de Segurança e Multi-Tenancy](./CLIENTS_SECURITY.md)
+### 3. [Guia de Segurança e Multi-Tenancy](CLIENTS_SECURITY.md)
 **Tipo**: Documentação de Segurança  
 **Público Alvo**: Arquitetos, Especialistas de Segurança, Code Reviewers
 
@@ -70,45 +70,45 @@ Documentação detalhada sobre segurança, isolamento de dados e conformidade:
 - Checklist de deploy
 
 **Seções Principais**:
-- [Arquitetura Multi-Tenant](./CLIENTS_SECURITY.md#2-arquitetura-multi-tenant)
-- [Filtragem por Tenant](./CLIENTS_SECURITY.md#4-filtragem-de-clientes-por-tenant)
-- [Validações por Operação](./CLIENTS_SECURITY.md#5-validações-de-segurança)
-- [Proteção contra Ataques](./CLIENTS_SECURITY.md#8-proteção-contra-ataques-comuns)
-- [Testes de Segurança](./CLIENTS_SECURITY.md#9-testes-de-segurança)
+- [Arquitetura Multi-Tenant](CLIENTS_SECURITY.md#2-arquitetura-multi-tenant)
+- [Filtragem por Tenant](CLIENTS_SECURITY.md#4-filtragem-de-clientes-por-tenant)
+- [Validações por Operação](CLIENTS_SECURITY.md#5-validações-de-segurança)
+- [Proteção contra Ataques](CLIENTS_SECURITY.md#8-proteção-contra-ataques-comuns)
+- [Testes de Segurança](CLIENTS_SECURITY.md#9-testes-de-segurança)
 
 ---
 
 ## Guia Rápido por Caso de Uso
 
 ### Para Front-End Developer
-1. Leia [Setup e Autenticação](./CLIENTS_EXAMPLES.md#setup-e-autenticação)
-2. Veja [Exemplos de Criação](./CLIENTS_EXAMPLES.md#exemplo-1-criar-cliente-simples)
-3. Consulte [Casos de Erro](./CLIENTS_EXAMPLES.md#casos-de-erro-comuns)
+1. Leia [Setup e Autenticação](CLIENTS_EXAMPLES.md#setup-e-autenticação)
+2. Veja [Exemplos de Criação](CLIENTS_EXAMPLES.md#exemplo-1-criar-cliente-simples)
+3. Consulte [Casos de Erro](CLIENTS_EXAMPLES.md#casos-de-erro-comuns)
 
 ### Para Back-End Developer
-1. Comece com [Visão Geral](./CLIENTS_README.md#visão-geral)
-2. Estude [Modelo de Dados](./CLIENTS_README.md#modelo-de-dados)
-3. Analise [Arquitetura da Camada](./CLIENTS_README.md#arquitetura-da-camada-de-clients)
-4. Entenda [Operações GraphQL](./CLIENTS_README.md#operações-disponíveis-graphql)
-5. Verifique [Segurança](./CLIENTS_SECURITY.md)
+1. Comece com [Visão Geral](CLIENTS_README.md#visão-geral)
+2. Estude [Modelo de Dados](CLIENTS_README.md#modelo-de-dados)
+3. Analise [Arquitetura da Camada](CLIENTS_README.md#arquitetura-da-camada-de-clients)
+4. Entenda [Operações GraphQL](CLIENTS_README.md#operações-disponíveis-graphql)
+5. Verifique [Segurança](CLIENTS_SECURITY.md)
 
 ### Para QA / Tester
-1. Leia [Operações Disponíveis](./CLIENTS_README.md#operações-disponíveis-graphql)
-2. Execute [Exemplos de Teste](./CLIENTS_EXAMPLES.md)
-3. Teste [Casos de Erro](./CLIENTS_EXAMPLES.md#casos-de-erro-comuns)
-4. Valide [Isolamento Multi-Tenant](./CLIENTS_SECURITY.md#9-testes-de-segurança)
+1. Leia [Operações Disponíveis](CLIENTS_README.md#operações-disponíveis-graphql)
+2. Execute [Exemplos de Teste](CLIENTS_EXAMPLES.md)
+3. Teste [Casos de Erro](CLIENTS_EXAMPLES.md#casos-de-erro-comuns)
+4. Valide [Isolamento Multi-Tenant](CLIENTS_SECURITY.md#9-testes-de-segurança)
 
 ### Para Product Manager / Business Analyst
-1. Leia [Visão Geral](./CLIENTS_README.md#visão-geral)
-2. Entenda [Modelo de Dados](./CLIENTS_README.md#modelo-de-dados)
-3. Conheça [Regras de Negócio](./CLIENTS_README.md#regras-de-negócio)
-4. Explore [Operações Disponíveis](./CLIENTS_README.md#operações-disponíveis-graphql)
+1. Leia [Visão Geral](CLIENTS_README.md#visão-geral)
+2. Entenda [Modelo de Dados](CLIENTS_README.md#modelo-de-dados)
+3. Conheça [Regras de Negócio](CLIENTS_README.md#regras-de-negócio)
+4. Explore [Operações Disponíveis](CLIENTS_README.md#operações-disponíveis-graphql)
 
 ### Para Security Architect
-1. Comece com [Arquitetura Multi-Tenant](./CLIENTS_SECURITY.md#2-arquitetura-multi-tenant)
-2. Estude [Fluxo de Autenticação](./CLIENTS_SECURITY.md#3-fluxo-de-autenticação-e-autorização)
-3. Analise [Filtragem por Tenant](./CLIENTS_SECURITY.md#4-filtragem-de-clientes-por-tenant)
-4. Revise [Checklist de Deploy](./CLIENTS_SECURITY.md#10-checklist-de-deploy)
+1. Comece com [Arquitetura Multi-Tenant](CLIENTS_SECURITY.md#2-arquitetura-multi-tenant)
+2. Estude [Fluxo de Autenticação](CLIENTS_SECURITY.md#3-fluxo-de-autenticação-e-autorização)
+3. Analise [Filtragem por Tenant](CLIENTS_SECURITY.md#4-filtragem-de-clientes-por-tenant)
+4. Revise [Checklist de Deploy](CLIENTS_SECURITY.md#10-checklist-de-deploy)
 
 ---
 
@@ -163,7 +163,7 @@ query {
 }
 ```
 
-**Veja exemplos completos em**: [Exemplos de Uso](./CLIENTS_EXAMPLES.md)
+**Veja exemplos completos em**: [Exemplos de Uso](CLIENTS_EXAMPLES.md)
 
 ---
 
@@ -235,17 +235,17 @@ query {
 
 Novo desenvolvedor? Siga este checklist:
 
-- [ ] Leia [Visão Geral do Módulo](./CLIENTS_README.md#visão-geral)
-- [ ] Estude o [Modelo de Dados](./CLIENTS_README.md#modelo-de-dados)
-- [ ] Entenda a [Arquitetura de Camadas](./CLIENTS_README.md#arquitetura-da-camada-de-clients)
+- [ ] Leia [Visão Geral do Módulo](CLIENTS_README.md#visão-geral)
+- [ ] Estude o [Modelo de Dados](CLIENTS_README.md#modelo-de-dados)
+- [ ] Entenda a [Arquitetura de Camadas](CLIENTS_README.md#arquitetura-da-camada-de-clients)
 - [ ] Analise o código das seguintes classes:
   - [ ] `Client.java` (entity)
   - [ ] `ClientRepository.java` (data access)
   - [ ] `ClientService.java` (business logic)
   - [ ] `ClientController.java` (API)
-- [ ] Execute os [Exemplos de Teste](./CLIENTS_EXAMPLES.md)
-- [ ] Leia a seção de [Segurança](./CLIENTS_SECURITY.md)
-- [ ] Revise os [Casos de Erro](./CLIENTS_EXAMPLES.md#casos-de-erro-comuns)
+- [ ] Execute os [Exemplos de Teste](CLIENTS_EXAMPLES.md)
+- [ ] Leia a seção de [Segurança](CLIENTS_SECURITY.md)
+- [ ] Revise os [Casos de Erro](CLIENTS_EXAMPLES.md#casos-de-erro-comuns)
 - [ ] Faça um test simples (criar + listar + atualizar cliente)
 
 ---
@@ -254,4 +254,4 @@ Novo desenvolvedor? Siga este checklist:
 **Data**: 25 de abril de 2026  
 **Status**: Completo e em Produção
 
-Para dúvidas ou contribuições, consulte o [README técnico principal](./CLIENTS_README.md).
+Para dúvidas ou contribuições, consulte o [README técnico principal](CLIENTS_README.md).
