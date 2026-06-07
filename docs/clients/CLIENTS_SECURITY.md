@@ -1,684 +1,640 @@
 # Guia de Segurança e Multi-Tenancy – Módulo Clients
 
-## 1. Introdução
+## Visão Geral
 
-O módulo Clients implementa um sistema rigoroso de isolamento de dados multi-tenant, garantindo que cada empresa (tenant) acesse apenas seus próprios clientes. Este documento descreve as estratégias, implementações e boas práticas de segurança.
+O módulo **Clients** foi projetado para operar num ambiente multi-tenant, garantindo isolamento lógico entre empresas e impedindo qualquer acesso cruzado de dados.
 
----
+Todo cliente pertence obrigatoriamente a uma única empresa e somente utilizadores autenticados vinculados a essa empresa podem visualizar ou manipular os seus registros.
 
-## 2. Arquitetura Multi-Tenant
+Os princípios adotados são:
 
-### 2.1 Modelo de Isolamento
-
-O sistema utiliza um modelo **database-per-schema** com isolamento por tabela:
-
-```
-┌─────────────────────────────────────────────────┐
-│           Database Igniscore (Única)            │
-├─────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────────────┐   │
-│  │ Tabela: companies                       │   │
-│  │ ├─ Empresa A (id: 1)                   │   │
-│  │ ├─ Empresa B (id: 2)                   │   │
-│  │ └─ Empresa C (id: 3)                   │   │
-│  └─────────────────────────────────────────┘   │
-│                                                 │
-│  ┌─────────────────────────────────────────┐   │
-│  │ Tabela: clients                         │   │
-│  │ ├─ Cliente A1 (fk_company: 1)          │   │
-│  │ ├─ Cliente A2 (fk_company: 1)          │   │
-│  │ ├─ Cliente B1 (fk_company: 2)          │   │
-│  │ └─ Cliente B2 (fk_company: 2)          │   │
-│  └─────────────────────────────────────────┘   │
-│                                                 │
-│  ┌─────────────────────────────────────────┐   │
-│  │ Tabela: users                           │   │
-│  │ ├─ Admin A1 (fk_company: 1)            │   │
-│  │ ├─ User A1 (fk_company: 1)             │   │
-│  │ ├─ Admin B1 (fk_company: 2)            │   │
-│  │ └─ User B1 (fk_company: 2)             │   │
-│  └─────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────┘
-```
-
-**Vantagens deste modelo:**
-- Simplicidade operacional (um único banco de dados)
-- Baixa complexidade de backup e disaster recovery
-- Isolamento lógico eficiente
-- Facilita migrações e escalabilidade
+- Isolamento de dados por tenant
+- Menor privilégio possível
+- Autorização baseada em contexto
+- Auditoria completa das operações
+- Proteção contra vulnerabilidades OWASP
+- Rastreabilidade de alterações
+- Segurança por padrão (Secure by ‘Default’)
 
 ---
 
-## 3. Fluxo de Autenticação e Autorização
+# Arquitetura de Multi-Tenancy
 
-### 3.1 Fluxo Geral
+## Estratégia Utilizada
 
+O sistema utiliza o modelo:
+
+**Shared Database + Shared Schema + Tenant Isolation**
+
+Todos os dados ficam armazenados no mesmo banco de dados, porém cada registro possui vínculo explícito com uma empresa.
+
+```text
+Company
+   │
+   ├── Client 1
+   ├── Client 2
+   ├── Client 3
+   └── Client N
+````
+
+Relacionamento:
+
+```sql
+clients.fk_id_company
+        ↓
+companies.pk_id_company
 ```
-┌─────────────┐
-│ Requisição  │
-│  GraphQL    │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────────────────────────┐
-│ SecurityFilter                  │
-│ ├─ Extrai JWT do header         │
-│ └─ Valida assinatura            │
-└──────┬──────────────────────────┘
-       │
-       ▼
-┌─────────────────────────────────┐
-│ JwtService                      │
-│ ├─ Parse token                  │
-│ └─ Extrai userId e companyId    │
-└──────┬──────────────────────────┘
-       │
-       ▼
-┌─────────────────────────────────┐
-│ AuthenticatedUserService        │
-│ ├─ Recupera user do contexto    │
-│ ├─ Recupera company do contexto │
-│ └─ Valida permissões (RBAC)     │
-└──────┬──────────────────────────┘
-       │
-       ▼
-┌─────────────────────────────────┐
-│ ClientController / Service      │
-│ ├─ Aplica filtros (tenant ID)   │
-│ ├─ Executa operação             │
-│ └─ Retorna resultado            │
-└─────────────────────────────────┘
-```
+
+Toda a operação realizada no módulo Clients considera automaticamente o tenant autenticado.
 
 ---
 
-### 3.2 Implementação do Contexto de Segurança
+# Fluxo de Segurança
 
-```java
-// AuthenticatedUserService.java
+## Processo de Autenticação
+
+```text
+Request
+   ↓
+JWT Filter
+   ↓
+Validação do Token
+   ↓
+Recuperação do Usuário
+   ↓
+Recuperação da Empresa
+   ↓
+Criação do Contexto de Segurança
+   ↓
+Execução da Operação
+```
+
+O JWT contém:
+
+```json
+{
+  "sub": "user@email.com",
+  "userId": 10,
+  "companyId": 3,
+  "role": "ADMIN",
+  "exp": 1780729200
+}
+```
+
+O `companyId` extraído do ‘token’ torna-se a base de todas as validações do módulo.
+
+---
+
+# Contexto de Segurança
+
+A empresa autenticada é carregada uma única vez durante a requisição.
+
+Exemplo:
+
+```bash
 @Service
 public class AuthenticatedUserService {
-    
-    private static final ThreadLocal<User> CURRENT_USER = new ThreadLocal<>();
-    private static final ThreadLocal<Company> CURRENT_COMPANY = new ThreadLocal<>();
-    
-    // Armazena contexto de autenticação
-    public void setAuthenticatedUser(User user) {
-        CURRENT_USER.set(user);
-        CURRENT_COMPANY.set(user.getCompany());
-    }
-    
-    // Recupera usuário autenticado
-    public User getAuthenticatedUser() {
-        User user = CURRENT_USER.get();
-        if (user == null) {
-            throw new UnauthorizedException("No authenticated user found");
-        }
-        return user;
-    }
-    
-    // Recupera empresa do usuário autenticado
-    public Company getAuthenticatedCompany() {
-        Company company = CURRENT_COMPANY.get();
-        if (company == null) {
-            throw new UnauthorizedException("No company context found");
-        }
-        return company;
-    }
-    
-    // Limpa contexto após requisição
-    public void clearContext() {
-        CURRENT_USER.remove();
-        CURRENT_COMPANY.remove();
-    }
+
+    public User getAuthenticatedUser() { ... }
+
+    public Company getAuthenticatedCompany() { ... }
+
 }
 ```
+
+Uso:
+
+```java
+Company company =
+    authenticatedUserService.getAuthenticatedCompany();
+```
+
+A partir desse momento todas as consultas são limitadas à empresa autenticada.
 
 ---
 
-## 4. Filtragem de Clientes por Tenant
+# Regra Fundamental de Isolamento
 
-### 4.1 Padrão de Filtragem
+Nenhuma operação deve acessar clientes sem considerar o tenant.
 
-Toda query ou mutation que acessa clientes **DEVE** aplicar filtro de tenant:
+## Correto
 
-```java
-// Padrão CORRETO
-@Service
-public class ClientService {
-    
-    private final ClientRepository repository;
-    private final AuthenticatedUserService authService;
-    
-    // CORRETO: Filtra por company_id
-    public Client findById(Integer id) {
-        Integer companyId = authService.getAuthenticatedCompany().getId();
-        
-        return repository.findByIdAndCompanyId(id, companyId)
-            .orElseThrow(() -> new ClientNotFoundException("Client not found"));
-    }
-    
-    // CORRETO: Lista apenas clientes da empresa
-    public Page<Client> listByCompany(Pageable pageable) {
-        Integer companyId = authService.getAuthenticatedCompany().getId();
-        
-        return repository.findByCompanyId(companyId, pageable);
-    }
-}
+```bash
+repository.findByIdAndCompanyId(
+    clientId,
+    companyId
+);
 ```
 
-### 4.2 Repository com Queries Seguras
+## Incorreto
+
+```bash
+repository.findById(clientId);
+```
+
+O segundo exemplo pode permitir acesso indevido entre empresas.
+
+---
+
+# Repositórios Seguros
+
+Todos os métodos do repository devem considerar o companyId.
 
 ```java
 @Repository
-public interface ClientRepository extends JpaRepository<Client, Integer> {
-    
-    // SEGURA: Filtra por company_id
-    Optional<Client> findByIdAndCompanyId(Integer id, Integer companyId);
-    
-    // SEGURA: Lista com filtro de company
-    Page<Client> findByCompanyId(Integer companyId, Pageable pageable);
-    
-    // SEGURA: Busca por CNPJ com filtro de company
-    Optional<Client> findByCnpjAndCompanyId(String cnpj, Integer companyId);
-    
-    // INSEGURA: Não deveria existir
-    // Optional<Client> findById(Integer id);  // Sem filtro de company!
-    
-    // INSEGURA: Não deveria existir
-    // List<Client> findAll();  // Retorna TODOS os clientes!
+public interface ClientRepository
+        extends JpaRepository<Client, Integer> {
+
+    Optional<Client> findByIdAndCompanyId(
+        Integer id,
+        Integer companyId
+    );
+
+    Optional<Client> findByCnpjAndCompanyId(
+        String cnpj,
+        Integer companyId
+    );
+
+    Page<Client> findByCompanyId(
+        Integer companyId,
+        Pageable pageable
+    );
+
+}
+```
+
+Métodos proibidos:
+
+```java
+findAll();
+
+findById();
+
+findByCnpj();
+```
+
+Sem filtro de tenant.
+
+---
+
+# Controle de Acesso
+
+## Matriz de Permissões
+
+| Operação            | USER | MANAGER | ADMIN |
+|---------------------|------|---------|-------|
+| Consultar clientes  | ✅    | ✅       | ✅     |
+| Criar clientes      | ✅    | ✅       | ✅     |
+| Atualizar clientes  | ✅    | ✅       | ✅     |
+| Inativar clientes   | ❌    | ✅       | ✅     |
+| Excluir clientes    | ❌    | ❌       | ✅     |
+| Consultar auditoria | ❌    | ❌       | ✅     |
+
+---
+
+# Validações Obrigatórias
+
+Todas as operações passam pelas seguintes validações:
+
+```text
+Usuário autenticado?
+      ↓
+Token válido?
+      ↓
+Empresa válida?
+      ↓
+Permissão suficiente?
+      ↓
+Cliente pertence à empresa?
+      ↓
+Validações de negócio?
+      ↓
+Executar operação
+```
+
+---
+
+# Segurança por Operação
+
+## CREATE
+
+Validações:
+
+* Utilizador autenticado
+* Empresa ativa
+* Nome obrigatório
+* Email válido
+* CNPJ válido
+* CNPJ único dentro da empresa
+
+Fluxo:
+
+```text
+Validar JWT
+ ↓
+Validar DTO
+ ↓
+Validar Tenant
+ ↓
+Validar CNPJ
+ ↓
+Persistir
+ ↓
+Auditar
+```
+
+---
+
+## READ
+
+Ao buscar um cliente:
+
+```java
+Client client =
+    repository.findByIdAndCompanyId(
+        id,
+        companyId
+    )
+    .orElseThrow(
+        ClientNotFoundException::new
+    );
+```
+
+Mesmo que o ‘ID’ exista em outra empresa, o utilizador não terá acesso.
+
+---
+
+## UPDATE
+
+Validações adicionais:
+
+* Cliente pertence ao tenant
+* Novo CNPJ não está duplicado
+* Email continua válido
+* Campos sensíveis são auditados
+
+---
+
+## DEACTIVATE
+
+Validações:
+
+```bash
+if (!user.isAdmin()) {
+    throw new ForbiddenException();
+}
+```
+
+Após validação:
+
+```bash
+client.setActive(false);
+client.setDeactivatedAt(LocalDateTime.now());
+```
+
+Nenhum dado é removido fisicamente.
+
+---
+
+# Proteção Contra Escalada de Privilégios
+
+Um utilizador nunca pode informar o tenant manualmente.
+
+Exemplo incorreto:
+
+```bash
+mutation {
+  storeClient((
+    companyId: 5
+  )
+}
+```
+
+O tenant sempre é obtido do contexto autenticado:
+
+```java
+Company company =
+    authService.getAuthenticatedCompany();
+```
+
+Isso elimina tentativas de acesso cruzado.
+
+---
+
+# Tratamento Seguro de Erros
+
+## Nunca Retornar
+
+```json
+{
+  "message": "Client 123 belongs to Company ABC"
+}
+```
+
+```json
+{
+  "message": "Foreign key fk_company violated"
+}
+```
+
+```json
+{
+  "message": "SQLSyntaxErrorException ..."
 }
 ```
 
 ---
 
-## 5. Validações de Segurança
+## Sempre Retornar
 
-### 5.1 Checklist de Validação
-
-Toda operação CRUD passa por este checklist:
-
-```
-┌─────────────────────────────────────────────┐
-│ CHECKLIST DE SEGURANÇA PARA CADA OPERAÇÃO   │
-├─────────────────────────────────────────────┤
-│ ☑ Usuário está autenticado?                 │
-│ ☑ Token JWT é válido?                       │
-│ ☑ Usuário tem permissão para operação?      │
-│ ☑ Cliente pertence à empresa do usuário?    │
-│ ☑ Validações de negócio foram aplicadas?    │
-│ ☑ Operação foi registrada (audit log)?      │
-└─────────────────────────────────────────────┘
-```
-
-### 5.2 Validações por Operação
-
-#### CREATE (storeClient)
-```java
-@Service
-public class ClientService {
-    
-    public Client store(ClientRegisterDTO input) {
-        // 1. Validar autenticação
-        User user = authService.getAuthenticatedUser();
-        Company company = authService.getAuthenticatedCompany();
-        
-        // 2. Validar entrada
-        if (input.getName() == null || input.getName().isBlank()) {
-            throw new ValidationException("Client name is required");
-        }
-        
-        // 3. Validar CNPJ
-        if (!isValidCNPJ(input.getCnpj())) {
-            throw new ValidationException("Invalid CNPJ format");
-        }
-        
-        // 4. Validar unicidade por empresa
-        if (repository.findByCnpjAndCompanyId(input.getCnpj(), company.getId()).isPresent()) {
-            throw new DuplicateClientException("CNPJ already exists in this company");
-        }
-        
-        // 5. Validar email
-        if (!isValidEmail(input.getEmail())) {
-            throw new ValidationException("Invalid email format");
-        }
-        
-        // 6. Criar cliente
-        Client client = new Client();
-        client.setName(input.getName());
-        client.setCnpj(input.getCnpj());
-        client.setEmail(input.getEmail());
-        client.setPhon(input.getPhone());
-        client.setCompany(company);
-        
-        // 7. Persistir
-        Client saved = repository.save(client);
-        
-        // 8. Registrar auditoria
-        auditService.log(user, "CREATE_CLIENT", saved.getId(), "New client created");
-        
-        return saved;
+```json
+{
+  "errors": [
+    {
+      "message": "Access denied",
+      "extensions": {
+        "code": "UNAUTHORIZED"
+      }
     }
+  ]
 }
 ```
 
-#### READ (findById)
-```java
-public Client findById(Integer id) {
-    // 1. Autenticado?
-    Company company = authService.getAuthenticatedCompany();
-    
-    // 2. Existe?
-    Client client = repository.findById(id)
-        .orElseThrow(() -> new ClientNotFoundException("Client not found"));
-    
-    // 3. Pertence à empresa autenticada?
-    if (!client.getCompany().getId().equals(company.getId())) {
-        // Levantar exceção sem revelar detalhes
-        throw new UnauthorizedException("Access denied");
+Ou:
+
+```json
+{
+  "errors": [
+    {
+      "message": "Client not found"
     }
-    
-    return client;
+  ]
 }
 ```
 
-#### UPDATE (updateClient)
-```java
-public Client update(ClientUpdateDTO input) {
-    // 1. Autenticado?
-    User user = authService.getAuthenticatedUser();
-    Company company = authService.getAuthenticatedCompany();
-    
-    // 2. Cliente existe e pertence à empresa?
-    Client client = repository.findByIdAndCompanyId(input.getId(), company.getId())
-        .orElseThrow(() -> new ClientNotFoundException("Client not found"));
-    
-    // 3. Se CNPJ foi modificado, validar unicidade
-    if (input.getCnpj() != null && !input.getCnpj().equals(client.getCnpj())) {
-        if (repository.findByCnpjAndCompanyId(input.getCnpj(), company.getId()).isPresent()) {
-            throw new DuplicateClientException("CNPJ already exists");
-        }
-        client.setCnpj(input.getCnpj());
-    }
-    
-    // 4. Se email foi modificado, validar formato
-    if (input.getEmail() != null) {
-        if (!isValidEmail(input.getEmail())) {
-            throw new ValidationException("Invalid email format");
-        }
-        client.setEmail(input.getEmail());
-    }
-    
-    // 5. Atualizar outros campos...
-    if (input.getName() != null) client.setName(input.getName());
-    if (input.getPhone() != null) client.setPhone(input.getPhone());
-    // ... etc
-    
-    // 6. Persistir
-    Client updated = repository.save(client);
-    
-    // 7. Registrar auditoria
-    auditService.log(user, "UPDATE_CLIENT", updated.getId(), "Client updated");
-    
-    return updated;
-}
-```
-
-#### DELETE (deactivate)
-```java
-public Client deactivate(Integer id) {
-    // 1. Autenticado + permissão de admin?
-    User user = authService.getAuthenticatedUser();
-    Company company = authService.getAuthenticatedCompany();
-    
-    if (!user.getRole().equals(UserRole.ADMIN)) {
-        throw new ForbiddenException("Only admins can deactivate clients");
-    }
-    
-    // 2. Cliente existe e pertence à empresa?
-    Client client = repository.findByIdAndCompanyId(id, company.getId())
-        .orElseThrow(() -> new ClientNotFoundException("Client not found"));
-    
-    // 3. Marcar como inativo (soft delete)
-    client.setActive(false);
-    client.setDeactivatedAt(LocalDateTime.now());
-    
-    Client deactivated = repository.save(client);
-    
-    // 4. Registrar auditoria (importante: registrar quem e quando)
-    auditService.log(user, "DEACTIVATE_CLIENT", deactivated.getId(), 
-        "Client deactivated by " + user.getEmail());
-    
-    return deactivated;
-}
-```
+Sem exposição de detalhes internos.
 
 ---
 
-## 6. Tratamento de Erros Seguro
+# Auditoria
 
-### 6.1 Mensagens de Erro - O QUE NÃO FAZER
+## Objetivos
 
-```java
-// INSEGURO: Revela informações sensíveis
-try {
-    client = repository.findById(unauthorizedClientId);
-} catch (EntityNotFoundException e) {
-    // Mensagem revela que o cliente existe mas é de outra empresa
-    throw new GraphQLException("Client with ID 123 belongs to Company ABC");
-}
+Registrar:
 
-// INSEGURO: Revela estrutura do banco de dados
-throw new GraphQLException("Column 'fk_id_company' violates unique constraint");
-
-// INSEGURO: Stack trace exposto
-e.printStackTrace();
-```
-
-### 6.2 Mensagens de Erro - CORRETO
-
-```java
-// SEGURO: Mensagem genérica, sem revelar detalhes
-if (!client.getCompany().getId().equals(company.getId())) {
-    throw new UnauthorizedException("Access denied");
-}
-
-// SEGURO: Não revela que cliente existe ou não
-throw new UnauthorizedException("Client not found or access denied");
-
-// SEGURO: Log detalhado no servidor, mensagem genérica ao cliente
-logger.warn("Unauthorized access attempt: User {} tried to access client {} from company {}",
-    user.getId(), clientId, user.getCompanyId());
-    
-throw new UnauthorizedException("Access denied");
-```
+* Quem executou
+* Quando executou
+* O que executou
+* Em qual empresa
+* Em qual cliente
+* Endereço IP
+* Resultado da operação
 
 ---
 
-## 7. Auditoria e Logging
+## Eventos Auditados
 
-### 7.1 Eventos Auditados
+| Evento              | Auditoria |
+|---------------------|-----------|
+| CREATE_CLIENT       | Sim       |
+| UPDATE_CLIENT       | Sim       |
+| DEACTIVATE_CLIENT   | Sim       |
+| DELETE_CLIENT       | Sim       |
+| LOGIN               | Sim       |
+| FAILED_LOGIN        | Sim       |
+| UNAUTHORIZED_ACCESS | Sim       |
 
-```
-Tabela: audit_logs
-┌──────────────┬────────────────┬────────────┬──────────────┐
-│ timestamp    │ user_id        │ action     │ client_id    │
-├──────────────┼────────────────┼────────────┼──────────────┤
-│ 2026-04-25   │ user_1         │ CREATE     │ client_5     │
-│ 10:30:00     │ (admin@a.com)  │ _CLIENT    │              │
-├──────────────┼────────────────┼────────────┼──────────────┤
-│ 2026-04-25   │ user_2         │ UPDATE     │ client_5     │
-│ 11:00:00     │ (user@a.com)   │ _CLIENT    │              │
-├──────────────┼────────────────┼────────────┼──────────────┤
-│ 2026-04-25   │ user_1         │ DEACTIVATE │ client_5     │
-│ 14:30:00     │ (admin@a.com)  │ _CLIENT    │              │
-└──────────────┴────────────────┴────────────┴──────────────┘
-```
+---
 
-### 7.2 Implementação de Auditoria
-
-```java
-@Service
-public class AuditService {
-    
-    private final AuditLogRepository repository;
-    
-    public void log(User user, String action, Integer clientId, String details) {
-        AuditLog log = new AuditLog();
-        log.setTimestamp(LocalDateTime.now());
-        log.setUserId(user.getId());
-        log.setUserEmail(user.getEmail());
-        log.setCompanyId(user.getCompany().getId());
-        log.setAction(action);
-        log.setEntityId(clientId);
-        log.setEntityType("CLIENT");
-        log.setDetails(details);
-        log.setIpAddress(getClientIpAddress());  // Rastrear IP
-        
-        repository.save(log);
-    }
-}
-```
-
-### 7.3 Queries de Auditoria
+## Estrutura Recomendada
 
 ```sql
--- Listar todas as operações em um cliente
-SELECT * FROM audit_logs 
-WHERE entity_id = ? AND entity_type = 'CLIENT'
-ORDER BY timestamp DESC;
+audit_logs
+```
 
--- Listar mudanças feitas por um usuário
-SELECT * FROM audit_logs 
-WHERE user_id = ? 
-ORDER BY timestamp DESC;
+| Campo       | Tipo      |
+|-------------|-----------|
+| id          | BIGINT    |
+| timestamp   | TIMESTAMP |
+| user_id     | BIGINT    |
+| company_id  | BIGINT    |
+| action      | VARCHAR   |
+| entity_type | VARCHAR   |
+| entity_id   | BIGINT    |
+| ip_address  | VARCHAR   |
+| details     | TEXT      |
 
--- Detectar atividades suspeitas
-SELECT * FROM audit_logs 
-WHERE action = 'UNAUTHORIZED_ACCESS_ATTEMPT'
-AND timestamp > DATE_SUB(NOW(), INTERVAL 24 HOUR);
+---
+
+# Proteção Contra Vulnerabilidades OWASP
+
+## Broken Access Control
+
+Mitigação:
+
+* Filtro obrigatório por companyId
+* RBAC
+* Contexto autenticado
+
+---
+
+## SQL Injection
+
+Mitigação:
+
+```bash
+JpaRepository
+```
+
+e parâmetros bindados.
+
+Nunca:
+
+```bash
+"SELECT * FROM clients WHERE id = " + id
 ```
 
 ---
 
-## 8. Proteção contra Ataques Comuns
+## Authentication Failures
 
-### 8.1 SQL Injection
+Mitigação:
 
-**Proteção**: JPA com parametrização automática
+* BCrypt
+* JWT
+* Expiração de token
+* Refresh Token
+* Bloqueio por tentativas excessivas
 
-```java
-// SEGURO: JPA parameteriza automaticamente
-Optional<Client> client = repository.findByIdAndCompanyId(id, companyId);
+---
 
-// INSEGURO: Não fazer queries com concatenação de strings
-// "SELECT * FROM clients WHERE id = " + id;
-```
+## Information Disclosure
 
-### 8.2 CSRF (Cross-Site Request Forgery)
+Mitigação:
 
-**Proteção**: 
-- JWT tokens (stateless, sem cookies)
-- Same-origin policy
-- Validação de origin no SecurityConfig
+* Sem stack traces
+* Sem SQL errors
+* Sem IDs internos
+* Sem nomes de tenants
 
-```java
-@Configuration
-public class SecurityConfig {
-    
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf().disable()  // Desabilitado para GraphQL com JWT
-            .cors().and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        
-        return http.build();
-    }
-}
-```
+---
 
-### 8.3 Broken Authentication
+## Security Misconfiguration
 
-**Sistema de Proteção**:
-- Senhas com hash bcrypt
-- JWT com expiração
-- Refresh token com TTL menor
-- Validação de email
+Mitigação:
 
-```java
-@Service
-public class AuthService {
-    
-    private final JwtService jwtService;
-    private final PasswordEncoder encoder;
-    
-    public LoginResponseDTO login(String email, String password) {
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
-        
-        // Compara senha com hash
-        if (!encoder.matches(password, user.getPassword())) {
-            throw new UnauthorizedException("Invalid credentials");
-        }
-        
-        // Gera JWT com expiração
-        String token = jwtService.generateToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
-        
-        return new LoginResponseDTO(token, refreshToken, "Bearer");
-    }
-}
-```
+* HTTPS obrigatório
+* Secrets externos
+* CORS restrito
+* Headers de segurança
 
-### 8.4 Broken Authorization
+---
 
-**Sistema de Controle**:
-- RBAC (Role-Based Access Control)
-- Validação de tenant em cada operação
-- Princípio do menor privilégio
+# Rate Limiting
 
-```java
-// Verificar permissão em cada operação
-public Client deactivate(Integer id) {
-    User user = authService.getAuthenticatedUser();
-    
-    if (!user.getRole().equals(UserRole.ADMIN)) {
-        throw new ForbiddenException("Only admins can deactivate");
-    }
-    
-    // ... resto da lógica
-}
-```
+Recomendado:
 
-### 8.5 Information Disclosure
+| Operação  | Limite  |
+|-----------|---------|
+| Login     | 10/min  |
+| Queries   | 300/min |
+| Mutations | 100/min |
 
-**Proteção**:
-- Não expor stack traces
-- Mensagens de erro genéricas
-- Sanitizar logs
-- Não revelar structure do banco
+Exemplo:
 
-```java
-// SEGURO: Mensagem genérica
-throw new UnauthorizedException("Access denied");
-
-// INSEGURO: Revela estrutura
-throw new UnauthorizedException("Foreign key constraint violation on column fk_id_company");
+```http
+429 TOO MANY REQUESTS
 ```
 
 ---
 
-## 9. Testes de Segurança
+# Logs de Segurança
 
-### 9.1 Teste de Isolamento de Tenant
+Registrar:
 
-```java
-@SpringBootTest
-@AutoConfigureMockMvc
-public class ClientSecurityTest {
-    
-    @Autowired
-    private MockMvc mockMvc;
-    
-    @Autowired
-    private ClientRepository repository;
-    
-    // Teste: Usuário A não deve acessar cliente da Empresa B
-    @Test
-    @WithMockUser(username = "user@companyA.com")
-    public void shouldNotAccessClientFromDifferentCompany() throws Exception {
-        // Arrange: Cliente pertence à Empresa B
-        Client clientFromCompanyB = createClientForCompany(2);
-        
-        // Act: Usuário da Empresa A tenta acessar
-        mockMvc.perform(graphql(
-            "query { clientById(id: " + clientFromCompanyB.getId() + ") { name } }"
-        ))
-        
-        // Assert: Deve retornar erro de acesso negado
-        .andExpect(jsonPath("$.errors[0].extensions.code").value("UNAUTHORIZED"));
-    }
-    
-    // Teste: Validação de unicidade por empresa
-    @Test
-    public void shouldAllowSameCnpjInDifferentCompanies() {
-        // Arrange: Mesmo CNPJ em duas empresas diferentes
-        Client client1 = createClient("12.345.678/0001-99", 1);  // Empresa 1
-        
-        // Act: Criar segundo cliente com mesmo CNPJ em empresa 2
-        Client client2 = createClient("12.345.678/0001-99", 2);  // Empresa 2
-        
-        // Assert: Ambos devem existir
-        assertNotNull(repository.findById(client1.getId()));
-        assertNotNull(repository.findById(client2.getId()));
-    }
-    
-    // Teste: Rejeitar CNPJ duplicado na mesma empresa
-    @Test
-    public void shouldRejectDuplicateCnpjInSameCompany() {
-        // Arrange: Primeiro cliente criado
-        createClient("12.345.678/0001-99", 1);
-        
-        // Act & Assert: Segundo com mesmo CNPJ deve ser rejeitado
-        assertThrows(DuplicateClientException.class, () -> {
-            createClient("12.345.678/0001-99", 1);
-        });
-    }
-}
+```text
+Tentativas de acesso negado
+
+Falhas de autenticação
+
+Tokens inválidos
+
+Operações administrativas
+
+Alterações críticas
+
+Desativações de clientes
 ```
 
-### 9.2 Teste de Auditoria
+Jamais registrar:
 
-```java
-@Test
-public void shouldLogAllOperations() {
-    // Arrange
-    String email = "admin@company.com";
-    Client client = createClient("Test", 1);
-    
-    // Act
-    clientService.deactivate(client.getId());
-    
-    // Assert
-    AuditLog log = auditRepository.findLatestLog("DEACTIVATE_CLIENT");
-    assertEquals(email, log.getUserEmail());
-    assertEquals(client.getId(), log.getEntityId());
-    assertNotNull(log.getTimestamp());
-}
+```text
+Senhas
+
+JWT completos
+
+Dados financeiros
+
+Informações sensíveis
 ```
 
 ---
 
-## 10. Checklist de Deploy
+# Testes de Segurança Obrigatórios
 
-Antes de colocar em produção:
+## Tenant Isolation
 
-- [ ] Todas as queries aplicam filtro de `company_id`
-- [ ] Mensagens de erro não revelam detalhes sensíveis
-- [ ] JWT secret é configurado com valor forte
-- [ ] CORS está restrito aos domínios autorizados
-- [ ] Auditoria está habilitada
-- [ ] Logs estão configurados (não expor senhas)
-- [ ] Rate limiting está ativo
-- [ ] Backup está configurado
-- [ ] HTTPS/TLS está obrigatório
-- [ ] Testes de segurança passam
-- [ ] Code review foi realizado
-- [ ] Plano de incident response está pronto
+Validar:
+
+```text
+Empresa A
+não consegue acessar
+clientes da Empresa B
+```
 
 ---
 
-## 11. Referências e Recursos
+## Duplicate CNPJ
 
-- **OWASP Top 10**: https://owasp.org/Top10/
-- **Spring Security**: https://spring.io/projects/spring-security
-- **JWT Best Practices**: https://tools.ietf.org/html/rfc8725
-- **GraphQL Security**: https://cheatsheetseries.owasp.org/cheatsheets/GraphQL_Cheat_Sheet.html
-- **Multi-Tenancy Patterns**: https://www.postgresql.org/docs/current/ddl-schemas.html
+Validar:
+
+```text
+Mesmo CNPJ
+permitido em empresas diferentes
+
+Mesmo CNPJ
+bloqueado dentro da mesma empresa
+```
 
 ---
 
-**Documento Versão**: 1.0  
-**Data de Atualização**: 25 de abril de 2026  
-**Responsável**: Time de Segurança
+## Authorization
+
+Validar:
+
+```text
+USER
+não pode desativar cliente
+
+ADMIN
+pode desativar cliente
+```
+
+---
+
+## Auditoria
+
+Validar:
+
+```text
+Toda alteração gera log
+```
+
+---
+
+# Checklist de Produção
+
+Antes de publicar:
+
+* [ ] JWT configurado com chave forte
+* [ ] HTTPS obrigatório
+* [ ] Auditoria habilitada
+* [ ] Filtro de tenant aplicado em todas as queries
+* [ ] Filtro de tenant aplicado em todas as mutations
+* [ ] Rate limiting habilitado
+* [ ] CORS configurado
+* [ ] ‘Logs’ revistos
+* [ ] Testes de isolamento executados
+* [ ] Testes de autorização executados
+* [ ] ‘Backup’ configurado
+* [ ] Monitoramento configurado
+
+---
+
+# Garantias de Segurança do Módulo
+
+O módulo Clients garante:
+
+✅ Isolamento completo entre empresas
+
+✅ Controle de acesso baseado em tenant
+
+✅ Auditoria de operações críticas
+
+✅ Proteção contra acesso cruzado
+
+✅ Compatibilidade com OWASP Top 10
+
+✅ Rastreabilidade de alterações
+
+✅ Segurança baseada em JWT + RBAC
+
+✅ Escalabilidade para múltiplos tenants
+
+---
+
+**Módulo:** Clients
+**Projeto:** Igniscore API
+**Arquitetura:** Spring Boot + GraphQL + JPA
+**Modelo de Segurança:** JWT + RBAC + Multi-Tenancy
+**Status:** Produção
