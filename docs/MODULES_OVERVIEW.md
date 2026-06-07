@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Este documento apresenta a organização dos módulos do Igniscore, seus relacionamentos e os principais fluxos de integração entre os componentes da plataforma.
+Este documento apresenta a organização dos módulos do Igniscore, os seus relacionamentos e os principais fluxos de integração entre os componentes da plataforma.
 
 ## Visão Geral
 
@@ -12,7 +12,7 @@ A documentação do Igniscore está organizada em módulos independentes que rep
 
 ## 1. Módulo Clients (Clientes)
 
-Gerenciamento de clientes pertencentes às empresas (tenants).
+Gestão de clientes pertencentes às empresas (tenants).
 
 ### Documentação
 
@@ -24,7 +24,7 @@ Gerenciamento de clientes pertencentes às empresas (tenants).
 ### Casos de Uso
 
 - Criar, consultar, atualizar e deletar clientes
-- Gerenciar dados de contato e endereço
+- Gerir dados de contato e endereço
 - Validar CNPJ e dados fiscais
 - Integrar com vendas e contatos
 
@@ -39,7 +39,7 @@ Gerenciamento de clientes pertencentes às empresas (tenants).
 
 ## 2. Módulo Products (Produtos)
 
-Gerenciamento de produtos e serviços das empresas.
+Gestão de produtos e serviços das empresas.
 
 ### Documentação
 
@@ -51,22 +51,22 @@ Gerenciamento de produtos e serviços das empresas.
 ### Casos de Uso
 
 - Cadastrar produtos (extintores, serviços, consumíveis, etc.)
-- Gerenciar tipos de produtos
+- Gerir tipos de produtos
 - Controlar validade e lotes
 - Ativar/inativar produtos
-- Gerenciar preços
+- Gerir preços
 
 ### Relacionamentos
 
-- **Sales**: Produtos são vendidos através de vendas
-- **Sale Items**: Cada item de venda referencia um produto
+- **Sales**: Produtos são vendidos por vendas
+- **Sale ‘Items’**: Cada ‘item’ de venda referencia um produto
 - **Company**: Cada produto pertence a uma empresa
 
 ---
 
 ## 3. Módulo Sales (Vendas)
 
-Gerenciamento de vendas e transações.
+Gestão de vendas e transações.
 
 ### Documentação
 
@@ -235,7 +235,7 @@ Cada módulo possui:
 A evolução da plataforma prevê a expansão para novos módulos e funcionalidades voltadas à gestão comercial e operacional.
 
 
-- Usuários e Permissões (RBAC)
+- Utilizadores e Permissões (RBAC)
 - Financeiro
 - Relatórios Avançados
 - Notificações
@@ -244,7 +244,7 @@ A evolução da plataforma prevê a expansão para novos módulos e funcionalida
 ---
 
 **Sistema:** Igniscore
-**Versão da Documentação:** 1.0
+**Versão da Documentação:** 1,0
 **Status:** MVP funcional
 
 Para sugestões ou atualizações, abra uma issue no GitHub.
