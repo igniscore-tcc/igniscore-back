@@ -63,7 +63,7 @@ public class ClientService {
 
     @PersistenceContext
     @SuppressWarnings("unused")
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     /**
      * Constructs the service with required dependencies.
@@ -74,11 +74,13 @@ public class ClientService {
     public ClientService(
             ClientRepository repository,
             AuthenticatedUserService authUserService,
-            AuditUtils audit
+            AuditUtils audit,
+            EntityManager entityManager
     ) {
         this.repository = repository;
         this.authUserService = authUserService;
         this.audit = audit;
+        this.entityManager = entityManager;
     }
 
     /**

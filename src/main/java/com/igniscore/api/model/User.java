@@ -75,6 +75,13 @@ public class User implements UserDetails {
     @JoinColumn(name = "fk_id_company")
     private Company company;
 
+    public User() {
+    }
+
+    public User(Integer id) {
+        this.id = id;
+    }
+
     // --- Getters ---
 
     public Integer getId() { return id; }
