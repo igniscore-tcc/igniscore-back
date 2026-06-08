@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -162,5 +163,52 @@ class ClientServiceTest {
 
         assertNotNull(clientes);
         assertEquals(2, clientes.getClients().size());
+    }
+
+    @Test
+    @DisplayName("Should need to find a client successfully")
+    void shouldFindOneClient() {
+
+        CreateCompanyDTO dtoCompany = new CreateCompanyDTO(
+                "IgnisCore",
+                "71.963.415/0001-09",
+                "572.754.780.502",
+                "SP",
+                "suporte@igniscore.com",
+                "1935798593"
+        );
+
+        var company = new Company(dtoCompany);
+
+        User user = new User(1);
+        user.setCompany(company);
+
+        given(authUserService.getUserOrThrow()).willReturn(user);
+
+        given(authUserService.getCompanyOrThrow()).willReturn(company);
+
+        var dtoClient = new ClientRegisterDTO(
+                "Cliente do IgnisCore",
+                "clienteignscore@gmail.com",
+                "37201849000133",
+                "99999999999",
+                "411873849804",
+                "SP",
+                ""
+        );
+
+        given(clientRepository.save(any()))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        var client = clientService.store(dtoClient);
+        client.setId(1);
+        client.setCompany(company);
+
+        given((clientRepository.findByIdAndCompany(1, company))).willReturn(Optional.of(client));
+
+        var clientFind = clientService.findById(1);
+
+        assertNotNull(clientFind);
+        assertEquals(1, clientFind.getId());
     }
 }
