@@ -66,6 +66,10 @@ public class CompanyService {
 
         Company company = new Company();
 
+        if (dto.getCnpj() == null || dto.getCnpj().isBlank()) {
+            throw new IllegalArgumentException("CNPJ is required");
+        }
+
         company.setName(dto.getName());
         company.setCnpj(dto.getCnpj());
         company.setIe(dto.getIe());
