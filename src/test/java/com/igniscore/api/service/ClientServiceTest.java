@@ -25,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ClientServiceTest {
@@ -210,5 +212,58 @@ class ClientServiceTest {
 
         assertNotNull(clientFind);
         assertEquals(1, clientFind.getId());
+    }
+
+    @Test
+    @DisplayName("Should must delete a client by ID")
+    void shouldDeleteByIDClient() {
+
+        CreateCompanyDTO dtoCompany = new CreateCompanyDTO(
+                "IgnisCore",
+                "71.963.415/0001-09",
+                "572.754.780.502",
+                "SP",
+                "suporte@igniscore.com",
+                "1935798593"
+        );
+
+        var company = new Company(dtoCompany);
+
+        User user = new User(1);
+        user.setCompany(company);
+
+        given(authUserService.getUserOrThrow()).willReturn(user);
+
+        given(authUserService.getCompanyOrThrow()).willReturn(company);
+
+        var dtoClient = new ClientRegisterDTO(
+                "Cliente do IgnisCore",
+                "clienteignscore@gmail.com",
+                "37201849000133",
+                "99999999999",
+                "411873849804",
+                "SP",
+                ""
+        );
+
+        given(clientRepository.save(any()))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        var client = clientService.store(dtoClient);
+        client.setId(1);
+        client.setCompany(company);
+
+        given((clientRepository.findByIdAndCompany(1, company))).willReturn(Optional.of(client));
+
+        var clientFind = clientService.findById(1);
+
+        doNothing().when(clientRepository).delete(clientFind);
+
+        String delete = clientService.delete(clientFind.getId());
+
+        assertNotNull(delete);
+        assertEquals("Client successfully deleted." , delete);
+
+        verify(clientRepository).delete(clientFind);
     }
 }
