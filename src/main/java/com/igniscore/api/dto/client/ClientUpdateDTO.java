@@ -105,6 +105,21 @@ public class ClientUpdateDTO {
      */
     private String obs;
 
+    public ClientUpdateDTO() {
+    }
+
+    public ClientUpdateDTO(Integer id, String name, String email, String cnpj, String cpf, String phone, String ie, String ufIe, String obs) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.cnpj = cnpj;
+        this.cpf = cpf;
+        this.phone = phone;
+        this.ie = ie;
+        this.ufIe = ufIe;
+        this.obs = obs;
+    }
+
     public Integer getId() {
         return id;
     }
