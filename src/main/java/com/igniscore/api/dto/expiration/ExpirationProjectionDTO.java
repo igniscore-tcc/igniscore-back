@@ -1,5 +1,7 @@
 package com.igniscore.api.dto.expiration;
 
+import com.igniscore.api.model.ExpirationStatus;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -8,5 +10,6 @@ public record ExpirationProjectionDTO(
         String clientName,
         LocalDate saleDate,
         LocalDate dueDate,
-        BigDecimal totalSale
+        BigDecimal totalSale,
+        ExpirationStatus status
 ) {}
