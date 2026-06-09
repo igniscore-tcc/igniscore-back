@@ -2,8 +2,8 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.expiration.ExpirationDTO;
 import com.igniscore.api.dto.expiration.ExpirationProjectionDTO;
-import com.igniscore.api.dto.expiration.ExpirationStatus;
 import com.igniscore.api.model.Company;
+import com.igniscore.api.model.ExpirationStatus;
 import com.igniscore.api.repository.ExpirationRepository;
 import org.springframework.stereotype.Service;
 
@@ -86,21 +86,6 @@ public class ExpirationService {
                 .toList();
     }
 
-    private ExpirationStatus calculateStatus(LocalDate dueDate) {
-
-        LocalDate today = LocalDate.now();
-
-        if (dueDate.isBefore(today)) {
-            return ExpirationStatus.VENCIDO;
-        }
-
-        if (!dueDate.isAfter(today.plusDays(30))) {
-            return ExpirationStatus.PROXIMO;
-        }
-
-        return ExpirationStatus.NORMAL;
-    }
-
     private ExpirationDTO mapExpiration(
             ExpirationProjectionDTO expiration
     ) {
@@ -110,7 +95,7 @@ public class ExpirationService {
                 expiration.saleDate(),
                 expiration.dueDate(),
                 expiration.totalSale(),
-                calculateStatus(expiration.dueDate())
+                expiration.status()
         );
     }
 }

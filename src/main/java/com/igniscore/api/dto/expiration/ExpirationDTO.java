@@ -1,5 +1,7 @@
 package com.igniscore.api.dto.expiration;
 
+import com.igniscore.api.model.ExpirationStatus;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 

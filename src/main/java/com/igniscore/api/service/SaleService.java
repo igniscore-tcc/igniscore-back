@@ -5,6 +5,7 @@ import com.igniscore.api.dto.sale.CreateSaleItemDTO;
 import com.igniscore.api.dto.sale.SaleQueryDTO;
 import com.igniscore.api.model.*;
 import com.igniscore.api.repository.ClientRepository;
+import com.igniscore.api.repository.ExpirationRepository;
 import com.igniscore.api.repository.ProductRepository;
 import com.igniscore.api.repository.SaleRepository;
 import org.springframework.cache.annotation.CacheEvict;
@@ -54,6 +55,8 @@ public class SaleService {
      */
     private final ProductRepository productRepository;
 
+    private final ExpirationRepository expirationRepository;
+
     /**
      * Service responsible for retrieving the authenticated user context.
      */
@@ -71,12 +74,14 @@ public class SaleService {
             SaleRepository repository,
             AuthenticatedUserService authUserService,
             ClientRepository clientRepository,
-            ProductRepository productRepository
+            ProductRepository productRepository,
+            ExpirationRepository expirationRepository
     ) {
         this.repository = repository;
         this.authUserService = authUserService;
         this.clientRepository = clientRepository;
         this.productRepository = productRepository;
+        this.expirationRepository = expirationRepository;
     }
 
     /**
@@ -140,10 +145,16 @@ public class SaleService {
                 products
         );
 
+        repository.save(sale);
+
+        var expiration = new Expiration(sale, ExpirationStatus.NORMAL);
+
+        expirationRepository.save(expiration);
+
         /*
          * Persists the sale and all associated items.
          */
-        return repository.save(sale);
+        return sale;
     }
 
     /**

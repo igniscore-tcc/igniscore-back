@@ -301,7 +301,7 @@ enum SaleStatus {
 }
 
 enum ExpirationStatus {
-    VENCIDO
-    PROXIMO
+    EXPIRED
+    NEXT
     NORMAL
 }
