@@ -7,10 +7,10 @@ import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.ClientRepository;
-import com.igniscore.api.repository.CompanyRepository;
 import com.igniscore.api.repository.UserRepository;
 import com.igniscore.api.utils.AuditUtils;
 import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,9 +53,10 @@ class ClientServiceTest {
     @InjectMocks
     private CompanyService companyService;
 
-    @Test
-    @DisplayName("Should create a client with successfully")
-    void shouldCreteClient() {
+    private Company company;
+
+    @BeforeEach
+    void setup() {
 
         CreateCompanyDTO dtoCompany = new CreateCompanyDTO(
                 "IgnisCore",
@@ -66,14 +67,21 @@ class ClientServiceTest {
                 "1935798593"
         );
 
-        var company = new Company(dtoCompany);
+        company = new Company(dtoCompany);
 
         User user = new User(1);
         user.setCompany(company);
 
-        given(authUserService.getUserOrThrow()).willReturn(user);
+        given(authUserService.getUserOrThrow())
+                .willReturn(user);
 
-        given(authUserService.getCompanyOrThrow()).willReturn(company);
+        given(authUserService.getCompanyOrThrow())
+                .willReturn(company);
+    }
+
+    @Test
+    @DisplayName("Should create a client with successfully")
+    void shouldCreteClient() {
 
         var dtoClient = new ClientRegisterDTO(
                 "Cliente do IgnisCore",
@@ -98,24 +106,6 @@ class ClientServiceTest {
     @Test
     @DisplayName("Should must successfully list all clients")
     void shouldFindAllClient() {
-
-        CreateCompanyDTO dtoCompany = new CreateCompanyDTO(
-                "IgnisCore",
-                "71.963.415/0001-09",
-                "572.754.780.502",
-                "SP",
-                "suporte@igniscore.com",
-                "1935798593"
-        );
-
-        var company = new Company(dtoCompany);
-
-        User user = new User(1);
-        user.setCompany(company);
-
-        given(authUserService.getUserOrThrow()).willReturn(user);
-
-        given(authUserService.getCompanyOrThrow()).willReturn(company);
 
         var dtoClientOne = new ClientRegisterDTO(
                 "Cliente do IgnisCore",
@@ -172,24 +162,6 @@ class ClientServiceTest {
     @DisplayName("Should need to find a client successfully")
     void shouldFindOneClient() {
 
-        CreateCompanyDTO dtoCompany = new CreateCompanyDTO(
-                "IgnisCore",
-                "71.963.415/0001-09",
-                "572.754.780.502",
-                "SP",
-                "suporte@igniscore.com",
-                "1935798593"
-        );
-
-        var company = new Company(dtoCompany);
-
-        User user = new User(1);
-        user.setCompany(company);
-
-        given(authUserService.getUserOrThrow()).willReturn(user);
-
-        given(authUserService.getCompanyOrThrow()).willReturn(company);
-
         var dtoClient = new ClientRegisterDTO(
                 "Cliente do IgnisCore",
                 "clienteignscore@gmail.com",
@@ -218,24 +190,6 @@ class ClientServiceTest {
     @Test
     @DisplayName("Should must delete a client by ID")
     void shouldDeleteByIDClient() {
-
-        CreateCompanyDTO dtoCompany = new CreateCompanyDTO(
-                "IgnisCore",
-                "71.963.415/0001-09",
-                "572.754.780.502",
-                "SP",
-                "suporte@igniscore.com",
-                "1935798593"
-        );
-
-        var company = new Company(dtoCompany);
-
-        User user = new User(1);
-        user.setCompany(company);
-
-        given(authUserService.getUserOrThrow()).willReturn(user);
-
-        given(authUserService.getCompanyOrThrow()).willReturn(company);
 
         var dtoClient = new ClientRegisterDTO(
                 "Cliente do IgnisCore",
@@ -272,24 +226,6 @@ class ClientServiceTest {
     @DisplayName("Should must update a client")
     void shouldUpdateClient() {
 
-        CreateCompanyDTO dtoCompany = new CreateCompanyDTO(
-                "IgnisCore",
-                "71.963.415/0001-09",
-                "572.754.780.502",
-                "SP",
-                "suporte@igniscore.com",
-                "1935798593"
-        );
-
-        var company = new Company(dtoCompany);
-
-        User user = new User(1);
-        user.setCompany(company);
-
-        given(authUserService.getUserOrThrow()).willReturn(user);
-
-        given(authUserService.getCompanyOrThrow()).willReturn(company);
-
         var dtoClient = new ClientRegisterDTO(
                 "Cliente do IgnisCore",
                 "clienteignscore@gmail.com",
@@ -309,7 +245,7 @@ class ClientServiceTest {
 
         given((clientRepository.findByIdAndCompany(1, company))).willReturn(Optional.of(client));
 
-        var clientFind = clientService.findById(1);
+        clientService.findById(1);
 
         var dtoClientUpdate = new ClientUpdateDTO(
                 1,
