@@ -1,15 +1,16 @@
 package com.igniscore.api.service;
 
 import com.igniscore.api.dto.client.ClientRegisterDTO;
+import com.igniscore.api.dto.client.ClientUpdateDTO;
 import com.igniscore.api.dto.company.CreateCompanyDTO;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.ClientRepository;
-import com.igniscore.api.repository.CompanyRepository;
 import com.igniscore.api.repository.UserRepository;
 import com.igniscore.api.utils.AuditUtils;
 import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ClientServiceTest {
@@ -50,9 +53,10 @@ class ClientServiceTest {
     @InjectMocks
     private CompanyService companyService;
 
-    @Test
-    @DisplayName("Should create a client with successfully")
-    void shouldCreteClient() {
+    private Company company;
+
+    @BeforeEach
+    void setup() {
 
         CreateCompanyDTO dtoCompany = new CreateCompanyDTO(
                 "IgnisCore",
@@ -63,14 +67,21 @@ class ClientServiceTest {
                 "1935798593"
         );
 
-        var company = new Company(dtoCompany);
+        company = new Company(dtoCompany);
 
         User user = new User(1);
         user.setCompany(company);
 
-        given(authUserService.getUserOrThrow()).willReturn(user);
+        given(authUserService.getUserOrThrow())
+                .willReturn(user);
 
-        given(authUserService.getCompanyOrThrow()).willReturn(company);
+        given(authUserService.getCompanyOrThrow())
+                .willReturn(company);
+    }
+
+    @Test
+    @DisplayName("Should create a client with successfully")
+    void shouldCreteClient() {
 
         var dtoClient = new ClientRegisterDTO(
                 "Cliente do IgnisCore",
@@ -95,24 +106,6 @@ class ClientServiceTest {
     @Test
     @DisplayName("Should must successfully list all clients")
     void shouldFindAllClient() {
-
-        CreateCompanyDTO dtoCompany = new CreateCompanyDTO(
-                "IgnisCore",
-                "71.963.415/0001-09",
-                "572.754.780.502",
-                "SP",
-                "suporte@igniscore.com",
-                "1935798593"
-        );
-
-        var company = new Company(dtoCompany);
-
-        User user = new User(1);
-        user.setCompany(company);
-
-        given(authUserService.getUserOrThrow()).willReturn(user);
-
-        given(authUserService.getCompanyOrThrow()).willReturn(company);
 
         var dtoClientOne = new ClientRegisterDTO(
                 "Cliente do IgnisCore",
@@ -169,24 +162,6 @@ class ClientServiceTest {
     @DisplayName("Should need to find a client successfully")
     void shouldFindOneClient() {
 
-        CreateCompanyDTO dtoCompany = new CreateCompanyDTO(
-                "IgnisCore",
-                "71.963.415/0001-09",
-                "572.754.780.502",
-                "SP",
-                "suporte@igniscore.com",
-                "1935798593"
-        );
-
-        var company = new Company(dtoCompany);
-
-        User user = new User(1);
-        user.setCompany(company);
-
-        given(authUserService.getUserOrThrow()).willReturn(user);
-
-        given(authUserService.getCompanyOrThrow()).willReturn(company);
-
         var dtoClient = new ClientRegisterDTO(
                 "Cliente do IgnisCore",
                 "clienteignscore@gmail.com",
@@ -210,5 +185,83 @@ class ClientServiceTest {
 
         assertNotNull(clientFind);
         assertEquals(1, clientFind.getId());
+    }
+
+    @Test
+    @DisplayName("Should must delete a client by ID")
+    void shouldDeleteByIDClient() {
+
+        var dtoClient = new ClientRegisterDTO(
+                "Cliente do IgnisCore",
+                "clienteignscore@gmail.com",
+                "37201849000133",
+                "99999999999",
+                "411873849804",
+                "SP",
+                ""
+        );
+
+        given(clientRepository.save(any()))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        var client = clientService.store(dtoClient);
+        client.setId(1);
+        client.setCompany(company);
+
+        given((clientRepository.findByIdAndCompany(1, company))).willReturn(Optional.of(client));
+
+        var clientFind = clientService.findById(1);
+
+        doNothing().when(clientRepository).delete(clientFind);
+
+        String delete = clientService.delete(clientFind.getId());
+
+        assertNotNull(delete);
+        assertEquals("Client successfully deleted." , delete);
+
+        verify(clientRepository).delete(clientFind);
+    }
+
+    @Test
+    @DisplayName("Should must update a client")
+    void shouldUpdateClient() {
+
+        var dtoClient = new ClientRegisterDTO(
+                "Cliente do IgnisCore",
+                "clienteignscore@gmail.com",
+                "37201849000133",
+                "99999999999",
+                "411873849804",
+                "SP",
+                ""
+        );
+
+        given(clientRepository.save(any()))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        var client = clientService.store(dtoClient);
+        client.setId(1);
+        client.setCompany(company);
+
+        given((clientRepository.findByIdAndCompany(1, company))).willReturn(Optional.of(client));
+
+        clientService.findById(1);
+
+        var dtoClientUpdate = new ClientUpdateDTO(
+                1,
+                "Cliente do IgnisCore",
+                "clienteignscore@gmail.com",
+                "37201849000133",
+                "",
+                "1325799356",
+                "314.606.502.496",
+                "SP",
+                "Nova observação"
+        );
+
+        var clientUpdate = clientService.update(dtoClientUpdate);
+
+        assertNotNull(clientUpdate);
+        assertEquals(dtoClientUpdate.getObs(), clientUpdate.getObs());
     }
 }
