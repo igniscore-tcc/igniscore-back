@@ -90,7 +90,26 @@ Gestão de vendas e transações.
 - **Products**: Itens de venda contêm produtos
 - **Company**: Cada venda pertence a uma empresa
 
-## 4. Dashboard
+## 4. Módulo Expirations (Vencimentos)
+
+Gestão de vencimentos.
+
+### Documentação
+
+- **[EXPIRATIONS_INDEX](expirations/EXPIRATIONS_INDEX.md)** - Índice centralizado *COMECE AQUI*
+- **[EXPIRATIONS_README.md](expirations/EXPIRATIONS_README.md)** - Documentação técnica completa
+- **[EXPIRATIONS_SECURITY.md](expirations/EXPIRATIONS_SECURITY.md)** - Segurança e multi-tenancy
+- **[EXPIRATIONS_EXAMPLES.md](expirations/EXPIRATIONS_EXAMPLES.md)** - Exemplos práticos
+
+### Casos de Uso
+
+- Listar vencimentos
+
+### Relacionamentos
+
+- **Sales**: Cada vencimento é associada a uma venda
+
+## 5. Dashboard
 
 Responsável pela consolidação de indicadores e métricas da plataforma.
 
@@ -111,18 +130,18 @@ Responsável pela consolidação de indicadores e métricas da plataforma.
 
 ## Comparação dos Módulos
 
-| Aspecto              | Clients     | Products       | Sales             |
-|----------------------|-------------|----------------|-------------------|
-| **Tabela Principal** | clients     | products       | sales, sale_items |
-| **Operações CRUD**   | Completo    | Completo       | Completo          |
-| **Multi-tenant**     | Sim         | Sim            | Sim               |
-| **Paginação**        | Sim         | Sim            | Sim               |
-| **GraphQL**          | Sim         | Sim            | Sim               |
-| **Filtros**          | CNPJ, Email | Tipo, Status   | Status, Cliente   |
-| **Validações**       | CNPJ, CPF   | Tipo, Validade | Desconto, Items   |
-| **Soft Delete**      | Sim         | Sim            | Sim               |
-| **Auditoria**        | Sim         | Sim            | Sim               |
-| **Segurança**        | JWT         | JWT            | JWT               |
+| Aspecto              | Clients     | Products       | Sales             | Expirations            | 
+|----------------------|-------------|----------------|-------------------|------------------------|
+| **Tabela Principal** | clients     | products       | sales, sale_items | expirations            |
+| **Operações CRUD**   | Completo    | Completo       | Completo          | Consultas              |
+| **Multi-tenant**     | Sim         | Sim            | Sim               | Sim                    |
+| **Paginação**        | Sim         | Sim            | Sim               | Não                    |
+| **GraphQL**          | Sim         | Sim            | Sim               | Sim                    |
+| **Filtros**          | CNPJ, Email | Tipo, Status   | Status, Cliente   | Período, cliente, dias |
+| **Validações**       | CNPJ, CPF   | Tipo, Validade | Desconto, Items   | Status                 |
+| **Soft Delete**      | Sim         | Sim            | Sim               | Não                    |
+| **Auditoria**        | Sim         | Sim            | Sim               | Não                    |
+| **Segurança**        | JWT         | JWT            | JWT               | JWT                    |
 
 ---
 
@@ -212,21 +231,25 @@ Cada módulo possui:
 - [Clientes](clients/CLIENTS_INDEX.md)
 - [Produtos](products/PRODUCTS_INDEX.md)
 - [Vendas](sales/SALES_INDEX.md)
+- [Vencimentos](expirations/EXPIRATIONS_INDEX.md)
 
 ### Documentação Técnica
 - [Clients README](clients/CLIENTS_README.md)
 - [Products README](products/PRODUCTS_README.md)
 - [Sales README](sales/SALES_README.md)
+- [Expirations README](expirations/EXPIRATIONS_README.md)
 
 ### Segurança
 - [Clients Security](clients/CLIENTS_SECURITY.md)
 - [Products Security](products/PRODUCTS_SECURITY.md)
 - [Sales Security](sales/SALES_SECURITY.md)
+- [Expirations Security](expirations/EXPIRATIONS_SECURITY.md)
 
 ### Exemplos Práticos
 - [Clients Examples](clients/CLIENTS_EXAMPLES.md)
 - [Products Examples](products/PRODUCTS_EXAMPLES.md)
 - [Sales Examples](sales/SALES_EXAMPLES.md)
+- [Expirations Examples](expirations/EXPIRATIONS_EXAMPLES.md)
 
 ---
 
