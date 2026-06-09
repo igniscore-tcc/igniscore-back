@@ -1,7 +1,3 @@
-Abaixo está o **README do módulo Products reestruturado e padronizado** no mesmo nível do exemplo do Clients, com linguagem mais consistente, menos redundância e organização mais “clean” para documentação técnica.
-
----
-
 # README Técnico – Módulo Products (API GraphQL / Spring Boot)
 
 ## Visão Geral
