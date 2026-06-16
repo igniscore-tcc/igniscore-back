@@ -168,11 +168,13 @@ public class SaleService {
      * @param pageable pagination configuration
      * @return paginated sales result
      */
+    /*
     @Cacheable(
             value = "sales",
             key = "@cacheKeyService.salesKey(#pageable)",
             unless = "#result == null"
     )
+     */
     @Transactional(readOnly = true)
     public SaleQueryDTO findAll(Pageable pageable) {
 
@@ -186,11 +188,13 @@ public class SaleService {
         );
     }
 
+    /*
     @Cacheable(
             value = "sales",
             key = "@cacheKeyService.salesKey(#pageable)",
             unless = "#result == null"
     )
+     */
     @Transactional(readOnly = true)
     public Page<Sale> findPerPeriod(
             LocalDate startDate,
