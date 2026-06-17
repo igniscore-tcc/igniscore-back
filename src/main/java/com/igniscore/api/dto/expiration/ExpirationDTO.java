@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record ExpirationDTO(
+        Integer expirationId,
         Integer saleId,
         String clientName,
         LocalDate saleDate,

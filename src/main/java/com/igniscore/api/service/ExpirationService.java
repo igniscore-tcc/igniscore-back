@@ -1,11 +1,13 @@
 package com.igniscore.api.service;
 
 import com.igniscore.api.dto.expiration.ExpirationDTO;
+import com.igniscore.api.dto.expiration.ExpirationPageDTO;
 import com.igniscore.api.dto.expiration.ExpirationProjectionDTO;
 import com.igniscore.api.model.Company;
-import com.igniscore.api.model.ExpirationStatus;
 import com.igniscore.api.repository.ExpirationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,71 +27,119 @@ public class ExpirationService {
     }
 
 
-    public List<ExpirationDTO> getExpirations() {
-        Company company = authenticatedUserService.getCompanyOrThrow();
-
-        return expirationRepository
-                .findExpirationsByCompanyId(company.getId())
-                .stream()
-                .map(this::mapExpiration)
-                .toList();
-    }
-
-    public List<ExpirationDTO> getExpirationsByPeriod(
-            LocalDate startDate,
-            LocalDate endDate
+    public ExpirationPageDTO getExpirations(
+            Integer page,
+            Integer size
     ) {
         Company company = authenticatedUserService.getCompanyOrThrow();
 
-        return expirationRepository
-                .findExpirationsByPeriod(
+        Page<ExpirationProjectionDTO> result =
+                expirationRepository.findExpirationsByCompanyId(
                         company.getId(),
-                        startDate,
-                        endDate
-                )
-                .stream()
-                .map(this::mapExpiration)
-                .toList();
+                        PageRequest.of(page, size)
+                );
+
+        return new ExpirationPageDTO(
+                result.getContent()
+                        .stream()
+                        .map(this::mapExpiration)
+                        .toList(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getNumber(),
+                result.getSize()
+        );
     }
 
-    public List<ExpirationDTO> getUpcomingExpirations(
-            Integer days
+    public ExpirationPageDTO getExpirationsByPeriod(
+            LocalDate startDate,
+            LocalDate endDate,
+            Integer page,
+            Integer size
+    ) {
+        Company company = authenticatedUserService.getCompanyOrThrow();
+
+        Page<ExpirationProjectionDTO> result =
+                expirationRepository.findExpirationsByPeriod(
+                        company.getId(),
+                        startDate,
+                        endDate,
+                        PageRequest.of(page, size)
+                );
+
+        return new ExpirationPageDTO(
+                result.getContent()
+                        .stream()
+                        .map(this::mapExpiration)
+                        .toList(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getNumber(),
+                result.getSize()
+        );
+    }
+
+    public ExpirationPageDTO getUpcomingExpirations(
+            Integer days,
+            Integer page,
+            Integer size
     ) {
         Company company = authenticatedUserService.getCompanyOrThrow();
 
         LocalDate today = LocalDate.now();
         LocalDate endDate = today.plusDays(days);
 
-        return expirationRepository
-                .findUpcomingExpirations(
+        Page<ExpirationProjectionDTO> result =
+                expirationRepository.findUpcomingExpirations(
                         company.getId(),
                         today,
-                        endDate
-                )
-                .stream()
-                .map(this::mapExpiration)
-                .toList();
+                        endDate,
+                        PageRequest.of(page, size)
+                );
+
+        return new ExpirationPageDTO(
+                result.getContent()
+                        .stream()
+                        .map(this::mapExpiration)
+                        .toList(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getNumber(),
+                result.getSize()
+        );
     }
 
-    public List<ExpirationDTO> getExpirationsByClient(
-            Integer clientId
+    public ExpirationPageDTO getExpirationsByClient(
+            Integer clientId,
+            Integer page,
+            Integer size
     ) {
         Company company = authenticatedUserService.getCompanyOrThrow();
 
-        return expirationRepository
-                .findExpirationsByClient(
+        Page<ExpirationProjectionDTO> result =
+                expirationRepository.findExpirationsByClient(
                         company.getId(),
-                        clientId
-                )
-                .stream()
-                .map(this::mapExpiration)
-                .toList();
+                        clientId,
+                        PageRequest.of(page, size)
+                );
+
+        return new ExpirationPageDTO(
+                result.getContent()
+                        .stream()
+                        .map(this::mapExpiration)
+                        .toList(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getNumber(),
+                result.getSize()
+        );
     }
 
     private ExpirationDTO mapExpiration(
             ExpirationProjectionDTO expiration
     ) {
         return new ExpirationDTO(
+                expiration.expirationId(),
                 expiration.saleId(),
                 expiration.clientName(),
                 expiration.saleDate(),
