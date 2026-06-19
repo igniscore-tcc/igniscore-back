@@ -96,6 +96,16 @@ public class ProductStoreDTO {
     @Positive(message = "Price must be greater than zero")
     private BigDecimal price;
 
+    public ProductStoreDTO(String name, ProductType type, LocalDate validity, String lot, BigDecimal price) {
+        this.name = name;
+        this.type = type;
+        this.validity = validity;
+        this.lot = lot;
+        this.price = price;
+    }
+
+
+
     public String getName() {
         return name;
     }
