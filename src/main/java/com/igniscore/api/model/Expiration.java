@@ -27,13 +27,18 @@ public class Expiration implements Serializable {
     @Column(name = "status_expiration")
     private ExpirationStatus status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_id_company")
+    @JsonIgnore
+    private Company company;
 
     public Expiration() {
     }
 
-    public Expiration(Sale sale, ExpirationStatus status) {
+    public Expiration(Sale sale, ExpirationStatus status, Company company) {
         this.sale = sale;
         this.status = status;
+        this.company = company;
     }
 
     public Integer getId() {
