@@ -62,15 +62,12 @@ public class DashboardService {
 
         Long upcomingExpirations =
                 dashboardRepository.countUpcomingExpirations(
-                        companyId,
-                        today,
-                        next30Days
+                        companyId
                 );
 
         Long expiredExpirations =
                 dashboardRepository.countExpiredExpirations(
-                        companyId,
-                        today
+                        companyId
                 );
 
         return new DashboardDTO(
