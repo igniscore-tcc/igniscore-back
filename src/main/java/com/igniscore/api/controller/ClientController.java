@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -79,6 +80,7 @@ public class ClientController {
      * @param input client update payload including identifier
      * @return the updated {@link Client}
      */
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
     @MutationMapping
     @SuppressWarnings("unused")
     public Client updateClient(@Argument @Valid ClientUpdateDTO input) {
@@ -146,6 +148,7 @@ public class ClientController {
      * @param id client identifier
      * @return operation result message
      */
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
     @MutationMapping
     @SuppressWarnings("unused")
     public String deleteClient(@Argument Integer id){
