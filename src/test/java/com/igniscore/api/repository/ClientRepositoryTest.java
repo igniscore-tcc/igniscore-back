@@ -27,7 +27,7 @@ class ClientRepositoryTest {
     EntityManager entityManager;
 
     @Test
-    void findByCompany() {
+    void findByCompanyAndDeletedAtIsNull() {
 
         String cnpj = "23.608.666/0001-22";
         CreateCompanyDTO dtoCompany = new CreateCompanyDTO("IgnisCore", cnpj, "12345678", "SP", "igniscore@tcc.com", "0000000000");
@@ -42,7 +42,7 @@ class ClientRepositoryTest {
                 Sort.by(Sort.Direction.ASC, "id")
         );
 
-        Page<Client> result = this.clientRepository.findByCompany(company, pageable);
+        Page<Client> result = this.clientRepository.findByCompanyAndDeletedAtIsNull(company, pageable);
 
         assertThat(result.getContent())
                 .hasSize(1)
@@ -50,7 +50,7 @@ class ClientRepositoryTest {
     }
 
     @Test
-    void findByIdAndCompany() {
+    void findByIdAndCompanyAndDeletedAtIsNull() {
         String cnpj = "23.608.666/0001-22";
         CreateCompanyDTO dtoCompany = new CreateCompanyDTO("IgnisCore", cnpj, "12345678", "SP", "igniscore@tcc.com", "0000000000");
 
@@ -58,7 +58,7 @@ class ClientRepositoryTest {
 
         Client client = createClient(company);
 
-        Optional<Client> result =  this.clientRepository.findByIdAndCompany(client.getId(), company);
+        Optional<Client> result =  this.clientRepository.findByIdAndCompanyAndDeletedAtIsNull(client.getId(), company);
         assertThat(result).isPresent();
         assertThat(result.get()).isEqualTo(client);
 
@@ -89,7 +89,7 @@ class ClientRepositoryTest {
         Pageable pageable = PageRequest.of(0,10);
 
         Page<Client> result =
-                clientRepository.findByCompany(company1, pageable);
+                clientRepository.findByCompanyAndDeletedAtIsNull(company1, pageable);
 
         assertThat(result.getContent())
                 .hasSize(1)
@@ -105,7 +105,7 @@ class ClientRepositoryTest {
         Company company = createCompany(dtoCompany);
 
         Optional<Client> result =
-                clientRepository.findByIdAndCompany(999, company);
+                clientRepository.findByIdAndCompanyAndDeletedAtIsNull(999, company);
 
         assertThat(result).isEmpty();
     }
@@ -131,7 +131,7 @@ class ClientRepositoryTest {
         Client client = createClient(company1);
 
         Optional<Client> result =
-                clientRepository.findByIdAndCompany(
+                clientRepository.findByIdAndCompanyAndDeletedAtIsNull(
                         client.getId(),
                         company2
                 );
@@ -153,7 +153,7 @@ class ClientRepositoryTest {
         Pageable pageable = PageRequest.of(0,2);
 
         Page<Client> result =
-                clientRepository.findByCompany(company, pageable);
+                clientRepository.findByCompanyAndDeletedAtIsNull(company, pageable);
 
         assertThat(result.getContent()).hasSize(2);
 
@@ -177,7 +177,7 @@ class ClientRepositoryTest {
         );
 
         Page<Client> result =
-                clientRepository.findByCompany(company, pageable);
+                clientRepository.findByCompanyAndDeletedAtIsNull(company, pageable);
 
         assertThat(result.getContent().get(0).getId())
                 .isLessThan(result.getContent().get(1).getId());

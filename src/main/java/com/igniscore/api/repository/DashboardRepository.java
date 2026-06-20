@@ -15,9 +15,10 @@ import java.util.List;
 public interface DashboardRepository extends JpaRepository<Company, Integer> {
 
     @Query("""
-        SELECT COUNT(c)
-        FROM Client c
-        WHERE c.company.id = :companyId
+    SELECT COUNT(c)
+    FROM Client c
+    WHERE c.company.id = :companyId
+      AND c.deletedAt IS NULL
     """)
     Long countClientsByCompanyId(@Param("companyId") Integer companyId);
 
@@ -89,6 +90,7 @@ public interface DashboardRepository extends JpaRepository<Company, Integer> {
     FROM Sale s
     JOIN s.client c
     WHERE s.company.id = :companyId
+      AND c.deletedAt IS NULL
     GROUP BY c.id, c.name
     ORDER BY SUM(s.total) DESC
     """)

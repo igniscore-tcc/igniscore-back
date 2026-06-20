@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 
+import java.sql.Timestamp;
+
 /**
  * Service layer responsible for managing {@link Client} entities.
  *
@@ -207,7 +209,8 @@ public class ClientService {
                 null
         );
 
-        repository.delete(client);
+        client.setDeletedAt(new Timestamp(System.currentTimeMillis()));
+        repository.save(client);
 
         return "Client successfully deleted.";
     }
@@ -221,7 +224,7 @@ public class ClientService {
      * @throws EntityNotFoundException if no matching client is found
      */
     private Client getClientOrThrow(Integer id, Company company) {
-        return repository.findByIdAndCompany(id, company)
+        return repository.findByIdAndCompanyAndDeletedAtIsNull(id, company)
                 .orElseThrow(() -> new EntityNotFoundException("Client not found"));
     }
 
@@ -258,7 +261,7 @@ public class ClientService {
     public ClientQueryDTO findAll(Pageable pageable) {
         Company company = authUserService.getCompanyOrThrow();
 
-        Page<Client> page = repository.findByCompany(company, pageable);
+        Page<Client> page = repository.findByCompanyAndDeletedAtIsNull(company, pageable);
 
         return new ClientQueryDTO(
                 page.getContent(),
