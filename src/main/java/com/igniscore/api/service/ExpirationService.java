@@ -140,6 +140,7 @@ public class ExpirationService {
     ) {
         return new ExpirationDTO(
                 expiration.expirationId(),
+                expiration.expirationNumber(),
                 expiration.saleId(),
                 expiration.clientName(),
                 expiration.saleDate(),

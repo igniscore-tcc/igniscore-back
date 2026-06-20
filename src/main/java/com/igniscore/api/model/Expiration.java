@@ -18,6 +18,9 @@ public class Expiration implements Serializable {
     @Column(name = "pk_id_expiration")
     private Integer id;
 
+    @Column(name = "number_expiration")
+    private Integer numberExpiration;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_id_sale", nullable = false)
     @JsonIgnore
@@ -53,6 +56,14 @@ public class Expiration implements Serializable {
         return status;
     }
 
+    public Integer getNumberExpiration() {
+        return numberExpiration;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }
@@ -63,5 +74,13 @@ public class Expiration implements Serializable {
 
     public void setStatus(ExpirationStatus status) {
         this.status = status;
+    }
+
+    public void setNumberExpiration(Integer numberExpiration) {
+        this.numberExpiration = numberExpiration;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
     }
 }

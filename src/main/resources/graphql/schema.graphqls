@@ -21,6 +21,7 @@ type User {
 
 type Product {
     id: ID
+    numberProduct: Int
     name: String!
     type: ProductType!
     validity: Date!
@@ -32,6 +33,7 @@ type Product {
 
 type ProductOutput {
     id: ID!
+    numberProduct: Int
     name: String!
     type: String!
     validity: Date!
@@ -181,6 +183,7 @@ type SaleQuery {
 
 type Expiration {
     expirationId: Int!
+    expirationNumber: Int!
     saleId: Int!
     clientName: String!
     saleDate: Date!
