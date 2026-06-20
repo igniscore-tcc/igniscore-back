@@ -147,7 +147,7 @@ public class SaleService {
 
         repository.save(sale);
 
-        var expiration = new Expiration(sale, ExpirationStatus.NORMAL);
+        var expiration = new Expiration(sale, ExpirationStatus.NORMAL, company);
 
         expirationRepository.save(expiration);
 
