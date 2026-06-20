@@ -68,7 +68,7 @@ type Sale {
     id: ID!
     numberSale: Int!
     quantityItems: Int!
-    discount: BigDecimal!
+    discount: BigDecimal
     total: BigDecimal!
     date: Date!
     paymentMethod: PaymentMethod!
@@ -300,6 +300,7 @@ input CreateSaleItemInput {
 input CreateSaleInput {
     clientId: Int!
     paymentMethod: PaymentMethod!
+    discount: BigDecimal
     items: [CreateSaleItemInput!]!
 }
 

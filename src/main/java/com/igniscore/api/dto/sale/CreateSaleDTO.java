@@ -2,6 +2,7 @@ package com.igniscore.api.dto.sale;
 
 import com.igniscore.api.model.PaymentMethod;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -40,6 +41,8 @@ public class CreateSaleDTO {
      */
     private PaymentMethod paymentMethod;
 
+    private BigDecimal discount;
+
     /**
      * List of items included in the sale.
      */
@@ -72,6 +75,10 @@ public class CreateSaleDTO {
         return items;
     }
 
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
     /**
      * Sets the client identifier.
      *
@@ -97,5 +104,9 @@ public class CreateSaleDTO {
      */
     public void setItems(List<CreateSaleItemDTO> items) {
         this.items = items;
+    }
+
+    public void setDiscount(BigDecimal discount) {
+        this.discount = discount;
     }
 }

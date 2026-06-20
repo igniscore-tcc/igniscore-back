@@ -211,23 +211,21 @@ public class Sale implements Serializable {
      */
     public void applyDiscount(BigDecimal discount) {
 
-        if (discount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException(
-                    "Discount cannot be negative"
-            );
+        if (discount == null) {
+            discount = BigDecimal.ZERO;
         }
 
-        BigDecimal totalWithoutDiscount =
-                this.total.add(this.discount);
+        if (discount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Discount cannot be negative");
+        }
+
+        BigDecimal totalWithoutDiscount = this.total.add(this.discount);
 
         if (discount.compareTo(totalWithoutDiscount) > 0) {
-            throw new IllegalArgumentException(
-                    "Discount cannot exceed total"
-            );
+            throw new IllegalArgumentException("Discount cannot exceed total");
         }
 
         this.discount = discount;
-
         this.total = totalWithoutDiscount.subtract(discount);
     }
 

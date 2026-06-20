@@ -93,7 +93,7 @@ public class SaleController {
         Pageable pageable = PageRequest.of(
                 page != null ? page : 0,
                 size != null ? size : 10,
-                Sort.by(Sort.Direction.ASC, "id")
+                Sort.by(Sort.Direction.DESC, "id")
         );
 
         return service.findAll(pageable);
@@ -110,7 +110,7 @@ public class SaleController {
         Pageable pageable = PageRequest.of(
                 page != null ? page : 0,
                 size != null ? size : 10,
-                Sort.by(Sort.Direction.ASC, "id")
+                Sort.by(Sort.Direction.DESC, "id")
         );
 
         return service.findPerPeriod(
