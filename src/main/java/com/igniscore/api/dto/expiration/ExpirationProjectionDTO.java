@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 public record ExpirationProjectionDTO(
         Integer expirationId,
+        Integer expirationNumber,
         Integer saleId,
         String clientName,
         LocalDate saleDate,

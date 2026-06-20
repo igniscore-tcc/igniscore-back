@@ -181,6 +181,7 @@ type SaleQuery {
 
 type Expiration {
     expirationId: Int!
+    expirationNumber: Int!
     saleId: Int!
     clientName: String!
     saleDate: Date!
