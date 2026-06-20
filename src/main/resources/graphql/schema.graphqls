@@ -152,7 +152,7 @@ type Query {
         size: Int!
     ): ExpirationPage!
 
-    me: String!
+    me: Me!
 }
 
 type ClientQuery {
@@ -194,6 +194,13 @@ type ExpirationPage {
     totalPages: Int!
     currentPage: Int!
     pageSize: Int!
+}
+
+type Me {
+    id: ID!
+    email: String!
+    role: UserRole!
+    companyId: Int
 }
 
 type Mutation {
@@ -324,4 +331,10 @@ enum ExpirationStatus {
     EXPIRED
     NEXT
     NORMAL
+}
+
+enum UserRole {
+    OWNER
+    ADMIN
+    EMPLOYEE
 }

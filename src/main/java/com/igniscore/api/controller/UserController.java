@@ -1,11 +1,16 @@
 package com.igniscore.api.controller;
 
+import com.igniscore.api.dto.user.MeDTO;
 import com.igniscore.api.model.User;
+import com.igniscore.api.model.UserRole;
 import com.igniscore.api.service.UserService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+
+import java.util.Objects;
 
 
 /**
@@ -77,5 +82,30 @@ public class UserController {
     @MutationMapping
     public User updateUser(@Argument String email, @Argument String name){
         return service.update(email, name);
+    }
+
+    @QueryMapping
+    public MeDTO me(Authentication authentication) {
+
+        User user = (User) authentication.getPrincipal();
+
+        UserRole role = UserRole.valueOf(
+                authentication.getAuthorities()
+                        .iterator()
+                        .next()
+                        .getAuthority()
+                        .replace("ROLE_", "")
+        );
+
+        Integer companyId = authentication.getDetails() != null
+                ? (Integer) authentication.getDetails()
+                : null;
+
+        return new MeDTO(
+                user.getId(),
+                user.getEmail(),
+                role,
+                companyId
+        );
     }
 }
