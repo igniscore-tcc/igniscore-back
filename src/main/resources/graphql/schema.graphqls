@@ -151,6 +151,8 @@ type Query {
         page: Int!,
         size: Int!
     ): ExpirationPage!
+
+    me: String!
 }
 
 type ClientQuery {
