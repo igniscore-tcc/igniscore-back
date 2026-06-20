@@ -68,6 +68,9 @@ public class Product implements Serializable {
     @Column(name = "pk_id_prod")
     private Integer id;
 
+    @Column(name = "number_product")
+    private Integer numberProduct;
+
     /**
      * Commercial or display name of the product.
      */
@@ -159,6 +162,7 @@ public class Product implements Serializable {
         this.lot = product.lot;
         this.price = product.price;
         this.status = product.status;
+        this.numberProduct = product.numberProduct;
     }
 
     // --- Getters ---
@@ -195,6 +199,10 @@ public class Product implements Serializable {
         return status;
     }
 
+    public Integer getNumberProduct() {
+        return numberProduct;
+    }
+
     // --- Setters ---
 
     public void setId(Integer id) {
@@ -227,6 +235,10 @@ public class Product implements Serializable {
 
     public void setStatus(Boolean status) {
         this.status = status;
+    }
+
+    public void setNumberProduct(Integer numberProduct) {
+        this.numberProduct = numberProduct;
     }
 
     public void update(ProductUpdateDTO dto) {
