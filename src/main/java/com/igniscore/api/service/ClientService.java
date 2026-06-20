@@ -224,7 +224,7 @@ public class ClientService {
      * @throws EntityNotFoundException if no matching client is found
      */
     private Client getClientOrThrow(Integer id, Company company) {
-        return repository.findByIdAndCompany(id, company)
+        return repository.findByIdAndCompanyAndDeletedAtIsNull(id, company)
                 .orElseThrow(() -> new EntityNotFoundException("Client not found"));
     }
 
@@ -261,7 +261,7 @@ public class ClientService {
     public ClientQueryDTO findAll(Pageable pageable) {
         Company company = authUserService.getCompanyOrThrow();
 
-        Page<Client> page = repository.findByCompany(company, pageable);
+        Page<Client> page = repository.findByCompanyAndDeletedAtIsNull(company, pageable);
 
         return new ClientQueryDTO(
                 page.getContent(),

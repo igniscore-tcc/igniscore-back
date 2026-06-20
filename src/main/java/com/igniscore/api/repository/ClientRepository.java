@@ -46,7 +46,10 @@ public interface ClientRepository extends JpaRepository<Client, Integer> {
      * @param pageable pagination and sorting information
      * @return a {@link Page} of clients scoped to the given company
      */
-    Page<Client> findByCompany(Company company, Pageable pageable);
+    Page<Client> findByCompanyAndDeletedAtIsNull(
+            Company company,
+            Pageable pageable
+    );
 
     /**
      * Retrieves a client by its identifier and associated company.
@@ -58,5 +61,8 @@ public interface ClientRepository extends JpaRepository<Client, Integer> {
      * @param company the {@link Company} used as a filter
      * @return an {@link Optional} containing the client if found within the given company scope
      */
-    Optional<Client> findByIdAndCompany(Integer id, Company company);
+    Optional<Client> findByIdAndCompanyAndDeletedAtIsNull(
+            Integer id,
+            Company company
+    );
 }

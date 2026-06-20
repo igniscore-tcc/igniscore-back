@@ -147,7 +147,7 @@ class ClientServiceTest {
         Page<Client> pageResult =
                 new PageImpl<>(clients, pageable, clients.size());
 
-        given(clientRepository.findByCompany(
+        given(clientRepository.findByCompanyAndDeletedAtIsNull(
                 eq(company),
                 eq(pageable)
         )).willReturn(pageResult);
@@ -179,7 +179,7 @@ class ClientServiceTest {
         client.setId(1);
         client.setCompany(company);
 
-        given((clientRepository.findByIdAndCompany(1, company))).willReturn(Optional.of(client));
+        given((clientRepository.findByIdAndCompanyAndDeletedAtIsNull(1, company))).willReturn(Optional.of(client));
 
         var clientFind = clientService.findById(1);
 
@@ -208,7 +208,7 @@ class ClientServiceTest {
         client.setId(1);
         client.setCompany(company);
 
-        given((clientRepository.findByIdAndCompany(1, company))).willReturn(Optional.of(client));
+        given((clientRepository.findByIdAndCompanyAndDeletedAtIsNull(1, company))).willReturn(Optional.of(client));
 
         var clientFind = clientService.findById(1);
 
@@ -243,7 +243,7 @@ class ClientServiceTest {
         client.setId(1);
         client.setCompany(company);
 
-        given((clientRepository.findByIdAndCompany(1, company))).willReturn(Optional.of(client));
+        given((clientRepository.findByIdAndCompanyAndDeletedAtIsNull(1, company))).willReturn(Optional.of(client));
 
         clientService.findById(1);
 
