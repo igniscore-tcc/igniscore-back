@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -144,6 +145,13 @@ public class SaleService {
                 dto.getItems(),
                 products
         );
+
+        BigDecimal discount = dto.getDiscount();
+        if (discount == null) {
+            discount = BigDecimal.ZERO;
+        }
+
+        sale.applyDiscount(discount);
 
         repository.save(sale);
 
