@@ -64,6 +64,7 @@ type SaleItem {
 
 type Sale {
     id: ID!
+    numberSale: Int!
     quantityItems: Int!
     discount: BigDecimal!
     total: BigDecimal!

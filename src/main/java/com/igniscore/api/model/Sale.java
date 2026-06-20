@@ -48,6 +48,9 @@ public class Sale implements Serializable {
     @Column(name = "pk_id_sale")
     private Integer id;
 
+    @Column(name = "number_sale")
+    private Integer numberSale;
+
     /**
      * Total quantity of items in the sale.
      *
@@ -342,6 +345,10 @@ public class Sale implements Serializable {
         return Collections.unmodifiableList(items);
     }
 
+    public Integer getNumberSale() {
+        return numberSale;
+    }
+
     /**
      * Defines the sale identifier.
      *
@@ -403,5 +410,9 @@ public class Sale implements Serializable {
      */
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    public void setNumberSale(Integer numberSale) {
+        this.numberSale = numberSale;
     }
 }
