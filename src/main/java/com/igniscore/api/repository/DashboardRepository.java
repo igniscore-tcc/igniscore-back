@@ -109,25 +109,24 @@ public interface DashboardRepository extends JpaRepository<Company, Integer> {
     );
 
     @Query("""
-    SELECT COUNT(s)
-    FROM Sale s
+    SELECT COUNT(e)
+    FROM Expiration e
+    JOIN e.sale s
     WHERE s.company.id = :companyId
-      AND s.dueDate BETWEEN :today AND :limitDate
+      AND e.status = com.igniscore.api.model.ExpirationStatus.NEXT
     """)
     Long countUpcomingExpirations(
-            @Param("companyId") Integer companyId,
-            @Param("today") LocalDate today,
-            @Param("limitDate") LocalDate limitDate
+            @Param("companyId") Integer companyId
     );
 
     @Query("""
-    SELECT COUNT(s)
-    FROM Sale s
+    SELECT COUNT(e)
+    FROM Expiration e
+    JOIN e.sale s
     WHERE s.company.id = :companyId
-      AND s.dueDate < :today
+      AND e.status = com.igniscore.api.model.ExpirationStatus.EXPIRED
     """)
     Long countExpiredExpirations(
-            @Param("companyId") Integer companyId,
-            @Param("today") LocalDate today
+            @Param("companyId") Integer companyId
     );
 }
