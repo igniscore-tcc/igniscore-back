@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 
+import java.sql.Timestamp;
+
 /**
  * Service layer responsible for managing {@link Client} entities.
  *
@@ -207,7 +209,8 @@ public class ClientService {
                 null
         );
 
-        repository.delete(client);
+        client.setDeletedAt(new Timestamp(System.currentTimeMillis()));
+        repository.save(client);
 
         return "Client successfully deleted.";
     }
