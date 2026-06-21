@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public record MonthlySalesDTO(
         Integer month,
+        Integer year,
         BigDecimal total
 ) {
 }

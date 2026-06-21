@@ -4,12 +4,17 @@ import java.math.BigDecimal;
 
 public record DashboardDTO(
         Long totalClients,
-        Long totalProducts,
-        Long totalSales,
+        Long newClientsThisWeek,
         BigDecimal monthlyRevenue,
+        Double revenueGrowthPercentage,
         Long pendingOrders,
-        Long expiringProducts,
-        Long currentMonthExpirations,
-        Long upcomingExpirations,
-        Long expiredExpirations
+        Long itemsExpiringSoon,
+        Long expiredItems,
+        Long compliantItems,
+        Long totalItems,
+        Double compliancePercentage,
+        BigDecimal forecastRecharges,
+        BigDecimal overdueRevenue,
+        Long overdueClientsCount,
+        Long condemnedItemsThisMonth
 ) {}
