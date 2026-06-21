@@ -101,9 +101,17 @@ type TopSellingProduct {
     totalSold: Int!
 }
 
+type UpcomingEquipmentExpiration {
+    equipmentName: String!
+    location: String
+    daysRemaining: Int!
+    expirationDate: Date!
+}
+
 type MonthlySales {
     month: Int!
-    total: Float!
+    year: Int!
+    total: BigDecimal!
 }
 
 type SalesByClient {
@@ -129,6 +137,10 @@ type Query {
     sales(page: Int, size: Int): SaleQuery!
 
     dashboard: Dashboard!
+
+    upcomingEquipmentExpirations: [UpcomingEquipmentExpiration!]!
+
+    salesLast12Months: [MonthlySales!]!
 
     topSellingProducts: [TopSellingProduct!]!
 
