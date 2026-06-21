@@ -1,13 +1,13 @@
 package com.igniscore.api.service;
 
-import com.igniscore.api.dto.dashboard.DashboardDTO;
-import com.igniscore.api.dto.dashboard.MonthlySalesDTO;
-import com.igniscore.api.dto.dashboard.SalesByClientDTO;
-import com.igniscore.api.dto.dashboard.TopSellingProductDTO;
+import com.igniscore.api.dto.dashboard.*;
 import com.igniscore.api.model.Company;
+import com.igniscore.api.model.ExpirationStatus;
 import com.igniscore.api.repository.DashboardRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -23,93 +23,85 @@ public class DashboardService {
     }
 
     public DashboardDTO getDashboardMetrics() {
-
         Company company = authUserService.getCompanyOrThrow();
-
         Integer companyId = company.getId();
 
-        Long totalClients =
-                dashboardRepository.countClientsByCompanyId(companyId);
-
-        Long totalProducts =
-                dashboardRepository.countProductsByCompanyId(companyId);
-
-        Long totalSales =
-                dashboardRepository.countSalesByCompanyId(companyId);
-
-        LocalDate startDate = LocalDate.now()
-                .withDayOfMonth(1);
-
-        LocalDate endDate = startDate
-                .withDayOfMonth(startDate.lengthOfMonth());
-
-        var monthlyRevenue =
-                dashboardRepository.getRevenueByPeriod(
-                        companyId,
-                        startDate,
-                        endDate
-                );
-
-        Long currentMonthExpirations =
-                dashboardRepository.countCurrentMonthExpirations(
-                        companyId,
-                        startDate,
-                        endDate
-                );
-
         LocalDate today = LocalDate.now();
-        LocalDate next30Days = today.plusDays(30);
+        LocalDate startOfCurrentMonth = today.withDayOfMonth(1);
+        LocalDate endOfCurrentMonth = today.withDayOfMonth(today.lengthOfMonth());
 
-        Long upcomingExpirations =
-                dashboardRepository.countUpcomingExpirations(
-                        companyId
-                );
+        LocalDate startOfLastMonth = startOfCurrentMonth.minusMonths(1);
+        LocalDate endOfLastMonth = today.minusMonths(1);
 
-        Long expiredExpirations =
-                dashboardRepository.countExpiredExpirations(
-                        companyId
-                );
+        Long totalClients = dashboardRepository.countClientsByCompanyId(companyId);
+        Long newClientsThisWeek = dashboardRepository.countNewClientsThisWeek(companyId, today.minusDays(7));
+
+        BigDecimal currentMonthRevenue = dashboardRepository.getRevenueByPeriod(companyId, startOfCurrentMonth, endOfCurrentMonth);
+        BigDecimal lastMonthRevenue = dashboardRepository.getRevenueByPeriod(companyId, startOfLastMonth, endOfLastMonth);
+        Double revenueGrowthPercentage = calculatePercentageGrowth(currentMonthRevenue, lastMonthRevenue);
+
+        Long pendingOrders = dashboardRepository.countPendingOrders(companyId);
+
+        LocalDate thirtyDaysHence = today.plusDays(30);
+        Long itemsExpiringSoon = dashboardRepository.countItemsExpiringSoon(companyId, thirtyDaysHence);
+        Long expiredItems = dashboardRepository.countExpiredItems(companyId);
+
+        Long compliantItems = dashboardRepository.countCompliantItems(companyId);
+        Long totalItems = dashboardRepository.countTotalItems(companyId);
+        Double compliancePercentage = totalItems > 0 ? (compliantItems.doubleValue() / totalItems) * 100 : 100.0;
+
+        LocalDate ninetyDaysHence = today.plusDays(90);
+        BigDecimal forecastRecharges = dashboardRepository.getForecastRechargesRevenue(companyId, ninetyDaysHence);
+
+        BigDecimal overdueRevenue = dashboardRepository.getOverdueRevenue(companyId);
+        Long overdueClientsCount = dashboardRepository.countOverdueClients(companyId);
+
+        long condemnedCount = dashboardRepository.countCondemnedExpirations(
+                companyId,
+                ExpirationStatus.EXPIRED,
+                startOfCurrentMonth,
+                endOfCurrentMonth
+        );
 
         return new DashboardDTO(
                 totalClients,
-                totalProducts,
-                totalSales,
-                monthlyRevenue,
-                0L,
-                0L,
-                currentMonthExpirations,
-                upcomingExpirations,
-                expiredExpirations
+                newClientsThisWeek,
+                currentMonthRevenue,
+                revenueGrowthPercentage,
+                pendingOrders,
+                itemsExpiringSoon,
+                expiredItems,
+                compliantItems,
+                totalItems,
+                compliancePercentage,
+                forecastRecharges,
+                overdueRevenue,
+                overdueClientsCount,
+                condemnedCount
         );
     }
 
-    public List<TopSellingProductDTO> getTopSellingProducts() {
-
+    public List<UpcomingEquipmentExpirationDTO> getUpcomingEquipmentExpirations() {
         Company company = authUserService.getCompanyOrThrow();
-
-        return dashboardRepository.findTopSellingProducts(
-                company.getId()
-        );
+        LocalDate thirtyDaysHence = LocalDate.now().plusDays(30);
+        return dashboardRepository.findUpcomingEquipmentExpirations(company.getId(), thirtyDaysHence);
     }
 
-    public List<MonthlySalesDTO> getMonthlySales() {
-
+    public List<MonthlySalesDTO> getSalesLast12Months() {
         Company company = authUserService.getCompanyOrThrow();
+        LocalDate today = LocalDate.now();
+        LocalDate twelveMonthsAgo = today.minusMonths(11).withDayOfMonth(1);
 
-        Integer currentYear = LocalDate.now().getYear();
-
-        return dashboardRepository.getMonthlySales(
-                company.getId(),
-                currentYear
-        );
+        return dashboardRepository.getSalesLast12Months(company.getId(), twelveMonthsAgo, today);
     }
 
-    public List<SalesByClientDTO> getSalesByClient() {
-
-        Company company = authUserService.getCompanyOrThrow();
-
-        return dashboardRepository.getSalesByClient(
-                company.getId()
-        );
+    private Double calculatePercentageGrowth(BigDecimal current, BigDecimal previous) {
+        if (previous == null || previous.compareTo(BigDecimal.ZERO) == 0) {
+            return current.compareTo(BigDecimal.ZERO) > 0 ? 100.0 : 0.0;
+        }
+        return current.subtract(previous)
+                .divide(previous, 4, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .doubleValue();
     }
 }

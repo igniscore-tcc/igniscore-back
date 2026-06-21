@@ -125,6 +125,9 @@ public class Client implements Serializable {
     @JsonIgnore
     private Company company;
 
+    @Column(name = "created_at", updatable = false)
+    private Timestamp createdAt;
+
     @Column(name = "deleted_at")
     private Timestamp deletedAt;
 

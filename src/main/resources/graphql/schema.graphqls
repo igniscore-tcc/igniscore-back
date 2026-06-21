@@ -80,14 +80,19 @@ type Sale {
 
 type Dashboard {
     totalClients: Int!
-    totalProducts: Int!
-    totalSales: Int!
-    monthlyRevenue: Float!
+    newClientsThisWeek: Int!
+    monthlyRevenue: BigDecimal!
+    revenueGrowthPercentage: Float!
     pendingOrders: Int!
-    expiringProducts: Int!
-    currentMonthExpirations: Int!
-    upcomingExpirations: Int!
-    expiredExpirations: Int!
+    itemsExpiringSoon: Int!
+    expiredItems: Int!
+    compliantItems: Int!
+    totalItems: Int!
+    compliancePercentage: Float!
+    forecastRecharges: BigDecimal!
+    overdueRevenue: BigDecimal!
+    overdueClientsCount: Int!
+    condemnedItemsThisMonth: Int!
 }
 
 type TopSellingProduct {

@@ -1,9 +1,8 @@
 package com.igniscore.api.repository;
 
-import com.igniscore.api.dto.dashboard.MonthlySalesDTO;
-import com.igniscore.api.dto.dashboard.SalesByClientDTO;
-import com.igniscore.api.dto.dashboard.TopSellingProductDTO;
+import com.igniscore.api.dto.dashboard.*;
 import com.igniscore.api.model.Company;
+import com.igniscore.api.model.ExpirationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,32 +14,21 @@ import java.util.List;
 public interface DashboardRepository extends JpaRepository<Company, Integer> {
 
     @Query("""
-    SELECT COUNT(c)
-    FROM Client c
-    WHERE c.company.id = :companyId
-      AND c.deletedAt IS NULL
+        SELECT COUNT(c) FROM Client c
+        WHERE c.company.id = :companyId
     """)
     Long countClientsByCompanyId(@Param("companyId") Integer companyId);
 
     @Query("""
-        SELECT COUNT(p)
-        FROM Product p
-        WHERE p.company.id = :companyId
+        SELECT COUNT(c) FROM Client c
+        WHERE c.company.id = :companyId
+          AND CAST(c.createdAt AS LocalDate) >= :oneWeekAgo
     """)
-    Long countProductsByCompanyId(@Param("companyId") Integer companyId);
+    Long countNewClientsThisWeek(@Param("companyId") Integer companyId, @Param("oneWeekAgo") LocalDate oneWeekAgo);
 
     @Query("""
-        SELECT COUNT(s)
-        FROM Sale s
-        WHERE s.company.id = :companyId
-    """)
-    Long countSalesByCompanyId(@Param("companyId") Integer companyId);
-
-    @Query("""
-        SELECT COALESCE(SUM(s.total), 0)
-        FROM Sale s
-        WHERE s.company.id = :companyId
-          AND s.date BETWEEN :startDate AND :endDate
+        SELECT COALESCE(SUM(s.total), 0) FROM Sale s
+        WHERE s.company.id = :companyId AND s.date BETWEEN :startDate AND :endDate
     """)
     BigDecimal getRevenueByPeriod(
             @Param("companyId") Integer companyId,
@@ -49,86 +37,114 @@ public interface DashboardRepository extends JpaRepository<Company, Integer> {
     );
 
     @Query("""
-    SELECT new com.igniscore.api.dto.dashboard.TopSellingProductDTO(
-        p.id,
-        p.name,
-        SUM(si.quantity)
-    )
-    FROM SaleItem si
-    JOIN si.product p
-    JOIN si.sale s
-    WHERE s.company.id = :companyId
-    GROUP BY p.id, p.name
-    ORDER BY SUM(si.quantity) DESC
+        SELECT COUNT(s) FROM Sale s
+        WHERE s.company.id = :companyId 
+          AND s.status = com.igniscore.api.model.SaleStatus.PENDING 
     """)
-    List<TopSellingProductDTO> findTopSellingProducts(
-            @Param("companyId") Integer companyId
-    );
+    Long countPendingOrders(@Param("companyId") Integer companyId);
 
     @Query("""
-    SELECT new com.igniscore.api.dto.dashboard.MonthlySalesDTO(
-        MONTH(s.date),
-        COALESCE(SUM(s.total), 0)
-    )
-    FROM Sale s
-    WHERE s.company.id = :companyId
-      AND YEAR(s.date) = :year
-    GROUP BY MONTH(s.date)
-    ORDER BY MONTH(s.date)
+        SELECT new com.igniscore.api.dto.dashboard.UpcomingEquipmentExpirationDTO(
+            'Equipamento #' || CAST(s.numberSale AS string),
+            'Estoque Geral',
+            dateDiff(day, CURRENT_DATE, s.dueDate),
+            s.dueDate
+        )
+        FROM Expiration e
+        JOIN e.sale s
+        WHERE s.company.id = :companyId
+          AND s.dueDate BETWEEN CURRENT_DATE AND :thirtyDaysHence
+        ORDER BY s.dueDate ASC
     """)
-    List<MonthlySalesDTO> getMonthlySales(
+    List<UpcomingEquipmentExpirationDTO> findUpcomingEquipmentExpirations(
             @Param("companyId") Integer companyId,
-            @Param("year") Integer year
+            @Param("thirtyDaysHence") LocalDate thirtyDaysHence
     );
 
     @Query("""
-    SELECT new com.igniscore.api.dto.dashboard.SalesByClientDTO(
-        c.id,
-        c.name,
-        COALESCE(SUM(s.total), 0)
-    )
-    FROM Sale s
-    JOIN s.client c
-    WHERE s.company.id = :companyId
-      AND c.deletedAt IS NULL
-    GROUP BY c.id, c.name
-    ORDER BY SUM(s.total) DESC
+        SELECT COUNT(e) FROM Expiration e
+        JOIN e.sale s
+        WHERE s.company.id = :companyId
+          AND s.dueDate BETWEEN CURRENT_DATE AND :thirtyDaysHence
     """)
-    List<SalesByClientDTO> getSalesByClient(
-            @Param("companyId") Integer companyId
-    );
+    Long countItemsExpiringSoon(@Param("companyId") Integer companyId, @Param("thirtyDaysHence") LocalDate thirtyDaysHence);
 
     @Query("""
-    SELECT COUNT(s)
-    FROM Sale s
-    WHERE s.company.id = :companyId
-      AND s.dueDate BETWEEN :startDate AND :endDate
+        SELECT COUNT(e) FROM Expiration e
+        JOIN e.sale s
+        WHERE s.company.id = :companyId
+          AND s.dueDate < CURRENT_DATE
     """)
-    Long countCurrentMonthExpirations(
+    Long countExpiredItems(@Param("companyId") Integer companyId);
+
+    @Query("""
+        SELECT COUNT(e) FROM Expiration e
+        JOIN e.sale s
+        WHERE s.company.id = :companyId
+          AND s.dueDate >= CURRENT_DATE
+    """)
+    Long countCompliantItems(@Param("companyId") Integer companyId);
+
+    @Query("""
+        SELECT COUNT(e) FROM Expiration e
+        JOIN e.sale s
+        WHERE s.company.id = :companyId
+    """)
+    Long countTotalItems(@Param("companyId") Integer companyId);
+
+    @Query("""
+        SELECT COALESCE(SUM(s.total), 0) FROM Sale s
+        WHERE s.company.id = :companyId
+          AND s.dueDate BETWEEN CURRENT_DATE AND :ninetyDaysHence
+    """)
+    BigDecimal getForecastRechargesRevenue(@Param("companyId") Integer companyId, @Param("ninetyDaysHence") LocalDate ninetyDaysHence);
+
+    @Query("""
+        SELECT COALESCE(SUM(s.total), 0) FROM Sale s
+        WHERE s.company.id = :companyId
+          AND s.dueDate < CURRENT_DATE
+          AND s.status = com.igniscore.api.model.SaleStatus.PENDING
+    """)
+    BigDecimal getOverdueRevenue(@Param("companyId") Integer companyId);
+
+    @Query("""
+        SELECT COUNT(DISTINCT s.client.id) FROM Sale s
+        WHERE s.company.id = :companyId
+          AND s.dueDate < CURRENT_DATE
+          AND s.status = com.igniscore.api.model.SaleStatus.PENDING
+    """)
+    Long countOverdueClients(@Param("companyId") Integer companyId);
+
+    @Query("""
+        SELECT COUNT(e)
+        FROM Expiration e
+        JOIN e.sale s
+        WHERE s.company.id = :companyId
+            AND e.status = :status
+            AND s.date BETWEEN :startOfMonth AND :endOfMonth
+    """)
+    long countCondemnedExpirations(
             @Param("companyId") Integer companyId,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate
+            @Param("status") ExpirationStatus status,
+            @Param("startOfMonth") LocalDate startOfMonth,
+            @Param("endOfMonth") LocalDate endOfMonth
     );
 
     @Query("""
-    SELECT COUNT(e)
-    FROM Expiration e
-    JOIN e.sale s
-    WHERE s.company.id = :companyId
-      AND e.status = com.igniscore.api.model.ExpirationStatus.NEXT
+        SELECT new com.igniscore.api.dto.dashboard.MonthlySalesDTO(
+            MONTH(s.date),
+            YEAR(s.date),
+            COALESCE(SUM(s.total), 0)
+        )
+        FROM Sale s
+        WHERE s.company.id = :companyId
+          AND s.date BETWEEN :twelveMonthsAgo AND :today
+        GROUP BY YEAR(s.date), MONTH(s.date)
+        ORDER BY YEAR(s.date) ASC, MONTH(s.date) ASC
     """)
-    Long countUpcomingExpirations(
-            @Param("companyId") Integer companyId
-    );
-
-    @Query("""
-    SELECT COUNT(e)
-    FROM Expiration e
-    JOIN e.sale s
-    WHERE s.company.id = :companyId
-      AND e.status = com.igniscore.api.model.ExpirationStatus.EXPIRED
-    """)
-    Long countExpiredExpirations(
-            @Param("companyId") Integer companyId
+    List<MonthlySalesDTO> getSalesLast12Months(
+            @Param("companyId") Integer companyId,
+            @Param("twelveMonthsAgo") LocalDate twelveMonthsAgo,
+            @Param("today") LocalDate today
     );
 }
