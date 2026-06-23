@@ -2,6 +2,7 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
+import com.igniscore.api.model.UserRole;
 import com.igniscore.api.repository.UserRepository;
 import com.igniscore.api.utils.CompanyUtils;
 import jakarta.transaction.Transactional;
@@ -64,6 +65,7 @@ public class UserService {
         Company company = companyUtils.existsCompany(companyCnpj);
 
         user.setCompany(company);
+        user.setRole(UserRole.EMPLOYEE);
 
         return repository.save(user);
     }
