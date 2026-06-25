@@ -10,6 +10,7 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Controller responsible for handling GraphQL queries and mutations
@@ -56,5 +57,10 @@ public class CompanyController {
     @MutationMapping
     public Company createCompany(@Argument @Valid CreateCompanyDTO input) {
         return service.storeCompany(input);
+    }
+
+    @QueryMapping
+    public Optional<Company> myCompany() {
+        return service.myCompany();
     }
 }
