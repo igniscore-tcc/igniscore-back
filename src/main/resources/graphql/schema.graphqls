@@ -173,6 +173,8 @@ type Query {
     ): ExpirationPage!
 
     me: Me!
+
+    myCompany:Company!
 }
 
 type ClientQuery {

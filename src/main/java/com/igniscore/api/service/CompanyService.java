@@ -8,6 +8,7 @@ import com.igniscore.api.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service responsible for managing {@link Company} entities.
@@ -83,5 +84,10 @@ public class CompanyService {
         userRepository.save(user);
 
         return savedCompany;
+    }
+
+    public Optional<Company> myCompany() {
+        Optional<Company> company = repository.findById(authUserService.getCompanyOrThrow().getId());
+        return company;
     }
 }
