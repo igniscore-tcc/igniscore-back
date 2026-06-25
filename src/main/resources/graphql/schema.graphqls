@@ -219,6 +219,7 @@ type ExpirationPage {
 
 type Me {
     id: ID!
+    name: String
     email: String!
     role: UserRole!
     companyId: Int

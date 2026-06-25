@@ -103,6 +103,7 @@ public class UserController {
 
         return new MeDTO(
                 user.getId(),
+                user.getName(),
                 user.getEmail(),
                 role,
                 companyId
