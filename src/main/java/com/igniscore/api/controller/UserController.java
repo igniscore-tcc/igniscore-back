@@ -51,17 +51,6 @@ public class UserController {
     }
 
     /**
-     * Retrieves a single user by ID.
-     *
-     * @param id user identifier
-     * @return user entity
-     */
-    @QueryMapping
-    public User user(@Argument Integer id) {
-        return service.findUserId(id);
-    }
-
-    /**
      * Updates the company associated with a user.
      *
      * @param cnpj company identifier
