@@ -35,7 +35,7 @@ public class ClientQueryDTO implements Serializable {
     /**
      * Current page content.
      */
-    private final List<Client> clients;
+    private final List<ClientResponseDTO> clients;
 
     /**
      * Total number of pages available for the query.
@@ -55,7 +55,7 @@ public class ClientQueryDTO implements Serializable {
      * @param totalClients total number of matching clients
      */
     public ClientQueryDTO(
-            List<Client> clients,
+            List<ClientResponseDTO> clients,
             int totalPages,
             long totalClients
     ) {
@@ -69,7 +69,7 @@ public class ClientQueryDTO implements Serializable {
      *
      * @return paginated clients
      */
-    public List<Client> getClients() {
+    public List<ClientResponseDTO> getClients() {
         return clients;
     }
 

@@ -2,6 +2,7 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.client.ClientQueryDTO;
 import com.igniscore.api.dto.client.ClientRegisterDTO;
+import com.igniscore.api.dto.client.ClientResponseDTO;
 import com.igniscore.api.dto.client.ClientUpdateDTO;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
@@ -20,6 +21,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * Service layer responsible for managing {@link Client} entities.
@@ -263,8 +265,12 @@ public class ClientService {
 
         Page<Client> page = repository.findByCompanyAndDeletedAtIsNull(company, pageable);
 
+        List<ClientResponseDTO> clients = page.getContent().stream()
+                .map(ClientResponseDTO::new)
+                .toList();
+
         return new ClientQueryDTO(
-                page.getContent(),
+                clients,
                 page.getTotalPages(),
                 page.getTotalElements()
         );
