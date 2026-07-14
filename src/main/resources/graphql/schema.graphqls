@@ -95,12 +95,6 @@ type Dashboard {
     condemnedItemsThisMonth: Int!
 }
 
-type TopSellingProduct {
-    productId: Int!
-    productName: String!
-    totalSold: Int!
-}
-
 type UpcomingEquipmentExpiration {
     equipmentName: String!
     location: String
@@ -114,19 +108,9 @@ type MonthlySales {
     total: BigDecimal!
 }
 
-type SalesByClient {
-    clientId: Int!
-    clientName: String!
-    totalSales: Float!
-}
-
 type Query {
 
     companies: [Company!]!
-
-    users: [User!]!
-
-    user(id: ID!): User
 
     client(id: ID!): Client
 
@@ -142,11 +126,12 @@ type Query {
 
     salesLast12Months: [MonthlySales!]!
 
-    topSellingProducts: [TopSellingProduct!]!
-
-    monthlySales: [MonthlySales!]!
-
-    salesByClient: [SalesByClient!]!
+    salesByPeriod(
+        startDate: Date!,
+        endDate: Date!,
+        page: Int,
+        size: Int
+    ): [Sale!]!
 
     expirations(
         page: Int!,
