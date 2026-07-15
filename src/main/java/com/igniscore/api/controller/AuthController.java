@@ -5,9 +5,12 @@ import com.igniscore.api.dto.auth.RegisterDTO;
 import com.igniscore.api.dto.auth.LoginResponseDTO;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.UserRepository;
+import com.igniscore.api.service.EmailService;
 import com.igniscore.api.service.JwtService;
 import jakarta.validation.Valid;
 import org.jspecify.annotations.NonNull;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +19,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 /**
  * Controller responsible for handling authentication-related HTTP requests.
@@ -43,6 +48,8 @@ public class AuthController {
      */
     private final JwtService jwtService;
 
+    private final EmailService emailService;
+
     /**
      * Constructor for AuthController.
      *
@@ -51,10 +58,15 @@ public class AuthController {
      * @param jwtService            the JWT service
      */
     @SuppressWarnings("unused")
-    public AuthController(AuthenticationManager authenticationManager, UserRepository repository, JwtService jwtService) {
+    public AuthController(AuthenticationManager authenticationManager,
+                          UserRepository repository,
+                          JwtService jwtService,
+                          EmailService emailService
+    ) {
         this.authenticationManager = authenticationManager;
         this.repository = repository;
         this.jwtService = jwtService;
+        this.emailService = emailService;
     }
 
     /**
@@ -108,5 +120,16 @@ public class AuthController {
         var token = jwtService.generateJwt(user);
 
         return ResponseEntity.ok(new LoginResponseDTO(token));
+    }
+
+    @MutationMapping
+    public String requestPasswordRecovery(@Argument String email) {
+        try {
+            String tokenGerado = UUID.randomUUID().toString();
+            emailService.sendRecoveryLink(email, tokenGerado);
+            return "Se o e-mail existir em nossa base, um link de recuperação será enviado.";
+        } catch (Exception e) {
+            return "Se o e-mail existir em nossa base, um link de recuperação será enviado.";
+        }
     }
 }
