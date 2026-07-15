@@ -128,20 +128,29 @@ type Query {
 
     salesByClient: [SalesByClient!]!
 
-    expirations: [Expiration!]!
+    expirations(
+        page: Int!,
+        size: Int!
+    ): ExpirationPage!
 
     expirationsByPeriod(
         startDate: Date!,
-        endDate: Date!
-    ): [Expiration!]!
+        endDate: Date!,
+        page: Int!,
+        size: Int!
+    ): ExpirationPage!
 
     upcomingExpirations(
-        days: Int!
-    ): [Expiration!]!
+        days: Int!,
+        page: Int!,
+        size: Int!
+    ): ExpirationPage!
 
     expirationsByClient(
-        clientId: Int!
-    ): [Expiration!]!
+        clientId: Int!,
+        page: Int!,
+        size: Int!
+    ): ExpirationPage!
 }
 
 type ClientQuery {
@@ -168,12 +177,21 @@ type SaleQuery {
 }
 
 type Expiration {
+    expirationId: Int!
     saleId: Int!
     clientName: String!
     saleDate: Date!
     dueDate: Date!
     totalSale: BigDecimal!
     status: ExpirationStatus!
+}
+
+type ExpirationPage {
+    items: [Expiration!]!
+    totalItems: Int!
+    totalPages: Int!
+    currentPage: Int!
+    pageSize: Int!
 }
 
 type Mutation {
