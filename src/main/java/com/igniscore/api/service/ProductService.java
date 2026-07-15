@@ -1,6 +1,7 @@
 package com.igniscore.api.service;
 
 import com.igniscore.api.dto.product.ProductQueryDTO;
+import com.igniscore.api.dto.product.ProductResponseDTO;
 import com.igniscore.api.dto.product.ProductStoreDTO;
 import com.igniscore.api.dto.product.ProductUpdateDTO;
 import com.igniscore.api.model.User;
@@ -16,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Service layer responsible for lifecycle management of {@link Product} entities.
@@ -192,8 +195,10 @@ public class ProductService {
 
         Page<Product> page = repository.findByCompanyAndStatusOrderByIdAsc(company, true, pageable );
 
+        List<ProductResponseDTO> products = page.getContent().stream().map(ProductResponseDTO::new).toList();
+
         return new ProductQueryDTO(
-                page.getContent(),
+                products,
                 page.getTotalPages(),
                 page.getTotalElements()
         );
