@@ -12,8 +12,6 @@ import com.igniscore.api.service.JwtService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.jspecify.annotations.NonNull;
-import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,52 +21,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.UUID;
 
-/**
- * Controller responsible for handling authentication-related HTTP requests.
- * This class provides endpoints for user login and registration.
- * It integrates with Spring Security for authentication and uses
- * JWT (JSON Web Token) for session management.
- */
 @RestController
 @RequestMapping("auth")
 @SuppressWarnings("unused")
 public class AuthController {
 
-    /**
-     * Manages authentication operations.
-     */
     private final AuthenticationManager authenticationManager;
-
-    /**
-     * Repository responsible for user data persistence.
-     */
     private final UserRepository repository;
-
-    /**
-     * Service responsible for generating JWT tokens.
-     */
     private final JwtService jwtService;
-
     private final EmailService emailService;
-
     private final PasswordResetTokenRepository tokenRepository;
 
-    /**
-     * Constructor for AuthController.
-     *
-     * @param authenticationManager the authentication manager
-     * @param repository            the user repository
-     * @param jwtService            the JWT service
-     */
-    @SuppressWarnings("unused")
     public AuthController(AuthenticationManager authenticationManager,
                           UserRepository repository,
                           JwtService jwtService,
                           EmailService emailService,
-                          PasswordResetTokenRepository tokenRepository
-    ) {
+                          PasswordResetTokenRepository tokenRepository) {
         this.authenticationManager = authenticationManager;
         this.repository = repository;
         this.jwtService = jwtService;
@@ -76,17 +47,7 @@ public class AuthController {
         this.tokenRepository = tokenRepository;
     }
 
-    /**
-     * Endpoint used to authenticate a user and generate a JWT token.
-     * This method validates the provided credentials, authenticates the user
-     * using Spring Security, and returns a JWT token if authentication succeeds.
-     *
-     * @param data the authentication data containing email and password
-     * @return a ResponseEntity containing the generated JWT token
-     * @throws RuntimeException if authentication fails or the principal is invalid
-     */
     @PostMapping("/login")
-    @SuppressWarnings("unused")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid @NonNull AutDTO data) {
         var usernamepassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var auth = this.authenticationManager.authenticate(usernamepassword);
@@ -97,20 +58,10 @@ public class AuthController {
         }
 
         var token = jwtService.generateJwt(user);
-
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
-    /**
-     * Endpoint used to register a new user.
-     * This method checks if the email is already in use, encrypts the password,
-     * creates a new User entity, and persists it in the database.
-     *
-     * @param data the registration data containing user information
-     * @return a ResponseEntity indicating success or failure
-     */
     @PostMapping("/register")
-    @SuppressWarnings("unused")
     public ResponseEntity<LoginResponseDTO> register(@RequestBody @Valid RegisterDTO data) {
         if(this.repository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().build();
 
@@ -123,21 +74,19 @@ public class AuthController {
         newUser.setRole(data.role());
 
         User user = this.repository.save(newUser);
-
         var token = jwtService.generateJwt(user);
 
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
-    @MutationMapping
+    @PostMapping("/forgot-password")
     @Transactional
-    public String requestPasswordRecovery(@Argument String email) {
+    public ResponseEntity<Map<String, String>> requestPasswordRecovery(@RequestBody Map<String, String> body) {
         try {
-            java.util.Optional<User> userOpt = java.util.Optional.ofNullable(this.repository.findByEmail(email));
+            String email = body.get("email");
+            User user = this.repository.findByEmail(email);
 
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
-
+            if (user != null) {
                 tokenRepository.deleteByUser(user);
 
                 String tokenGerado = UUID.randomUUID().toString();
@@ -147,22 +96,25 @@ public class AuthController {
                 emailService.sendRecoveryLink(user.getEmail(), tokenGerado);
             }
 
-            return "Se o e-mail existir em nossa base, um link de recuperação será enviado.";
+            return ResponseEntity.ok(Map.of("message", "Se o e-mail existir em nossa base, um link de recuperação será enviado."));
         } catch (Exception e) {
-            return "Se o e-mail existir em nossa base, um link de recuperação será enviado.";
+            return ResponseEntity.ok(Map.of("message", "Se o e-mail existir em nossa base, um link de recuperação será enviado."));
         }
     }
 
-    @MutationMapping
+    @PostMapping("/reset-password")
     @Transactional
-    public String resetPassword(@Argument String token, @Argument String newPassword) {
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> body) {
         try {
+            String token = body.get("token");
+            String newPassword = body.get("newPassword");
+
             PasswordResetToken resetToken = tokenRepository.findByToken(token)
                     .orElseThrow(() -> new RuntimeException("Token inválido ou inexistente."));
 
             if (resetToken.isExpired()) {
                 tokenRepository.delete(resetToken);
-                return "Erro: Este link de recuperação expirou após 15 minutos.";
+                return ResponseEntity.badRequest().body(Map.of("error", "Erro: Este link de recuperação expirou após 15 minutos."));
             }
 
             User user = resetToken.getUser();
@@ -172,9 +124,9 @@ public class AuthController {
 
             tokenRepository.delete(resetToken);
 
-            return "Senha redefinida com sucesso!";
+            return ResponseEntity.ok(Map.of("message", "Senha redefinida com sucesso!"));
         } catch (Exception e) {
-            return "Erro ao redefinir a senha: " + e.getMessage();
+            return ResponseEntity.badRequest().body(Map.of("error", "Erro ao redefinir a senha: " + e.getMessage()));
         }
     }
 }

@@ -14,7 +14,7 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     public void sendRecoveryLink(String recipient, String token) {
-        String recoveryLink = "https://front-end-tcc-lovat.vercel.app/" + token;
+        String recoveryLink = "https://front-end-tcc-lovat.vercel.app/reset-password?token=" + token;
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
