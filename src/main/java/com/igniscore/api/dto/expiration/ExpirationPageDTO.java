@@ -1,5 +1,7 @@
 package com.igniscore.api.dto.expiration;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
 public record ExpirationPageDTO(
@@ -8,4 +10,8 @@ public record ExpirationPageDTO(
         int totalPages,
         int currentPage,
         int pageSize
-) {}
+) implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+}
