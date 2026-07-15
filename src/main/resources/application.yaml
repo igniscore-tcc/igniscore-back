@@ -3,9 +3,9 @@ spring:
     name: igniscore
 
   datasource:
-    url: jdbc:postgresql://ep-shy-math-acsn16g6-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require
-    username: neondb_owner
-    password: npg_U6WsYuqMV5Sb
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -24,7 +24,19 @@ spring:
       repositories:
         enabled: false
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 api:
   security:
     token:
-      secret: ${JWT_SECRET:Z9f#7vL!q2Xw@8sP6m^G3dR0bT&yH1uJ$kE4nV*oC5aQzW%rF}
+      secret: ${JWT_SECRET}
