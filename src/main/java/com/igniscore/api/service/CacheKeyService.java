@@ -3,6 +3,8 @@ package com.igniscore.api.service;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 /**
  * Service responsible for generating cache keys used in application caching strategies.
  *
@@ -83,6 +85,16 @@ public class CacheKeyService {
         Integer companyId = authUserService.getCompanyOrThrow().getId();
 
         return "company:" + companyId +
+                ":page:" + pageable.getPageNumber() +
+                ":size:" + pageable.getPageSize();
+    }
+
+    public String salesPerPeriodKey(LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        Integer companyId = authUserService.getCompanyOrThrow().getId();
+
+        return "company:" + companyId +
+                ":start:" + startDate +
+                ":end:" + endDate +
                 ":page:" + pageable.getPageNumber() +
                 ":size:" + pageable.getPageSize();
     }
