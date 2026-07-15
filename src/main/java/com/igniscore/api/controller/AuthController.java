@@ -3,10 +3,13 @@ package com.igniscore.api.controller;
 import com.igniscore.api.dto.auth.AutDTO;
 import com.igniscore.api.dto.auth.RegisterDTO;
 import com.igniscore.api.dto.auth.LoginResponseDTO;
+import com.igniscore.api.model.PasswordResetToken;
 import com.igniscore.api.model.User;
+import com.igniscore.api.repository.PasswordResetTokenRepository;
 import com.igniscore.api.repository.UserRepository;
 import com.igniscore.api.service.EmailService;
 import com.igniscore.api.service.JwtService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.jspecify.annotations.NonNull;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -50,6 +53,8 @@ public class AuthController {
 
     private final EmailService emailService;
 
+    private final PasswordResetTokenRepository tokenRepository;
+
     /**
      * Constructor for AuthController.
      *
@@ -61,12 +66,14 @@ public class AuthController {
     public AuthController(AuthenticationManager authenticationManager,
                           UserRepository repository,
                           JwtService jwtService,
-                          EmailService emailService
+                          EmailService emailService,
+                          PasswordResetTokenRepository tokenRepository
     ) {
         this.authenticationManager = authenticationManager;
         this.repository = repository;
         this.jwtService = jwtService;
         this.emailService = emailService;
+        this.tokenRepository = tokenRepository;
     }
 
     /**
@@ -123,13 +130,51 @@ public class AuthController {
     }
 
     @MutationMapping
+    @Transactional
     public String requestPasswordRecovery(@Argument String email) {
         try {
-            String tokenGerado = UUID.randomUUID().toString();
-            emailService.sendRecoveryLink(email, tokenGerado);
+            java.util.Optional<User> userOpt = java.util.Optional.ofNullable(this.repository.findByEmail(email));
+
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+
+                tokenRepository.deleteByUser(user);
+
+                String tokenGerado = UUID.randomUUID().toString();
+                PasswordResetToken resetToken = new PasswordResetToken(tokenGerado, user, 15);
+                tokenRepository.save(resetToken);
+
+                emailService.sendRecoveryLink(user.getEmail(), tokenGerado);
+            }
+
             return "Se o e-mail existir em nossa base, um link de recuperação será enviado.";
         } catch (Exception e) {
             return "Se o e-mail existir em nossa base, um link de recuperação será enviado.";
+        }
+    }
+
+    @MutationMapping
+    @Transactional
+    public String resetPassword(@Argument String token, @Argument String newPassword) {
+        try {
+            PasswordResetToken resetToken = tokenRepository.findByToken(token)
+                    .orElseThrow(() -> new RuntimeException("Token inválido ou inexistente."));
+
+            if (resetToken.isExpired()) {
+                tokenRepository.delete(resetToken);
+                return "Erro: Este link de recuperação expirou após 15 minutos.";
+            }
+
+            User user = resetToken.getUser();
+            String encryptedPassword = new BCryptPasswordEncoder().encode(newPassword);
+            user.setPassword(encryptedPassword);
+            this.repository.save(user);
+
+            tokenRepository.delete(resetToken);
+
+            return "Senha redefinida com sucesso!";
+        } catch (Exception e) {
+            return "Erro ao redefinir a senha: " + e.getMessage();
         }
     }
 }
