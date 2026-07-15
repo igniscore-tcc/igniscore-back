@@ -241,6 +241,10 @@ type Mutation {
     ): String!
 
     storeSale(input: CreateSaleInput!): Sale!
+
+    requestPasswordRecovery(email: String!): String!
+
+    resetPassword(token: String!, newPassword: String!): String!
 }
 
 input CreateCompanyInput {

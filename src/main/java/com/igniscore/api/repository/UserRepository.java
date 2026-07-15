@@ -2,6 +2,7 @@ package com.igniscore.api.repository;
 
 import com.igniscore.api.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
@@ -33,5 +34,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      * @param email user email (unique identifier)
      * @return user entity if found, otherwise null
      */
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.company WHERE u.email = :email")
     User findByEmail(String email);
 }
