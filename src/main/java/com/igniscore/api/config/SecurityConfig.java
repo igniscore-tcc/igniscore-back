@@ -58,7 +58,7 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password").permitAll()
                         .requestMatchers("/graphql", "/graphiql").authenticated()
                         .anyRequest().authenticated()
                 )
