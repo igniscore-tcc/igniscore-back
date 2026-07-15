@@ -11,14 +11,14 @@ public class SaleQueryDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final List<Sale> sales;
+    private final List<SaleResponseDTO> sales;
 
     private final int totalPages;
 
     private final long totalSales;
 
     public SaleQueryDTO(
-            List<Sale> sales,
+            List<SaleResponseDTO> sales,
             int totalPages,
             long totalSales
     ) {
@@ -27,7 +27,7 @@ public class SaleQueryDTO implements Serializable {
         this.totalSales = totalSales;
     }
 
-    public List<Sale> getSales() {
+    public List<SaleResponseDTO> getSales() {
         return sales;
     }
 

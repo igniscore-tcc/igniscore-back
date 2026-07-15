@@ -3,6 +3,7 @@ package com.igniscore.api.service;
 import com.igniscore.api.dto.sale.CreateSaleDTO;
 import com.igniscore.api.dto.sale.CreateSaleItemDTO;
 import com.igniscore.api.dto.sale.SaleQueryDTO;
+import com.igniscore.api.dto.sale.SaleResponseDTO;
 import com.igniscore.api.model.*;
 import com.igniscore.api.repository.ClientRepository;
 import com.igniscore.api.repository.ExpirationRepository;
@@ -189,8 +190,11 @@ public class SaleService {
         Company company = authUserService.getCompanyOrThrow();
 
         Page<Sale> page = repository.findByCompany(company, true, pageable);
+
+        List<SaleResponseDTO> sales = page.getContent().stream().map(SaleResponseDTO::new).toList();
+
         return new SaleQueryDTO(
-                page.getContent(),
+                sales,
                 page.getTotalPages(),
                 page.getTotalElements()
         );
