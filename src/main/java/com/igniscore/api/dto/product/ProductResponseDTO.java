@@ -17,6 +17,7 @@ public record ProductResponseDTO(
         LocalDate validity,
         String lot,
         BigDecimal price,
+        Boolean status,
         CompanyResponseDTO company
 ) implements Serializable {
 
@@ -32,6 +33,7 @@ public record ProductResponseDTO(
                 product.getValidity(),
                 product.getLot(),
                 product.getPrice(),
+                product.getStatus(),
                 product.getCompany() != null ? new CompanyResponseDTO(product.getCompany()) : null
         );
     }
