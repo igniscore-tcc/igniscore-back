@@ -11,20 +11,20 @@ public class ProductQueryDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final List<Product> products;
+    private final List<ProductResponseDTO> products;
 
     private final int totalPages;
 
     private final Long totalProducts;
 
 
-    public ProductQueryDTO(List<Product> products, int totalPages, Long totalProducts) {
+    public ProductQueryDTO(List<ProductResponseDTO> products, int totalPages, Long totalProducts) {
         this.products = products;
         this.totalPages = totalPages;
         this.totalProducts = totalProducts;
     }
 
-    public List<Product> getProducts() {
+    public List<ProductResponseDTO> getProducts() {
         return products;
     }
 

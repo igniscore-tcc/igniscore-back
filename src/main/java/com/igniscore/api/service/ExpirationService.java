@@ -5,9 +5,11 @@ import com.igniscore.api.dto.expiration.ExpirationPageDTO;
 import com.igniscore.api.dto.expiration.ExpirationProjectionDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.repository.ExpirationRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,7 +28,10 @@ public class ExpirationService {
         this.authenticatedUserService = authenticatedUserService;
     }
 
-
+    @Cacheable(
+            value = "expirations",
+            key = "@cacheKeyService.expirationsKey(T(org.springframework.data.domain.PageRequest).of(#page, #size))"
+    )
     public ExpirationPageDTO getExpirations(
             Integer page,
             Integer size
@@ -51,6 +56,10 @@ public class ExpirationService {
         );
     }
 
+    @Cacheable(
+            value = "expirationsByPeriod",
+            key = "@cacheKeyService.expirationsByPeriodKey(#startDate, #endDate, T(org.springframework.data.domain.PageRequest).of(#page, #size))"
+    )
     public ExpirationPageDTO getExpirationsByPeriod(
             LocalDate startDate,
             LocalDate endDate,
@@ -79,6 +88,10 @@ public class ExpirationService {
         );
     }
 
+    @Cacheable(
+            value = "upcomingExpirations",
+            key = "@cacheKeyService.upcomingExpirationsKey(#days, T(org.springframework.data.domain.PageRequest).of(#page, #size))"
+    )
     public ExpirationPageDTO getUpcomingExpirations(
             Integer days,
             Integer page,
@@ -109,6 +122,10 @@ public class ExpirationService {
         );
     }
 
+    @Cacheable(
+            value = "expirationsByClient",
+            key = "@cacheKeyService.expirationsByClientKey(#clientId, T(org.springframework.data.domain.PageRequest).of(#page, #size))"
+    )
     public ExpirationPageDTO getExpirationsByClient(
             Integer clientId,
             Integer page,
