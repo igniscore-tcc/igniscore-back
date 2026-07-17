@@ -5,13 +5,17 @@ import com.igniscore.api.dto.auth.RegisterDTO;
 import com.igniscore.api.dto.auth.LoginResponseDTO;
 import com.igniscore.api.model.PasswordResetToken;
 import com.igniscore.api.model.User;
+import com.igniscore.api.model.VerificationToken;
 import com.igniscore.api.repository.PasswordResetTokenRepository;
 import com.igniscore.api.repository.UserRepository;
+import com.igniscore.api.repository.VerificationTokenRepository;
 import com.igniscore.api.service.EmailService;
 import com.igniscore.api.service.JwtService;
+import com.igniscore.api.service.TokenGeneratorService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -34,36 +39,51 @@ public class AuthController {
     private final JwtService jwtService;
     private final EmailService emailService;
     private final PasswordResetTokenRepository tokenRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final TokenGeneratorService tokenGenerator;
 
     public AuthController(AuthenticationManager authenticationManager,
                           UserRepository repository,
                           JwtService jwtService,
                           EmailService emailService,
-                          PasswordResetTokenRepository tokenRepository) {
+                          PasswordResetTokenRepository tokenRepository,
+                          VerificationTokenRepository verificationTokenRepository,
+                          TokenGeneratorService tokenGenerator) {
         this.authenticationManager = authenticationManager;
         this.repository = repository;
         this.jwtService = jwtService;
         this.emailService = emailService;
         this.tokenRepository = tokenRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
+        this.tokenGenerator = tokenGenerator;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid @NonNull AutDTO data) {
+    public ResponseEntity<?> login(@RequestBody @Valid @NonNull AutDTO data) {
+        User user = this.repository.findByEmail(data.email());
+        if (user != null && !user.isEmailVerified()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Email not verified. Please verify your account."));
+        }
+
         var usernamepassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var auth = this.authenticationManager.authenticate(usernamepassword);
 
         var principal = auth.getPrincipal();
-        if (!(principal instanceof User user)) {
+        if (!(principal instanceof User authenticatedUser)) {
             throw new RuntimeException("User authentication failed");
         }
 
-        var token = jwtService.generateJwt(user);
+        var token = jwtService.generateJwt(authenticatedUser);
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<LoginResponseDTO> register(@RequestBody @Valid RegisterDTO data) {
-        if(this.repository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().build();
+    @Transactional
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterDTO data) {
+        if (this.repository.findByEmail(data.email()) != null) {
+            return ResponseEntity.badRequest().build();
+        }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
 
@@ -72,11 +92,22 @@ public class AuthController {
         newUser.setEmail(data.email());
         newUser.setPassword(encryptedPassword);
         newUser.setRole(data.role());
+        newUser.setActive(false);
+        newUser.setEmailVerified(false);
 
-        User user = this.repository.save(newUser);
-        var token = jwtService.generateJwt(user);
+        User savedUser = this.repository.save(newUser);
 
-        return ResponseEntity.ok(new LoginResponseDTO(token));
+        String code = tokenGenerator.generateVerificationCode();
+        VerificationToken verificationToken = new VerificationToken(
+                code,
+                savedUser,
+                LocalDateTime.now().plusMinutes(15)
+        );
+        verificationTokenRepository.save(verificationToken);
+
+        emailService.sendVerificationCode(savedUser.getEmail(), code);
+
+        return ResponseEntity.ok(Map.of("message", "Registration successful. Verification code sent to email."));
     }
 
     @PostMapping("/forgot-password")
