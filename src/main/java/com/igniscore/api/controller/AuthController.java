@@ -186,4 +186,34 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of("message", "Account verified successfully. You can now log in."));
     }
+
+    @PostMapping("/resend-code")
+    @Transactional
+    public ResponseEntity<?> resendVerificationCode(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        User user = this.repository.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "User not found with the provided email."));
+        }
+
+        if (user.isEmailVerified()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Email is already verified."));
+        }
+
+        verificationTokenRepository.deleteByUserId(user.getId());
+
+        String newCode = tokenGenerator.generateVerificationCode();
+        VerificationToken verificationToken = new VerificationToken(
+                newCode,
+                user,
+                LocalDateTime.now().plusMinutes(15)
+        );
+        verificationTokenRepository.save(verificationToken);
+
+        emailService.sendVerificationCode(user.getEmail(), newCode);
+
+        return ResponseEntity.ok(Map.of("message", "A new verification code has been sent to your email."));
+    }
+
 }
