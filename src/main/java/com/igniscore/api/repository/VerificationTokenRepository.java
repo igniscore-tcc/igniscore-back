@@ -8,7 +8,7 @@ import java.util.Optional;
 @Repository
 public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Long> {
     Optional<VerificationToken> findByCode(String code);
-    Optional<VerificationToken> findByUserId(Long userId);
+    Optional<VerificationToken> findByUserId(Integer userId);
     void deleteByUserId(Integer userId);
 }
 
