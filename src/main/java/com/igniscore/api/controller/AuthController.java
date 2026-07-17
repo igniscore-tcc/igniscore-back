@@ -108,7 +108,8 @@ public class AuthController {
 
         emailService.sendVerificationCode(savedUser.getEmail(), code);
 
-        return ResponseEntity.ok(Map.of("message", "Registration successful. Verification code sent to email."));
+        var token = jwtService.generateJwt(savedUser);
+        return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
     @PostMapping("/forgot-password")
