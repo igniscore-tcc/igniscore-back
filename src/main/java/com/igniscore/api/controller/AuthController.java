@@ -3,6 +3,7 @@ package com.igniscore.api.controller;
 import com.igniscore.api.dto.auth.AutDTO;
 import com.igniscore.api.dto.auth.RegisterDTO;
 import com.igniscore.api.dto.auth.LoginResponseDTO;
+import com.igniscore.api.dto.auth.VerifyCodeDTO;
 import com.igniscore.api.model.PasswordResetToken;
 import com.igniscore.api.model.User;
 import com.igniscore.api.model.VerificationToken;
@@ -159,5 +160,30 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Erro ao redefinir a senha: " + e.getMessage()));
         }
+    }
+
+    @PostMapping("/verify-email")
+    @Transactional
+    public ResponseEntity<?> verifyEmail(@RequestBody @Valid VerifyCodeDTO data) {
+        VerificationToken verificationToken = verificationTokenRepository.findByCode(data.code())
+                .orElse(null);
+
+        if (verificationToken == null || !verificationToken.getUser().getEmail().equals(data.email())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid verification code."));
+        }
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            verificationTokenRepository.delete(verificationToken);
+            return ResponseEntity.badRequest().body(Map.of("error", "Verification code has expired."));
+        }
+
+        User user = verificationToken.getUser();
+        user.setActive(true);
+        user.setEmailVerified(true);
+        repository.save(user);
+
+        verificationTokenRepository.delete(verificationToken);
+
+        return ResponseEntity.ok(Map.of("message", "Account verified successfully. You can now log in."));
     }
 }
