@@ -1,7 +1,10 @@
 package com.igniscore.api.service;
 
+import org.springframework.stereotype.Service;
+
 import java.security.SecureRandom;
 
+@Service
 public class TokenGeneratorService {
 
     private final SecureRandom random = new SecureRandom();
