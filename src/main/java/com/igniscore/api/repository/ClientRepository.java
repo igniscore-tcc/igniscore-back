@@ -4,6 +4,7 @@ import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
@@ -61,6 +62,7 @@ public interface ClientRepository extends JpaRepository<Client, Integer> {
      * @param company the {@link Company} used as a filter
      * @return an {@link Optional} containing the client if found within the given company scope
      */
+    @EntityGraph(attributePaths = "company")
     Optional<Client> findByIdAndCompanyAndDeletedAtIsNull(
             Integer id,
             Company company
