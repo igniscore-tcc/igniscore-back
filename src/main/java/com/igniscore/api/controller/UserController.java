@@ -4,6 +4,8 @@ import com.igniscore.api.dto.user.MeDTO;
 import com.igniscore.api.model.User;
 import com.igniscore.api.model.UserRole;
 import com.igniscore.api.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -97,5 +99,25 @@ public class UserController {
                 role,
                 companyId
         );
+    }
+
+    /**
+     * Retrieves users belonging to the authenticated user's company.
+     *
+     * @param page page number, starting from 0
+     * @param size number of users per page
+     * @return paginated users
+     */
+    @QueryMapping
+    public Page<User> usersByCompany(
+            @Argument Integer page,
+            @Argument Integer size
+    ) {
+        PageRequest pageable = PageRequest.of(
+                page != null ? page : 0,
+                size != null ? size : 10
+        );
+
+        return service.findUsersByCompany(pageable);
     }
 }

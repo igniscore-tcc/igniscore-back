@@ -19,6 +19,14 @@ type User {
     company: Company
 }
 
+type UserPage {
+    content: [User!]!
+    totalElements: Int!
+    totalPages: Int!
+    number: Int!
+    size: Int!
+}
+
 type Product {
     id: ID
     numberProduct: Int
@@ -111,6 +119,8 @@ type MonthlySales {
 type Query {
 
     companies: [Company!]!
+
+    usersByCompany(page: Int, size: Int): UserPage
 
     client(id: ID!): Client
 

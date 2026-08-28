@@ -6,6 +6,8 @@ import com.igniscore.api.model.UserRole;
 import com.igniscore.api.repository.UserRepository;
 import com.igniscore.api.utils.CompanyUtils;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -110,5 +112,23 @@ public class UserService {
         user.setEmail(email);
 
         return user;
+    }
+
+    /**
+     * Retrieves all users belonging to the authenticated user's company.
+     *
+     * @param pageable pagination and sorting information
+     * @return paginated list of users belonging to the company
+     */
+    public Page<User> findUsersByCompany(Pageable pageable) {
+        User authenticatedUser = authUserService.getUserOrThrow();
+
+        Company company = authenticatedUser.getCompany();
+
+        if (company == null) {
+            throw new RuntimeException("User is not associated with a company.");
+        }
+
+        return repository.findByCompany(company, pageable);
     }
 }
