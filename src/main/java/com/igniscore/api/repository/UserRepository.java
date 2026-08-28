@@ -1,6 +1,9 @@
 package com.igniscore.api.repository;
 
+import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,4 +39,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      */
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.company WHERE u.email = :email")
     User findByEmail(String email);
+
+    /**
+     * Retrieves all users belonging to a company with pagination.
+     *
+     * @param company company used to filter the users
+     * @param pageable pagination and sorting information
+     * @return paginated list of users belonging to the company
+     */
+    Page<User> findByCompany(Company company, Pageable pageable);
 }
