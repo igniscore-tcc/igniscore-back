@@ -159,6 +159,18 @@ public class UserService {
     @Transactional
     public String store(RegisterDTO data) {
 
+        User owner = authUserService.getUserOrThrow();
+
+        if (owner.getRole() != UserRole.OWNER) {
+            return "Apenas o proprietário pode cadastrar funcionários.";
+        }
+
+        Company company = owner.getCompany();
+
+        if (company == null) {
+            return "O proprietário não possui uma empresa associada.";
+        }
+
         if (repository.findByEmail(data.email()) != null) {
             return "Erro ao criar conta.";
         }
@@ -172,6 +184,7 @@ public class UserService {
         newUser.setRole(UserRole.EMPLOYEE);
         newUser.setActive(true);
         newUser.setEmailVerified(false);
+        newUser.setCompany(company);
 
         User savedUser = repository.save(newUser);
 
