@@ -19,10 +19,6 @@ type User {
     company: Company
 }
 
-type LoginResponseDTO {
-    token: String!
-}
-
 type UserPage {
     content: [User!]!
     totalElements: Int!
@@ -229,7 +225,7 @@ type Me {
 type Mutation {
     createCompany(input: CreateCompanyInput!): Company!
 
-    register(data: RegisterInput!): LoginResponseDTO!
+    createEmployee(data: RegisterInput!): String!
 
     updateUser(
         email: String!,

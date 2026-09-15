@@ -157,11 +157,10 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<?> store(RegisterDTO data) {
+    public String store(RegisterDTO data) {
 
         if (repository.findByEmail(data.email()) != null) {
-            return ResponseEntity.badRequest()
-                    .body("E-mail já cadastrado.");
+            return "Erro ao criar conta.";
         }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
@@ -191,8 +190,6 @@ public class UserService {
                 code
         );
 
-        return ResponseEntity.ok(
-                "Funcionário criado com sucesso. Um e-mail de verificação foi enviado para o funcionário."
-        );
+        return "Funcionário criado com sucesso. Um e-mail de verificação foi enviado para o funcionário.";
     }
 }

@@ -1,5 +1,6 @@
 package com.igniscore.api.controller;
 
+import com.igniscore.api.dto.auth.RegisterDTO;
 import com.igniscore.api.dto.user.MeDTO;
 import com.igniscore.api.model.User;
 import com.igniscore.api.model.UserRole;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 
@@ -119,5 +121,10 @@ public class UserController {
         );
 
         return service.findUsersByCompany(pageable);
+    }
+
+    @MutationMapping
+    public String createEmployee(@Argument RegisterDTO data) {
+        return service.store(data);
     }
 }
