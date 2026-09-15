@@ -1,14 +1,24 @@
 package com.igniscore.api.service;
 
+import com.igniscore.api.dto.auth.LoginResponseDTO;
+import com.igniscore.api.dto.auth.RegisterDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.model.UserRole;
+import com.igniscore.api.model.VerificationToken;
 import com.igniscore.api.repository.UserRepository;
+import com.igniscore.api.repository.VerificationTokenRepository;
 import com.igniscore.api.utils.CompanyUtils;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import java.time.LocalDateTime;
 
 /**
  * Service responsible for managing {@link User} entities.
@@ -32,6 +42,10 @@ public class UserService {
     private final UserRepository repository;
     private final CompanyUtils companyUtils;
     private final AuthenticatedUserService authUserService;
+    private final JwtService jwtService;
+    private final EmailService emailService;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final TokenGeneratorService tokenGenerator;
 
     /**
      * Constructor-based dependency injection (preferred over field injection).
@@ -39,10 +53,20 @@ public class UserService {
      * @param repository   user persistence repository
      * @param companyUtils utility for company validation and retrieval
      */
-    public UserService(UserRepository repository, CompanyUtils companyUtils, AuthenticatedUserService authUserService) {
+    public UserService(UserRepository repository,
+                       CompanyUtils companyUtils,
+                       AuthenticatedUserService authUserService,
+                       JwtService jwtService,
+                       EmailService emailService,
+                       VerificationTokenRepository verificationTokenRepository,
+                       TokenGeneratorService tokenGenerator) {
         this.repository = repository;
         this.companyUtils = companyUtils;
         this.authUserService = authUserService;
+        this.jwtService = jwtService;
+        this.emailService = emailService;
+        this.verificationTokenRepository = verificationTokenRepository;
+        this.tokenGenerator = tokenGenerator;
     }
 
     /**
@@ -130,5 +154,55 @@ public class UserService {
         }
 
         return repository.findByCompany(company, pageable);
+    }
+
+    @Transactional
+    public String store(RegisterDTO data) {
+
+        User owner = authUserService.getUserOrThrow();
+
+        if (owner.getRole() != UserRole.OWNER) {
+            return "Apenas o proprietário pode cadastrar funcionários.";
+        }
+
+        Company company = owner.getCompany();
+
+        if (company == null) {
+            return "O proprietário não possui uma empresa associada.";
+        }
+
+        if (repository.findByEmail(data.email()) != null) {
+            return "Erro ao criar conta.";
+        }
+
+        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
+
+        User newUser = new User();
+        newUser.setName(data.name());
+        newUser.setEmail(data.email());
+        newUser.setPassword(encryptedPassword);
+        newUser.setRole(UserRole.EMPLOYEE);
+        newUser.setActive(true);
+        newUser.setEmailVerified(false);
+        newUser.setCompany(company);
+
+        User savedUser = repository.save(newUser);
+
+        String code = tokenGenerator.generateVerificationCode();
+
+        VerificationToken verificationToken = new VerificationToken(
+                code,
+                savedUser,
+                LocalDateTime.now().plusMinutes(15)
+        );
+
+        verificationTokenRepository.save(verificationToken);
+
+        emailService.sendVerificationCode(
+                savedUser.getEmail(),
+                code
+        );
+
+        return "Funcionário criado com sucesso. Um e-mail de verificação foi enviado para o funcionário.";
     }
 }

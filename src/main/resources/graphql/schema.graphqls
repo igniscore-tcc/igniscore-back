@@ -225,6 +225,8 @@ type Me {
 type Mutation {
     createCompany(input: CreateCompanyInput!): Company!
 
+    createEmployee(data: RegisterInput!): String!
+
     updateUser(
         email: String!,
         name: String!
@@ -261,6 +263,12 @@ input CreateCompanyInput {
     ufIe: String
     email: String!
     phone: String!
+}
+
+input RegisterInput {
+    name: String!
+    email: String!
+    password: String!
 }
 
 input ClientRegisterInput {
