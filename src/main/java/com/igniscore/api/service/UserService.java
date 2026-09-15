@@ -158,8 +158,10 @@ public class UserService {
 
     @Transactional
     public ResponseEntity<?> store(RegisterDTO data) {
-        if (this.repository.findByEmail(data.email()) != null) {
-            return ResponseEntity.badRequest().build();
+
+        if (repository.findByEmail(data.email()) != null) {
+            return ResponseEntity.badRequest()
+                    .body("E-mail já cadastrado.");
         }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
@@ -172,19 +174,25 @@ public class UserService {
         newUser.setActive(true);
         newUser.setEmailVerified(false);
 
-        User savedUser = this.repository.save(newUser);
+        User savedUser = repository.save(newUser);
 
         String code = tokenGenerator.generateVerificationCode();
+
         VerificationToken verificationToken = new VerificationToken(
                 code,
                 savedUser,
                 LocalDateTime.now().plusMinutes(15)
         );
+
         verificationTokenRepository.save(verificationToken);
 
-        emailService.sendVerificationCode(savedUser.getEmail(), code);
+        emailService.sendVerificationCode(
+                savedUser.getEmail(),
+                code
+        );
 
-        var token = jwtService.generateJwt(savedUser);
-        return ResponseEntity.ok(new LoginResponseDTO(token));
+        return ResponseEntity.ok(
+                "Funcionário criado com sucesso. Um e-mail de verificação foi enviado para o funcionário."
+        );
     }
 }

@@ -19,6 +19,10 @@ type User {
     company: Company
 }
 
+type LoginResponseDTO {
+    token: String!
+}
+
 type UserPage {
     content: [User!]!
     totalElements: Int!
@@ -225,6 +229,8 @@ type Me {
 type Mutation {
     createCompany(input: CreateCompanyInput!): Company!
 
+    register(data: RegisterInput!): LoginResponseDTO!
+
     updateUser(
         email: String!,
         name: String!
@@ -261,6 +267,12 @@ input CreateCompanyInput {
     ufIe: String
     email: String!
     phone: String!
+}
+
+input RegisterInput {
+    name: String!
+    email: String!
+    password: String!
 }
 
 input ClientRegisterInput {
