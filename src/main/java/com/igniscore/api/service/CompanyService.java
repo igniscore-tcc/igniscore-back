@@ -87,7 +87,6 @@ public class CompanyService {
     }
 
     public Optional<Company> myCompany() {
-        Optional<Company> company = repository.findById(authUserService.getCompanyOrThrow().getId());
-        return company;
+        return repository.findById(authUserService.getCompanyOrThrow().getId());
     }
 }
