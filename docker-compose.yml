@@ -1,7 +1,38 @@
 services:
-  redis:
-    image: redis:7
-    container_name: redis
-    ports:
-      - "6379:6379"
+  igniscore:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: igniscore
     restart: unless-stopped
+
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      JWT_SECRET: ${JWT_SECRET}
+
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+    networks:
+      - compose_default
+
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.igniscore.rule=Host(`igniscore.com.br`)"
+      - "traefik.http.routers.igniscore.entrypoints=websecure"
+
+      - "traefik.http.routers.igniscore.tls=true"
+      - "traefik.http.routers.igniscore.tls.certresolver=le"
+
+      - "traefik.http.services.igniscore.loadbalancer.server.port=8080"
+
+networks:
+  compose_default:
+    external: true
