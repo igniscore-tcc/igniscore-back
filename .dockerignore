@@ -1,0 +1,10 @@
+.git
+.github
+.mvn
+src
+docs
+README.md
+*.md
+.env
+target/*
+!target/*.jar
