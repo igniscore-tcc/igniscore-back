@@ -111,10 +111,6 @@ public class ClientService {
         User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
 
-        if (!dto.isCpfOrCnpjValid()) {
-            throw new IllegalArgumentException("CPF or CNPJ must be provided");
-        }
-
         Client client = new Client(dto, company);
 
         Client saved = repository.save(client);

@@ -49,6 +49,11 @@ public class ClientUpdateDTO {
     private String name;
 
     /**
+     * Updated client legal name.
+     */
+    private String legal;
+
+    /**
      * Updated client email address.
      */
     private String email;
@@ -108,9 +113,10 @@ public class ClientUpdateDTO {
     public ClientUpdateDTO() {
     }
 
-    public ClientUpdateDTO(Integer id, String name, String email, String cnpj, String cpf, String phone, String ie, String ufIe, String obs) {
+    public ClientUpdateDTO(Integer id, String name, String legal, String email, String cnpj, String cpf, String phone, String ie, String ufIe, String obs) {
         this.id = id;
         this.name = name;
+        this.legal = legal;
         this.email = email;
         this.cnpj = cnpj;
         this.cpf = cpf;
@@ -126,6 +132,10 @@ public class ClientUpdateDTO {
 
     public String getName() {
         return name;
+    }
+
+    public String getLegal() {
+        return legal;
     }
 
     public String getEmail() {
@@ -162,6 +172,10 @@ public class ClientUpdateDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setLegal(String legal) {
+        this.legal = legal;
     }
 
     public void setEmail(String email) {

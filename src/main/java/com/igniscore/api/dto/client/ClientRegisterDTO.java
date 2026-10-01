@@ -2,128 +2,59 @@ package com.igniscore.api.dto.client;
 
 import com.igniscore.api.validation.ValidCNPJ;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.AssertTrue;
 
 /**
  * Data Transfer Object (DTO) used for client registration requests.
  *
- * <p>Encapsulates input data required to create a {@link com.igniscore.api.model.Client}
- * and defines validation constraints to ensure data integrity before reaching
- * the service layer.
- *
- * <p><strong>Validation strategy:</strong>
- * <ul>
- *     <li>Field-level validation using Jakarta Bean Validation annotations</li>
- *     <li>Cross-field validation to enforce business rules (CPF or CNPJ requirement)</li>
- * </ul>
- *
- * <p><strong>Domain constraints:</strong>
- * <ul>
- *     <li>At least one of CPF or CNPJ must be provided</li>
- *     <li>CPF and CNPJ accept both numeric-only and formatted inputs</li>
- *     <li>Phone number must contain 10 or 11 digits (no formatting)</li>
- * </ul>
- *
- * <p><strong>Notes:</strong>
- * <ul>
- *     <li>This DTO is intended for input only (write operations)</li>
- *     <li>Does not contain business logic beyond validation rules</li>
- * </ul>
+ * <p>All fields are optional and may be null or blank.
  */
 public class ClientRegisterDTO {
 
-    /**
-     * Client name.
-     *
-     * <p>Must not be null or blank.
-     */
-    @NotBlank(message = "Name is required")
     private String name;
 
-    /**
-     * Client email address.
-     *
-     * <p>Must follow a valid email format if provided.
-     */
+    private String legal;
+
     @Email(message = "Invalid email")
     private String email;
 
-    /**
-     * Brazilian CNPJ (Cadastro Nacional da Pessoa Jurídica).
-     *
-     * <p>Accepts either:
-     * <ul>
-     *     <li>14 numeric digits</li>
-     * </ul>
-     */
     @ValidCNPJ
     private String cnpj;
 
-    /**
-     * Brazilian CPF (Cadastro de Pessoas Físicas).
-     *
-     * <p>Accepts either:
-     * <ul>
-     *     <li>11 numeric digits</li>
-     *     <li>Formatted pattern: XXX.XXX.XXX-XX</li>
-     * </ul>
-     */
     @Pattern(
             regexp = "(\\d{11})|(\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2})",
             message = "Invalid CPF format"
     )
     private String cpf;
 
-    /**
-     * Client phone number.
-     *
-     * <p>Must contain 10 or 11 digits (area code + number), without formatting.
-     */
     @Pattern(
-            regexp = "\\d{10,11}",
+            regexp = "\\d{0,11}",
             message = "Phone must contain 10 or 11 digits"
     )
     private String phone;
 
-    /**
-     * State registration (Inscrição Estadual).
-     *
-     * <p>Optional field used for tax identification at the state level.
-     */
     private String ie;
 
-    /**
-     * Federative unit (state) associated with the state registration.
-     *
-     * <p>Typically a two-letter UF code (e.g., SP, RJ).
-     */
     private String ufIe;
 
-    /**
-     * Additional notes or observations about the client.
-     *
-     * <p>Free-form text field.
-     */
     private String obs;
 
-    /**
-     * Cross-field validation to ensure that at least one identification
-     * document (CPF or CNPJ) is provided.
-     *
-     * @return true if either CPF or CNPJ is non-null and non-blank
-     */
-    @AssertTrue(message = "CPF or CNPJ must be provided")
-    public boolean isCpfOrCnpjValid() {
-        return (cpf != null && !cpf.isBlank()) ||
-                (cnpj != null && !cnpj.isBlank());
-    }
-
-    public ClientRegisterDTO(String name, String email, String cnpj, String phone, String ie, String ufIe, String obs) {
+    public ClientRegisterDTO(
+            String name,
+            String legal,
+            String email,
+            String cnpj,
+            String cpf,
+            String phone,
+            String ie,
+            String ufIe,
+            String obs
+    ) {
         this.name = name;
+        this.legal = legal;
         this.email = email;
         this.cnpj = cnpj;
+        this.cpf = cpf;
         this.phone = phone;
         this.ie = ie;
         this.ufIe = ufIe;
@@ -135,6 +66,10 @@ public class ClientRegisterDTO {
 
     public String getName() {
         return name;
+    }
+
+    public String getLegal() {
+        return legal;
     }
 
     public String getEmail() {
@@ -167,6 +102,10 @@ public class ClientRegisterDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setLegal(String legal) {
+        this.legal = legal;
     }
 
     public void setEmail(String email) {

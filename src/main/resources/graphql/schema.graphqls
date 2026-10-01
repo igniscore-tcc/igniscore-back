@@ -53,10 +53,11 @@ type ProductOutput {
 type Client {
     id: ID!
     number: Int!
-    name: String!
+    name: String
+    legal: String
     cnpj: String
-    email: String!
-    phone: String!
+    email: String
+    phone: String
     ie: String
     ufIe: String
     obs: String
@@ -272,11 +273,12 @@ input RegisterInput {
 }
 
 input ClientRegisterInput {
-    name: String!
-    email: String!
+    name: String
+    legal: String
+    email: String
     cnpj: String
     cpf: String
-    phone: String!
+    phone: String
     ie: String
     ufIe: String
     obs: String
@@ -285,6 +287,7 @@ input ClientRegisterInput {
 input ClientUpdateInput {
     id: ID!
     name: String
+    legal: String
     email: String
     cnpj: String
     cpf: String
