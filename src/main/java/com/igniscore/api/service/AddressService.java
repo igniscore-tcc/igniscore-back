@@ -1,6 +1,7 @@
 package com.igniscore.api.service;
 
 import com.igniscore.api.dto.address.AddressRegisterDTO;
+import com.igniscore.api.dto.address.AddressUpdateDTO;
 import com.igniscore.api.model.Address;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
@@ -56,5 +57,34 @@ public class AddressService {
         );
 
         return saved;
+    }
+
+    @Transactional
+    public Address update(AddressUpdateDTO dto) {
+
+        User user = authUserService.getUserOrThrow();
+        Company company = authUserService.getCompanyOrThrow();
+
+        Client client = clientRepository
+                .findByIdAndCompanyAndDeletedAtIsNull(dto.getClientId(), company)
+                .orElseThrow(() -> new EntityNotFoundException("Client not found"));
+
+        Address address = repository.findByClient(client)
+                .orElseThrow(() -> new EntityNotFoundException("Address not found"));
+
+        Address oldData = new Address(address);
+
+        address.update(dto);
+
+        audit.newAudit(
+                user,
+                company,
+                "Address",
+                "Update",
+                oldData,
+                address
+        );
+
+        return address;
     }
 }

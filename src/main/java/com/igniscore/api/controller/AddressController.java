@@ -1,6 +1,7 @@
 package com.igniscore.api.controller;
 
 import com.igniscore.api.dto.address.AddressRegisterDTO;
+import com.igniscore.api.dto.address.AddressUpdateDTO;
 import com.igniscore.api.model.Address;
 import com.igniscore.api.service.AddressService;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -19,5 +20,10 @@ public class AddressController {
     @MutationMapping
     public Address storeAddress(@Argument AddressRegisterDTO input) {
         return addressService.store(input);
+    }
+
+    @MutationMapping
+    public Address updateAddress(@Argument AddressUpdateDTO input) {
+        return addressService.update(input);
     }
 }

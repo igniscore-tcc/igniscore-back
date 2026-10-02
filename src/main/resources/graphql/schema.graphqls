@@ -268,6 +268,8 @@ type Mutation {
 
     storeAddress(input: AddressRegisterInput!): Address!
 
+    updateAddress(input: AddressUpdateInput!): Address!
+
 }
 
 input CreateCompanyInput {
@@ -350,6 +352,16 @@ input AddressRegisterInput {
     number: String
     city: String
     neighborhood: String
+    state: String
+    cep: String
+}
+
+input AddressUpdateInput {
+    clientId: ID!
+    street: String
+    number: String
+    neighborhood: String
+    city: String
     state: String
     cep: String
 }
