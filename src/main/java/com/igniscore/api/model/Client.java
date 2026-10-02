@@ -12,6 +12,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serial;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Entity representing a client within the system.
@@ -131,6 +133,13 @@ public class Client implements Serializable {
     @JsonIgnore
     private Company company;
 
+    @OneToMany(
+            mappedBy = "client",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Address> addresses = new ArrayList<>();
+
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
 
@@ -219,6 +228,10 @@ public class Client implements Serializable {
         return company;
     }
 
+    public List<Address> getAddresses() {
+        return addresses;
+    }
+
     public Timestamp getDeletedAt() {
         return deletedAt;
     }
@@ -267,6 +280,10 @@ public class Client implements Serializable {
 
     public void setCompany(Company company) {
         this.company = company;
+    }
+
+    public void setAddresses(List<Address> addresses) {
+        this.addresses = addresses;
     }
 
     public void setDeletedAt(Timestamp deletedAt) {

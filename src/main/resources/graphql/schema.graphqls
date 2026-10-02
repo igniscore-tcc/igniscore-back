@@ -50,6 +50,15 @@ type ProductOutput {
     company: Company
 }
 
+type Address {
+    id: ID!
+    street: String
+    number: String
+    city: String
+    state: String
+    cep: String
+}
+
 type Client {
     id: ID!
     number: Int!
@@ -63,6 +72,7 @@ type Client {
     obs: String
     cpf: String
     company: Company
+    address: Address
 }
 
 type SaleItem {

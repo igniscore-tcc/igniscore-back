@@ -2,6 +2,7 @@ package com.igniscore.api.controller;
 
 import com.igniscore.api.dto.client.ClientQueryDTO;
 import com.igniscore.api.dto.client.ClientRegisterDTO;
+import com.igniscore.api.dto.client.ClientResponseDTO;
 import com.igniscore.api.dto.client.ClientUpdateDTO;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.service.ClientService;
@@ -136,7 +137,7 @@ public class ClientController {
      */
     @QueryMapping
     @SuppressWarnings("unused")
-    public Client client(@Argument Integer id){
+    public ClientResponseDTO client(@Argument Integer id){
         return service.findById(id);
     }
 
