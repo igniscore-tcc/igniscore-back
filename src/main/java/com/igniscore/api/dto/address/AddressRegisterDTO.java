@@ -12,6 +12,7 @@ public class AddressRegisterDTO implements Serializable {
     private String street;
     private String number;
     private String city;
+    private String neighborhood;
     private String state;
     private String cep;
 
@@ -32,6 +33,10 @@ public class AddressRegisterDTO implements Serializable {
 
     public String getCity() {
         return city;
+    }
+
+    public String getNeighborhood() {
+        return neighborhood;
     }
 
     public String getState() {
@@ -56,6 +61,10 @@ public class AddressRegisterDTO implements Serializable {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public void setNeighborhood(String neighborhood) {
+        this.neighborhood = neighborhood;
     }
 
     public void setState(String state) {

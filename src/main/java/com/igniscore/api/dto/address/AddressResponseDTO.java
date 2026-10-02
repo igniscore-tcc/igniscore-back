@@ -8,6 +8,7 @@ public record AddressResponseDTO( Integer id,
                                   String street,
                                   String number,
                                   String city,
+                                  String neighborhood,
                                   String state,
                                   String cep ) implements Serializable {
     @Serial private static final long serialVersionUID = 1L;
@@ -17,6 +18,7 @@ public record AddressResponseDTO( Integer id,
                 address.getStreet(),
                 address.getNumber(),
                 address.getCity(),
+                address.getNeighborhood(),
                 address.getState(),
                 address.getCep()
         );

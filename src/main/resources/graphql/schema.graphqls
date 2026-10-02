@@ -55,6 +55,7 @@ type Address {
     street: String
     number: String
     city: String
+    neighborhood: String
     state: String
     cep: String
 }
@@ -348,6 +349,7 @@ input AddressRegisterInput {
     street: String
     number: String
     city: String
+    neighborhood: String
     state: String
     cep: String
 }

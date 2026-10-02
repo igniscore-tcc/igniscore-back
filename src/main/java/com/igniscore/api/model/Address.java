@@ -33,6 +33,9 @@ public class Address implements Serializable {
     @Column(name = "city_address", nullable = false, length = 100)
     private String city;
 
+    @Column(name = "neighborhood_address")
+    private String neighborhood;
+
     @Column(name = "state_address", nullable = false, length = 2)
     private String state;
 
@@ -54,61 +57,70 @@ public class Address implements Serializable {
         this.street = dto.getStreet();
         this.number = dto.getNumber();
         this.city = dto.getCity();
+        this.neighborhood = dto.getNeighborhood();
         this.state = dto.getState();
         this.cep = dto.getCep();
         this.client = client;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getStreet() {
-        return street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public String getNumber() {
-        return number;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
+    public Client getClient() {
+        return client;
     }
 
     public String getCep() {
         return cep;
     }
 
-    public void setCep(String cep) {
-        this.cep = cep;
+    public String getState() {
+        return state;
     }
 
-    public Client getClient() {
-        return client;
+    public String getNeighborhood() {
+        return neighborhood;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setNeighborhood(String neighborhood) {
+        this.neighborhood = neighborhood;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public void setCep(String cep) {
+        this.cep = cep;
     }
 
     public void setClient(Client client) {
