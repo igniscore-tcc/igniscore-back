@@ -265,6 +265,8 @@ type Mutation {
 
     storeSale(input: CreateSaleInput!): Sale!
 
+    storeAddress(input: AddressRegisterInput!): Address!
+
 }
 
 input CreateCompanyInput {
@@ -339,6 +341,15 @@ input CreateSaleInput {
     paymentMethod: PaymentMethod!
     discount: BigDecimal
     items: [CreateSaleItemInput!]!
+}
+
+input AddressRegisterInput {
+    clientId: ID!
+    street: String
+    number: String
+    city: String
+    state: String
+    cep: String
 }
 
 enum PaymentMethod {

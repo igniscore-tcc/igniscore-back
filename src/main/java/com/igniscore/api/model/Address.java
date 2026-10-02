@@ -2,6 +2,7 @@ package com.igniscore.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.igniscore.api.dto.address.AddressRegisterDTO;
 import jakarta.persistence.*;
 
 import java.io.Serial;
@@ -45,6 +46,18 @@ public class Address implements Serializable {
     )
     @JsonIgnore
     private Client client;
+
+    public Address() {
+    }
+
+    public Address(AddressRegisterDTO dto, Client client) {
+        this.street = dto.getStreet();
+        this.number = dto.getNumber();
+        this.city = dto.getCity();
+        this.state = dto.getState();
+        this.cep = dto.getCep();
+        this.client = client;
+    }
 
     public Integer getId() {
         return id;
