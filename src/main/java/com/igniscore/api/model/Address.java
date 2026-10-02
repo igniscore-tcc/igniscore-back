@@ -75,6 +75,16 @@ public class Address implements Serializable {
         this.client = address.client;
     }
 
+    public Address(AddressUpdateDTO dto, Client client) {
+        this.street = dto.getStreet();
+        this.number = dto.getNumber();
+        this.city = dto.getCity();
+        this.neighborhood = dto.getNeighborhood();
+        this.state = dto.getState();
+        this.cep = dto.getCep();
+        this.client = client;
+    }
+
     public Client getClient() {
         return client;
     }

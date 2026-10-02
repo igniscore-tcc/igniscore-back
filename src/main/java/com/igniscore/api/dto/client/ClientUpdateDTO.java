@@ -90,7 +90,7 @@ public class ClientUpdateDTO {
      * <p>Must contain 10 or 11 digits if provided.
      */
     @Pattern(
-            regexp = "\\d{10,11}",
+            regexp = "\\d{0,11}",
             message = "Phone must contain 10 or 11 digits"
     )
     private String phone;

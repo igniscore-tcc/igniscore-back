@@ -69,22 +69,34 @@ public class AddressService {
                 .findByIdAndCompanyAndDeletedAtIsNull(dto.getClientId(), company)
                 .orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
-        Address address = repository.findByClient(client)
-                .orElseThrow(() -> new EntityNotFoundException("Address not found"));
+        Address address = repository
+                .findByClient(client)
+                .orElse(null);
 
-        Address oldData = new Address(address);
+        boolean creating = address == null;
 
-        address.update(dto);
+        if (creating) {
+            address = new Address(dto, client);
+        } else {
+            address.setStreet(dto.getStreet());
+            address.setNumber(dto.getNumber());
+            address.setCity(dto.getCity());
+            address.setNeighborhood(dto.getNeighborhood());
+            address.setState(dto.getState());
+            address.setCep(dto.getCep());
+        }
+
+        Address saved = repository.save(address);
 
         audit.newAudit(
                 user,
                 company,
                 "Address",
-                "Update",
-                oldData,
-                address
+                creating ? "Create" : "Update",
+                null,
+                saved
         );
 
-        return address;
+        return saved;
     }
 }
