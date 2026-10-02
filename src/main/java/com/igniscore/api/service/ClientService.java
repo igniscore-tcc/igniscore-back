@@ -111,10 +111,6 @@ public class ClientService {
         User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
 
-        if (!dto.isCpfOrCnpjValid()) {
-            throw new IllegalArgumentException("CPF or CNPJ must be provided");
-        }
-
         Client client = new Client(dto, company);
 
         Client saved = repository.save(client);
@@ -180,9 +176,13 @@ public class ClientService {
      * @throws EntityNotFoundException if not found within the company scope
      */
     @Transactional(readOnly = true)
-    public Client findById(Integer id) {
+    public ClientResponseDTO findById(Integer id) {
         Company company = authUserService.getCompanyOrThrow();
-        return getClientOrThrow(id, company);
+
+        Client client = getClientOrThrow(id, company);
+
+
+        return new ClientResponseDTO(client);
     }
 
     /**

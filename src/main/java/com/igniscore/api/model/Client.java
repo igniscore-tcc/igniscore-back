@@ -12,6 +12,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serial;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Entity representing a client within the system.
@@ -60,10 +62,16 @@ public class Client implements Serializable {
     private Integer id;
 
     /**
-     * Client name or legal entity name.
+     * Client name entity name.
      */
-    @Column(name = "name_client", nullable = false)
+    @Column(name = "name_client")
     private String name;
+
+    /**
+     * Client legal entity name.
+     */
+    @Column(name = "legal_name")
+    private String legal;
 
     /**
      * Client CNPJ (Brazilian business identifier).
@@ -74,7 +82,7 @@ public class Client implements Serializable {
     /**
      * Client contact email.
      */
-    @Column(name = "email_client", nullable = false)
+    @Column(name = "email_client")
     private String email;
 
     /**
@@ -125,6 +133,13 @@ public class Client implements Serializable {
     @JsonIgnore
     private Company company;
 
+    @OneToMany(
+            mappedBy = "client",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Address> addresses = new ArrayList<>();
+
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
 
@@ -136,6 +151,7 @@ public class Client implements Serializable {
 
     public Client(ClientRegisterDTO dto, Company company) {
         this.name = dto.getName();
+        this.legal = dto.getLegal();
         this.cnpj = dto.getCnpj();
         this.email = dto.getEmail();
         this.phone = dto.getPhone();
@@ -150,6 +166,7 @@ public class Client implements Serializable {
     public Client(Client client) {
         this.id = client.id;
         this.name = client.name;
+        this.legal = client.legal;
         this.cnpj = client.cnpj;
         this.email = client.email;
         this.phone = client.phone;
@@ -169,6 +186,10 @@ public class Client implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public String getLegal() {
+        return legal;
     }
 
     public String getCnpj() {
@@ -207,6 +228,10 @@ public class Client implements Serializable {
         return company;
     }
 
+    public List<Address> getAddresses() {
+        return addresses;
+    }
+
     public Timestamp getDeletedAt() {
         return deletedAt;
     }
@@ -219,6 +244,10 @@ public class Client implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setLegal(String legal) {
+        this.legal = legal;
     }
 
     public void setCnpj(String cnpj) {
@@ -253,12 +282,17 @@ public class Client implements Serializable {
         this.company = company;
     }
 
+    public void setAddresses(List<Address> addresses) {
+        this.addresses = addresses;
+    }
+
     public void setDeletedAt(Timestamp deletedAt) {
         this.deletedAt = deletedAt;
     }
 
     public void update(ClientUpdateDTO dto) {
         if (dto.getName() != null) this.name = dto.getName();
+        if (dto.getLegal() != null) this.legal = dto.getLegal();
         if (dto.getCnpj() != null) this.cnpj = dto.getCnpj();
         if (dto.getEmail() != null) this.email = dto.getEmail();
         if (dto.getPhone() != null) this.phone = dto.getPhone();

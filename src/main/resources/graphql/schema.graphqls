@@ -50,18 +50,30 @@ type ProductOutput {
     company: Company
 }
 
+type Address {
+    id: ID!
+    street: String
+    number: String
+    city: String
+    neighborhood: String
+    state: String
+    cep: String
+}
+
 type Client {
     id: ID!
     number: Int!
-    name: String!
+    name: String
+    legal: String
     cnpj: String
-    email: String!
-    phone: String!
+    email: String
+    phone: String
     ie: String
     ufIe: String
     obs: String
     cpf: String
     company: Company
+    address: Address
 }
 
 type SaleItem {
@@ -254,6 +266,10 @@ type Mutation {
 
     storeSale(input: CreateSaleInput!): Sale!
 
+    storeAddress(input: AddressRegisterInput!): Address!
+
+    updateAddress(input: AddressUpdateInput!): Address!
+
 }
 
 input CreateCompanyInput {
@@ -272,11 +288,12 @@ input RegisterInput {
 }
 
 input ClientRegisterInput {
-    name: String!
-    email: String!
+    name: String
+    legal: String
+    email: String
     cnpj: String
     cpf: String
-    phone: String!
+    phone: String
     ie: String
     ufIe: String
     obs: String
@@ -285,6 +302,7 @@ input ClientRegisterInput {
 input ClientUpdateInput {
     id: ID!
     name: String
+    legal: String
     email: String
     cnpj: String
     cpf: String
@@ -326,6 +344,26 @@ input CreateSaleInput {
     paymentMethod: PaymentMethod!
     discount: BigDecimal
     items: [CreateSaleItemInput!]!
+}
+
+input AddressRegisterInput {
+    clientId: ID!
+    street: String
+    number: String
+    city: String
+    neighborhood: String
+    state: String
+    cep: String
+}
+
+input AddressUpdateInput {
+    clientId: ID!
+    street: String
+    number: String
+    neighborhood: String
+    city: String
+    state: String
+    cep: String
 }
 
 enum PaymentMethod {

@@ -1,5 +1,6 @@
 package com.igniscore.api.dto.client;
 
+import com.igniscore.api.dto.address.AddressResponseDTO;
 import com.igniscore.api.dto.company.CompanyResponseDTO;
 import com.igniscore.api.model.Client;
 
@@ -10,6 +11,7 @@ public record ClientResponseDTO(
         Integer id,
         Integer number,
         String name,
+        String legal,
         String cnpj,
         String email,
         String phone,
@@ -17,7 +19,8 @@ public record ClientResponseDTO(
         String ufIe,
         String obs,
         String cpf,
-        CompanyResponseDTO company
+        CompanyResponseDTO company,
+        AddressResponseDTO address
 ) implements Serializable {
 
     @Serial
@@ -28,6 +31,7 @@ public record ClientResponseDTO(
                 client.getId(),
                 client.getNumber(),
                 client.getName(),
+                client.getLegal(),
                 client.getCnpj(),
                 client.getEmail(),
                 client.getPhone(),
@@ -35,7 +39,8 @@ public record ClientResponseDTO(
                 client.getUfIe(),
                 client.getObs(),
                 client.getCpf(),
-                client.getCompany() != null ? new CompanyResponseDTO(client.getCompany()) : null
+                client.getCompany() != null ? new CompanyResponseDTO(client.getCompany()) : null,
+                client.getAddresses() != null && !client.getAddresses().isEmpty() ? new AddressResponseDTO(client.getAddresses().getFirst()) : null
         );
     }
 }
