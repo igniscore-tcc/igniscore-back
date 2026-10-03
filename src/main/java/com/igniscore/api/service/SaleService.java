@@ -134,6 +134,8 @@ public class SaleService {
         Sale sale = createSale(
                 company,
                 client,
+                dto.getType(),
+                dto.getDocument(),
                 dto.getPaymentMethod()
         );
 
@@ -244,7 +246,7 @@ public class SaleService {
 
         if (products.size() != productIds.size()) {
             throw new RuntimeException(
-                    "Um ou mais produtos não foram encontrados"
+                    "One or more products were not found."
             );
         }
 
@@ -260,7 +262,7 @@ public class SaleService {
 
             if (!product.getCompany().getId().equals(company.getId())) {
                 throw new RuntimeException(
-                        "Produto não pertence à empresa"
+                        "The product does not belong to the company."
                 );
             }
         }
@@ -273,11 +275,11 @@ public class SaleService {
 
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() ->
-                        new RuntimeException("Cliente não encontrado"));
+                        new RuntimeException("Client not found"));
 
         if (!client.getCompany().getId().equals(company.getId())) {
             throw new RuntimeException(
-                    "Cliente não pertence à empresa"
+                    "Client does not belong to the company"
             );
         }
 
@@ -308,10 +310,20 @@ public class SaleService {
     private Sale createSale(
             Company company,
             Client client,
-            PaymentMethod paymentMethod
+            SaleDocument type,
+            String document,
+            SaleType paymentMethod
     ) {
         LocalDate today = LocalDate.now();
 
-        return new Sale(today, SaleStatus.PENDING, today.plusYears(1), company, client, paymentMethod);
+        return new Sale(
+                today,
+                SaleStatus.PENDING,
+                type,
+                document,
+                today.plusYears(1),
+                company, client,
+                paymentMethod
+        );
     }
 }

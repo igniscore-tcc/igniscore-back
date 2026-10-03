@@ -1,8 +1,9 @@
 package com.igniscore.api.dto.sale;
 
 import com.igniscore.api.dto.client.ClientResponseDTO;
-import com.igniscore.api.model.PaymentMethod;
+import com.igniscore.api.model.SaleType;
 import com.igniscore.api.model.Sale;
+import com.igniscore.api.model.SaleDocument;
 import com.igniscore.api.model.SaleStatus;
 
 import java.io.Serial;
@@ -19,8 +20,10 @@ public record SaleResponseDTO(
     BigDecimal discount,
     BigDecimal total,
     LocalDate date,
-    PaymentMethod paymentMethod,
+    SaleType paymentMethod,
     SaleStatus status,
+    SaleDocument type,
+    String document,
     LocalDate dueDate,
     ClientResponseDTO client,
     List<SaleItemResponseDTO> items
@@ -39,6 +42,8 @@ public record SaleResponseDTO(
                 sale.getDate(),
                 sale.getPaymentMethod(),
                 sale.getStatus(),
+                sale.getType(),
+                sale.getDocument(),
                 sale.getDueDate(),
                 sale.getClient() != null ? new ClientResponseDTO(sale.getClient()) : null,
                 sale.getItems() != null

@@ -91,8 +91,10 @@ type Sale {
     discount: BigDecimal
     total: BigDecimal!
     date: Date!
-    paymentMethod: PaymentMethod!
+    paymentMethod: SaleType!
     status: SaleStatus!
+    type: SaleDocument!
+    document: String
     dueDate: Date!
     client: Client!
     items: [SaleItem!]!
@@ -341,7 +343,9 @@ input CreateSaleItemInput {
 
 input CreateSaleInput {
     clientId: Int!
-    paymentMethod: PaymentMethod!
+    paymentMethod: SaleType!
+    type: SaleDocument!
+    document: String
     discount: BigDecimal
     items: [CreateSaleItemInput!]!
 }
@@ -366,12 +370,9 @@ input AddressUpdateInput {
     cep: String
 }
 
-enum PaymentMethod {
-    PIX
+enum SaleType {
+    INSTALLMENT
     CASH
-    CREDIT_CARD
-    DEBIT_CARD
-    BANK_SLIP
 }
 
 enum ProductType {
@@ -391,7 +392,12 @@ enum ProductType {
 enum SaleStatus {
     PENDING
     PAID
-    CANCELED
+}
+
+enum SaleDocument {
+    TAX_INVOICE
+    SERVICE_ORDER
+    NONE
 }
 
 enum ExpirationStatus {

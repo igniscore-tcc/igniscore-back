@@ -3,8 +3,7 @@ package com.igniscore.api.model;
 public enum SaleStatus
 {
     PENDING("pending"),
-    CANCELED("canceled"),
-    COMPLETED("completed");
+    PAID("paid");
 
     private final String status;
 
