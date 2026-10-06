@@ -2,31 +2,22 @@ package com.igniscore.api.controller;
 
 import com.igniscore.api.dto.stripe.StripeRequestDTO;
 import com.igniscore.api.dto.stripe.StripeResponseDTO;
-import com.igniscore.api.service.StripeService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.igniscore.api.service.SubscriptionService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.stereotype.Controller;
 
-@RestController
-@RequestMapping("/product/v1")
+@Controller
+@RequiredArgsConstructor
 public class StripeController {
 
-    private StripeService stripeService;
+    private final SubscriptionService subscriptionService;
 
-    public StripeController(StripeService stripeService) {
-        this.stripeService = stripeService;
-    }
-
-    @PostMapping("/checkout")
-    public ResponseEntity<StripeResponseDTO> checkoutProducts(@RequestBody StripeRequestDTO stripeRequestDTO) {
-        StripeResponseDTO response = stripeService.checkoutProducts(stripeRequestDTO);
-
-        return  ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
-
+    @MutationMapping
+    public StripeResponseDTO createCheckout(
+            @Argument StripeRequestDTO input
+    ) {
+        return subscriptionService.createCheckout(input);
     }
 }

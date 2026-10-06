@@ -64,8 +64,7 @@ public class SecurityConfig {
                                 "/auth/forgot-password",
                                 "/auth/reset-password",
                                 "/auth/verify-email",
-                                "/auth/resend-code",
-                                "/product/v1/checkout"
+                                "/auth/resend-code"
                         ).permitAll()
                         .requestMatchers("/graphql", "/graphiql").authenticated()
                         .anyRequest().authenticated()

@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StripeRequestDTO {
-    private Long amount;
-    private Long quantity;
-    private String name;
+
+    private String planCode;
+
     private String currency;
 }

@@ -236,6 +236,13 @@ type Me {
     companyId: Int
 }
 
+type StripeResponse {
+    status: String!
+    message: String!
+    sessionId: String
+    sessionUrl: String
+}
+
 type Mutation {
     createCompany(input: CreateCompanyInput!): Company!
 
@@ -271,6 +278,8 @@ type Mutation {
     storeAddress(input: AddressRegisterInput!): Address!
 
     updateAddress(input: AddressUpdateInput!): Address!
+
+    createCheckout(input: StripeRequestInput!): StripeResponse!
 
 }
 
@@ -370,6 +379,11 @@ input AddressUpdateInput {
     cep: String
 }
 
+input StripeRequestInput {
+    planCode: String!
+    currency: Currency!
+}
+
 enum SaleType {
     INSTALLMENT
     CASH
@@ -410,4 +424,9 @@ enum UserRole {
     OWNER
     ADMIN
     EMPLOYEE
+}
+
+enum Currency {
+    BRL
+    USD
 }
