@@ -91,8 +91,10 @@ type Sale {
     discount: BigDecimal
     total: BigDecimal!
     date: Date!
-    paymentMethod: PaymentMethod!
+    paymentMethod: SaleType!
     status: SaleStatus!
+    type: SaleDocument!
+    document: String
     dueDate: Date!
     client: Client!
     items: [SaleItem!]!
@@ -234,6 +236,13 @@ type Me {
     companyId: Int
 }
 
+type StripeResponse {
+    status: String!
+    message: String!
+    sessionId: String
+    sessionUrl: String
+}
+
 type Mutation {
     createCompany(input: CreateCompanyInput!): Company!
 
@@ -269,6 +278,8 @@ type Mutation {
     storeAddress(input: AddressRegisterInput!): Address!
 
     updateAddress(input: AddressUpdateInput!): Address!
+
+    createCheckout(input: StripeRequestInput!): StripeResponse!
 
 }
 
@@ -341,7 +352,9 @@ input CreateSaleItemInput {
 
 input CreateSaleInput {
     clientId: Int!
-    paymentMethod: PaymentMethod!
+    paymentMethod: SaleType!
+    type: SaleDocument!
+    document: String
     discount: BigDecimal
     items: [CreateSaleItemInput!]!
 }
@@ -366,12 +379,14 @@ input AddressUpdateInput {
     cep: String
 }
 
-enum PaymentMethod {
-    PIX
+input StripeRequestInput {
+    planCode: String!
+    currency: Currency!
+}
+
+enum SaleType {
+    INSTALLMENT
     CASH
-    CREDIT_CARD
-    DEBIT_CARD
-    BANK_SLIP
 }
 
 enum ProductType {
@@ -391,7 +406,12 @@ enum ProductType {
 enum SaleStatus {
     PENDING
     PAID
-    CANCELED
+}
+
+enum SaleDocument {
+    TAX_INVOICE
+    SERVICE_ORDER
+    NONE
 }
 
 enum ExpirationStatus {
@@ -404,4 +424,9 @@ enum UserRole {
     OWNER
     ADMIN
     EMPLOYEE
+}
+
+enum Currency {
+    BRL
+    USD
 }

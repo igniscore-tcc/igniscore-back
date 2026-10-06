@@ -27,4 +27,6 @@ import java.util.Optional;
  */
 public interface CompanyRepository extends JpaRepository<Company, Integer> {
     Optional<Company> findByCnpj(String cnpj);
+
+    Optional<Company> findByStripeCustomerId(String stripeCustomerId);
 }

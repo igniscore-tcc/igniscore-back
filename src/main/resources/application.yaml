@@ -45,3 +45,7 @@ api:
   security:
     token:
       secret: ${JWT_SECRET}
+
+stripe:
+  secret: ${STRIPE_KEY}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET}

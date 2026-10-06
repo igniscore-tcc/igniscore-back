@@ -99,7 +99,7 @@ public class Sale implements Serializable {
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "type_sale", nullable = false, length = 30)
-    private PaymentMethod paymentMethod;
+    private SaleType paymentMethod;
 
     /**
      * Current status of the sale.
@@ -107,6 +107,13 @@ public class Sale implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "status_sale", nullable = false, length = 20)
     private SaleStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "document_sale")
+    private SaleDocument type;
+
+    @Column(name = "document_number", length = 10)
+    private String document;
 
     /**
      * Due date associated with the sale payment.
@@ -232,9 +239,11 @@ public class Sale implements Serializable {
     public Sale() {
     }
 
-    public Sale(LocalDate date, SaleStatus status, LocalDate dueDate, Company company, Client client, PaymentMethod paymentMethod) {
+    public Sale(LocalDate date, SaleStatus status, SaleDocument type, String document, LocalDate dueDate, Company company, Client client, SaleType paymentMethod) {
         this.date = date;
         this.status = status;
+        this.type = type;
+        this.document = document;
         this.dueDate = dueDate;
         this.company = company;
         this.client = client;
@@ -291,7 +300,7 @@ public class Sale implements Serializable {
      *
      * @return payment method
      */
-    public PaymentMethod getPaymentMethod() {
+    public SaleType getPaymentMethod() {
         return paymentMethod;
     }
 
@@ -302,6 +311,14 @@ public class Sale implements Serializable {
      */
     public SaleStatus getStatus() {
         return status;
+    }
+
+    public SaleDocument getType() {
+        return type;
+    }
+
+    public String getDocument() {
+        return document;
     }
 
     /**
@@ -370,7 +387,7 @@ public class Sale implements Serializable {
      *
      * @param paymentMethod payment method
      */
-    public void setPaymentMethod(PaymentMethod paymentMethod) {
+    public void setPaymentMethod(SaleType paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 
@@ -381,6 +398,14 @@ public class Sale implements Serializable {
      */
     public void setStatus(SaleStatus status) {
         this.status = status;
+    }
+
+    public void setType(SaleDocument type) {
+        this.type = type;
+    }
+
+    public void setDocument(String document) {
+        this.document = document;
     }
 
     /**
