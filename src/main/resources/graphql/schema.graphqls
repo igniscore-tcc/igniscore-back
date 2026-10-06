@@ -353,7 +353,7 @@ input CreateSaleItemInput {
 input CreateSaleInput {
     clientId: Int!
     paymentMethod: SaleType!
-    type: SaleDocument!
+    type: SaleDocument
     document: String
     discount: BigDecimal
     items: [CreateSaleItemInput!]!
