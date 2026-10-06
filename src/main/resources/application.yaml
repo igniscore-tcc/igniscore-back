@@ -48,3 +48,4 @@ api:
 
 stripe:
   secret: ${STRIPE_KEY}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET}

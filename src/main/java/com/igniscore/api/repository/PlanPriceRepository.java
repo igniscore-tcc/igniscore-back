@@ -11,4 +11,6 @@ public interface PlanPriceRepository extends JpaRepository<PlanPrice, Integer> {
             String code,
             String currency
     );
+
+    Optional<PlanPrice> findByStripePriceId(String stripePriceId);
 }
