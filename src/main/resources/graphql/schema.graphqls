@@ -265,6 +265,8 @@ type Mutation {
 
     createEmployee(data: RegisterInput!): String!
 
+    userRegister(data: RegisterInput!): String!
+
     updateUser(
         email: String!,
         name: String!
@@ -323,7 +325,6 @@ input CreateCompanyInput {
 input RegisterInput {
     name: String!
     email: String!
-    password: String!
 }
 
 input ClientRegisterInput {

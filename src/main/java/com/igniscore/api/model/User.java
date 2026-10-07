@@ -84,11 +84,22 @@ public class User implements UserDetails {
     @Column(name = "onboarding")
     private boolean onboarding;
 
+    @Column(name = "first_login")
+    private boolean firstLogin;
+
     public User() {
     }
 
     public User(Integer id) {
         this.id = id;
+    }
+
+    public User(String name, String email, String password, UserRole role, Company company) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.company = company;
     }
 
     // --- Getters ---
@@ -101,6 +112,10 @@ public class User implements UserDetails {
 
     public boolean isOnboarding() {
         return onboarding;
+    }
+
+    public boolean isFirstLogin() {
+        return firstLogin;
     }
 
     /**
@@ -129,6 +144,7 @@ public class User implements UserDetails {
         return emailVerified;
     }
 
+
     // --- Setters ---
 
     public void setName(String name) { this.name = name; }
@@ -151,6 +167,10 @@ public class User implements UserDetails {
 
     public void setOnboarding(boolean onboarding) {
         this.onboarding = onboarding;
+    }
+
+    public void setFirstLogin(boolean firstLogin) {
+        this.firstLogin = firstLogin;
     }
 
     // --- Spring Security Methods ---

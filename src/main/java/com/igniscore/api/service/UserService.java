@@ -2,6 +2,7 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.auth.LoginResponseDTO;
 import com.igniscore.api.dto.auth.RegisterDTO;
+import com.igniscore.api.dto.user.UserRegisterDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.model.UserRole;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
 /**
@@ -214,5 +216,50 @@ public class UserService {
         user.setOnboarding(true);
 
         return repository.save(user);
+    }
+
+    @Transactional
+    public String userRegister(UserRegisterDTO data) {
+
+        User owner = authUserService.getUserOrThrow();
+
+        if(owner.getRole() != UserRole.OWNER && owner.getCompany() != null) {
+            return "It is not possible to create a user";
+        }
+
+        String temporaryPassword = generateTemporaryPassword();
+
+        String encryptedPassword = new BCryptPasswordEncoder().encode(temporaryPassword);
+
+        User user = new User(
+                data.getName(),
+                data.getEmail(),
+                encryptedPassword,
+                UserRole.EMPLOYEE,
+                owner.getCompany());
+
+        repository.save(user);
+
+        emailService.sendTemporaryPassword(
+                user.getEmail(),
+                user.getName(),
+                temporaryPassword
+        );
+
+        return "User successfully registered";
+
+    }
+
+    private String generateTemporaryPassword() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+
+        StringBuilder password = new StringBuilder(8);
+
+        for (int i = 0; i < 8; i++) {
+            password.append(characters.charAt(random.nextInt(characters.length())));
+        }
+
+        return password.toString();
     }
 }
