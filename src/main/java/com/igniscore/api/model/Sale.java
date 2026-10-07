@@ -6,6 +6,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -120,6 +121,20 @@ public class Sale implements Serializable {
      */
     @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
+
+    /**
+     * Timestamp when the sale was created.
+     */
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    /**
+     * Timestamp when the sale was deleted.
+     *
+     * <p>When this field is null, the sale is considered active.
+     */
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     /**
      * Company associated with the sale.
@@ -322,6 +337,24 @@ public class Sale implements Serializable {
     }
 
     /**
+     * Returns the sale creation timestamp.
+     *
+     * @return creation timestamp
+     */
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    /**
+     * Returns the sale deletion timestamp.
+     *
+     * @return deletion timestamp, or null when the sale is active
+     */
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    /**
      * Returns the payment due date.
      *
      * @return due date
@@ -415,6 +448,24 @@ public class Sale implements Serializable {
      */
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
+    }
+
+    /**
+     * Defines the sale creation timestamp.
+     *
+     * @param createdAt creation timestamp
+     */
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    /**
+     * Defines the sale deletion timestamp.
+     *
+     * @param deletedAt deletion timestamp
+     */
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     /**
