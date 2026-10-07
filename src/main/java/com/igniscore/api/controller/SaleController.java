@@ -129,4 +129,9 @@ public class SaleController {
     ) {
         return service.updateSaleStatus(saleId, status);
     }
+
+    @MutationMapping
+    public Boolean deleteSale(@Argument Integer saleId) {
+        return service.deleteSale(saleId);
+    }
 }

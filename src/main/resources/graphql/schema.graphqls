@@ -297,6 +297,10 @@ type Mutation {
         status: SaleStatus!
     ): SaleResponse!
 
+    deleteSale(
+        saleId: ID!
+    ): Boolean
+
     storeAddress(input: AddressRegisterInput!): Address!
 
     updateAddress(input: AddressUpdateInput!): Address!
