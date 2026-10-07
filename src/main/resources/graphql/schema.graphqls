@@ -230,9 +230,10 @@ type ExpirationPage {
 
 type Me {
     id: ID!
-    name: String
+    name: String!
     email: String!
     role: UserRole!
+    onboarding: Boolean!
     companyId: Int
 }
 
@@ -280,6 +281,8 @@ type Mutation {
     updateAddress(input: AddressUpdateInput!): Address!
 
     createCheckout(input: StripeRequestInput!): StripeResponse!
+
+    completeOnboarding: Me
 
 }
 

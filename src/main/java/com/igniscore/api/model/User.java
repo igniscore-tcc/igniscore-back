@@ -81,6 +81,9 @@ public class User implements UserDetails {
     @Column(nullable = false, name = "email_verified")
     private boolean emailVerified = false;
 
+    @Column(name = "onboarding")
+    private boolean onboarding;
+
     public User() {
     }
 
@@ -95,6 +98,10 @@ public class User implements UserDetails {
     public String getName() { return name; }
 
     public String getEmail() { return email; }
+
+    public boolean isOnboarding() {
+        return onboarding;
+    }
 
     /**
      * Returns the user's password (used by Spring Security).
@@ -140,6 +147,10 @@ public class User implements UserDetails {
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public void setOnboarding(boolean onboarding) {
+        this.onboarding = onboarding;
     }
 
     // --- Spring Security Methods ---

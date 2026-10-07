@@ -205,4 +205,14 @@ public class UserService {
 
         return "Funcionário criado com sucesso. Um e-mail de verificação foi enviado para o funcionário.";
     }
+
+    @Transactional
+    public User completeOnboarding(Integer userId) {
+        User user = repository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        user.setOnboarding(false);
+
+        return repository.save(user);
+    }
 }

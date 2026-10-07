@@ -7,5 +7,6 @@ public record MeDTO(
         String name,
         String email,
         UserRole role,
+        Boolean onboarding,
         Integer companyId
 ) {}
