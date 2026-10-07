@@ -211,7 +211,7 @@ public class UserService {
         User user = repository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        user.setOnboarding(false);
+        user.setOnboarding(true);
 
         return repository.save(user);
     }

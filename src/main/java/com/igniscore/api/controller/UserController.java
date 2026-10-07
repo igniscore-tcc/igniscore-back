@@ -109,6 +109,7 @@ public class UserController {
 
         User user = (User) authentication.getPrincipal();
 
+        assert user != null;
         User updatedUser = service.completeOnboarding(user.getId());
 
         UserRole role = UserRole.valueOf(
