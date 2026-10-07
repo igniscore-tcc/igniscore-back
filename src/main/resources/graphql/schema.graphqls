@@ -93,7 +93,7 @@ type Sale {
     date: Date!
     paymentMethod: SaleType!
     status: SaleStatus!
-    type: SaleDocument!
+    type: SaleDocument
     document: String
     dueDate: Date!
     client: Client!
@@ -353,7 +353,7 @@ input CreateSaleItemInput {
 input CreateSaleInput {
     clientId: Int!
     paymentMethod: SaleType!
-    type: SaleDocument!
+    type: SaleDocument
     document: String
     discount: BigDecimal
     items: [CreateSaleItemInput!]!
