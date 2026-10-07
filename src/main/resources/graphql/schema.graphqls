@@ -130,6 +130,22 @@ type MonthlySales {
     total: BigDecimal!
 }
 
+type SaleResponse {
+    id: ID!
+    numberSale: Int!
+    quantityItems: Int!
+    discount: BigDecimal
+    total: BigDecimal!
+    date: Date!
+    paymentMethod: SaleType!
+    status: SaleStatus!
+    type: SaleDocument
+    document: String
+    dueDate: Date!
+    client: Client!
+    items: [SaleItem!]!
+}
+
 type Query {
 
     companies: [Company!]!
@@ -230,9 +246,10 @@ type ExpirationPage {
 
 type Me {
     id: ID!
-    name: String
+    name: String!
     email: String!
     role: UserRole!
+    onboarding: Boolean!
     companyId: Int
 }
 
@@ -275,11 +292,22 @@ type Mutation {
 
     storeSale(input: CreateSaleInput!): Sale!
 
+    updateSaleStatus(
+        saleId: Int!,
+        status: SaleStatus!
+    ): SaleResponse!
+
+    deleteSale(
+        saleId: ID!
+    ): Boolean
+
     storeAddress(input: AddressRegisterInput!): Address!
 
     updateAddress(input: AddressUpdateInput!): Address!
 
     createCheckout(input: StripeRequestInput!): StripeResponse!
+
+    completeOnboarding: Me
 
 }
 
@@ -387,6 +415,10 @@ input StripeRequestInput {
 enum SaleType {
     INSTALLMENT
     CASH
+    CREDIT_CARD
+    DEBIT_CARD
+    PIX
+    BANK_SLIP
 }
 
 enum ProductType {

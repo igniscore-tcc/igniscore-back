@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 
@@ -83,10 +82,41 @@ public class UserController {
         User user = (User) authentication.getPrincipal();
 
         UserRole role = UserRole.valueOf(
-                authentication.getAuthorities()
-                        .iterator()
-                        .next()
-                        .getAuthority()
+                Objects.requireNonNull(authentication.getAuthorities()
+                                .iterator()
+                                .next()
+                                .getAuthority())
+                        .replace("ROLE_", "")
+        );
+
+        Integer companyId = authentication.getDetails() != null
+                ? (Integer) authentication.getDetails()
+                : null;
+
+        assert user != null;
+        return new MeDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                role,
+                user.isOnboarding(),
+                companyId
+        );
+    }
+
+    @MutationMapping
+    public MeDTO completeOnboarding(Authentication authentication) {
+
+        User user = (User) authentication.getPrincipal();
+
+        assert user != null;
+        User updatedUser = service.completeOnboarding(user.getId());
+
+        UserRole role = UserRole.valueOf(
+                Objects.requireNonNull(authentication.getAuthorities()
+                                .iterator()
+                                .next()
+                                .getAuthority())
                         .replace("ROLE_", "")
         );
 
@@ -95,10 +125,11 @@ public class UserController {
                 : null;
 
         return new MeDTO(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
+                updatedUser.getId(),
+                updatedUser.getName(),
+                updatedUser.getEmail(),
                 role,
+                updatedUser.isOnboarding(),
                 companyId
         );
     }

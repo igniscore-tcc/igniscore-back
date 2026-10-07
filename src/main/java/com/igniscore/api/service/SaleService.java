@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -193,7 +194,7 @@ public class SaleService {
 
         Company company = authUserService.getCompanyOrThrow();
 
-        Page<Sale> page = repository.findByCompany(company, true, pageable);
+        Page<Sale> page = repository.findByCompanyAndDeletedAtIsNull(company, true, pageable);
 
         List<SaleResponseDTO> sales = page.getContent().stream().map(SaleResponseDTO::new).toList();
 
@@ -217,12 +218,68 @@ public class SaleService {
     ) {
         Company company = authUserService.getCompanyOrThrow();
 
-        return repository.findByCompanyAndDateBetween(
+        return repository.findByCompanyAndDateBetweenAndDeletedAtIsNull(
                 company,
                 startDate,
                 endDate,
                 pageable
         );
+    }
+
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "sales", allEntries = true),
+            @CacheEvict(value = "salesPerPeriod", allEntries = true)
+    })
+    public SaleResponseDTO updateSaleStatus(
+            Integer saleId,
+            SaleStatus status
+    ) {
+        Company company = authUserService.getCompanyOrThrow();
+
+        Sale sale = repository.findById(saleId)
+                .orElseThrow(() ->
+                        new RuntimeException("Sale not found")
+                );
+
+        if (!sale.getCompany().getId().equals(company.getId())) {
+            throw new RuntimeException(
+                    "Sale does not belong to the company"
+            );
+        }
+
+        sale.setStatus(status);
+
+        Sale updatedSale = repository.save(sale);
+
+        return new SaleResponseDTO(updatedSale);
+    }
+
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "sales", allEntries = true),
+            @CacheEvict(value = "salesPerPeriod", allEntries = true)
+    })
+    public Boolean deleteSale(Integer saleId) {
+
+        Company company = authUserService.getCompanyOrThrow();
+
+        Sale sale = repository.findById(saleId)
+                .orElseThrow(() ->
+                        new RuntimeException("Sale not found")
+                );
+
+        if (!sale.getCompany().getId().equals(company.getId())) {
+            throw new RuntimeException(
+                    "Sale does not belong to the company"
+            );
+        }
+
+        sale.setDeletedAt(LocalDateTime.now());
+
+        repository.save(sale);
+
+        return true;
     }
 
     private Map<Integer, Product> loadAndValidateProducts(
