@@ -130,6 +130,22 @@ type MonthlySales {
     total: BigDecimal!
 }
 
+type SaleResponse {
+    id: ID!
+    numberSale: Int!
+    quantityItems: Int!
+    discount: BigDecimal
+    total: BigDecimal!
+    date: Date!
+    paymentMethod: SaleType!
+    status: SaleStatus!
+    type: SaleDocument
+    document: String
+    dueDate: Date!
+    client: Client!
+    items: [SaleItem!]!
+}
+
 type Query {
 
     companies: [Company!]!
@@ -275,6 +291,11 @@ type Mutation {
     ): String!
 
     storeSale(input: CreateSaleInput!): Sale!
+
+    updateSaleStatus(
+        saleId: Int!,
+        status: SaleStatus!
+    ): SaleResponse!
 
     storeAddress(input: AddressRegisterInput!): Address!
 

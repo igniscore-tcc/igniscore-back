@@ -225,6 +225,35 @@ public class SaleService {
         );
     }
 
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "sales", allEntries = true),
+            @CacheEvict(value = "salesPerPeriod", allEntries = true)
+    })
+    public SaleResponseDTO updateSaleStatus(
+            Integer saleId,
+            SaleStatus status
+    ) {
+        Company company = authUserService.getCompanyOrThrow();
+
+        Sale sale = repository.findById(saleId)
+                .orElseThrow(() ->
+                        new RuntimeException("Sale not found")
+                );
+
+        if (!sale.getCompany().getId().equals(company.getId())) {
+            throw new RuntimeException(
+                    "Sale does not belong to the company"
+            );
+        }
+
+        sale.setStatus(status);
+
+        Sale updatedSale = repository.save(sale);
+
+        return new SaleResponseDTO(updatedSale);
+    }
+
     private Map<Integer, Product> loadAndValidateProducts(
             List<CreateSaleItemDTO> items
     ) {

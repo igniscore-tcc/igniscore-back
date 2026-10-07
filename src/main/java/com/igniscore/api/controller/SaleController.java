@@ -2,7 +2,9 @@ package com.igniscore.api.controller;
 
 import com.igniscore.api.dto.sale.CreateSaleDTO;
 import com.igniscore.api.dto.sale.SaleQueryDTO;
+import com.igniscore.api.dto.sale.SaleResponseDTO;
 import com.igniscore.api.model.Sale;
+import com.igniscore.api.model.SaleStatus;
 import com.igniscore.api.service.SaleService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -118,5 +120,13 @@ public class SaleController {
                 endDate,
                 pageable
         ).getContent();
+    }
+
+    @MutationMapping
+    public SaleResponseDTO updateSaleStatus(
+            @Argument Integer saleId,
+            @Argument SaleStatus status
+    ) {
+        return service.updateSaleStatus(saleId, status);
     }
 }
