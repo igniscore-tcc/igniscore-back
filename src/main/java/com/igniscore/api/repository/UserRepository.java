@@ -47,5 +47,14 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      * @param pageable pagination and sorting information
      * @return paginated list of users belonging to the company
      */
-    Page<User> findByCompany(Company company, Pageable pageable);
+    @Query("""
+        SELECT u
+        FROM User u
+        WHERE u.company = :company
+          AND u.deletedAt IS NULL
+        ORDER BY
+            CASE WHEN u.role = com.igniscore.api.model.UserRole.OWNER THEN 0 ELSE 1 END,
+            u.id ASC
+        """)
+    Page<User> findByCompanyAndDeletedAtIsNull(Company company, Pageable pageable);
 }

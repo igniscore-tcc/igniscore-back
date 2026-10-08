@@ -1,9 +1,9 @@
 package com.igniscore.api.service;
 
-import com.igniscore.api.dto.auth.LoginResponseDTO;
 import com.igniscore.api.dto.auth.RegisterDTO;
 import com.igniscore.api.dto.user.ChangePasswordDTO;
 import com.igniscore.api.dto.user.UserRegisterDTO;
+import com.igniscore.api.dto.user.UserUpdateDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.model.UserRole;
@@ -12,15 +12,14 @@ import com.igniscore.api.repository.UserRepository;
 import com.igniscore.api.repository.VerificationTokenRepository;
 import com.igniscore.api.utils.CompanyUtils;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.security.SecureRandom;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 /**
@@ -156,7 +155,7 @@ public class UserService {
             throw new RuntimeException("User is not associated with a company.");
         }
 
-        return repository.findByCompany(company, pageable);
+        return repository.findByCompanyAndDeletedAtIsNull(company, pageable);
     }
 
     @Transactional
@@ -284,6 +283,76 @@ public class UserService {
         repository.save(user);
 
         return "Password changed successfully.";
+    }
+
+    @Transactional
+    public String updateEmployee(UserUpdateDTO data) {
+
+        User employee = validateEmployee(data.getId());
+
+        User existingUser = repository.findByEmail(data.getEmail());
+
+        if (existingUser != null &&
+                !existingUser.getId().equals(employee.getId())) {
+            return "Unable to update employee.";
+        }
+
+        assert employee != null;
+        employee.setName(data.getName());
+        employee.setEmail(data.getEmail());
+
+        repository.save(employee);
+
+        return "Employee updated successfully.";
+    }
+
+    @Transactional
+    public String deleteEmployee(Integer employeeId) {
+
+        User employee = validateEmployee(employeeId);
+
+        if (employee == null) {
+            return "Unable to delete employee.";
+        }
+
+        employee.setDeletedAt(Timestamp.from(Instant.now()));
+
+        repository.save(employee);
+
+        return "Employee deleted successfully.";
+    }
+
+    private User validateEmployee(Integer employeeId) {
+
+        User owner = authUserService.getUserOrThrow();
+
+        if (owner.getRole() != UserRole.OWNER) {
+            return null;
+        }
+
+        Company company = owner.getCompany();
+
+        if (company == null) {
+            return null;
+        }
+
+        User employee = repository.findById(employeeId)
+                .orElse(null);
+
+        if (employee == null) {
+            return null;
+        }
+
+        if (employee.getCompany() == null ||
+                !employee.getCompany().getId().equals(company.getId())) {
+            return null;
+        }
+
+        if (employee.getRole() != UserRole.EMPLOYEE) {
+            return null;
+        }
+
+        return employee;
     }
 
     private String generateTemporaryPassword() {

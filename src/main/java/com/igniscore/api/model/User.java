@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 
@@ -87,6 +88,9 @@ public class User implements UserDetails {
     @Column(name = "first_login")
     private boolean firstLogin;
 
+    @Column(name = "deleted_at")
+    private Timestamp deletedAt;
+
     public User() {
     }
 
@@ -144,6 +148,9 @@ public class User implements UserDetails {
         return emailVerified;
     }
 
+    public Timestamp getDeletedAt() {
+        return deletedAt;
+    }
 
     // --- Setters ---
 
@@ -171,6 +178,10 @@ public class User implements UserDetails {
 
     public void setFirstLogin(boolean firstLogin) {
         this.firstLogin = firstLogin;
+    }
+
+    public void setDeletedAt(Timestamp deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     // --- Spring Security Methods ---
