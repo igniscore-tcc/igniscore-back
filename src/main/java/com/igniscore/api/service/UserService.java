@@ -2,6 +2,7 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.auth.LoginResponseDTO;
 import com.igniscore.api.dto.auth.RegisterDTO;
+import com.igniscore.api.dto.user.ChangePasswordDTO;
 import com.igniscore.api.dto.user.UserRegisterDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
@@ -238,6 +239,8 @@ public class UserService {
                 UserRole.EMPLOYEE,
                 owner.getCompany());
 
+        user.setFirstLogin(true);
+
         repository.save(user);
 
         emailService.sendTemporaryPassword(
@@ -248,6 +251,39 @@ public class UserService {
 
         return "User successfully registered";
 
+    }
+
+    @Transactional
+    public String changeTemporaryPassword(ChangePasswordDTO data) {
+
+        User user = authUserService.getUserOrThrow();
+
+        if (!user.isFirstLogin()) {
+            return "Changing the temporary password is not necessary.";
+        }
+
+        if (data.getNewPassword() == null || data.getConfirmPassword() == null) {
+            return "The new password and the confirmation are mandatory.";
+        }
+
+        if (data.getNewPassword().length() < 8) {
+            return "The password must be at least 8 characters long.";
+        }
+
+        if (!data.getNewPassword().equals(data.getConfirmPassword())) {
+            return "The passwords do not match.";
+        }
+
+        String encryptedPassword =
+                new BCryptPasswordEncoder().encode(data.getNewPassword());
+
+        user.setPassword(encryptedPassword);
+        user.setFirstLogin(false);
+        user.setEmailVerified(true);
+
+        repository.save(user);
+
+        return "Password changed successfully.";
     }
 
     private String generateTemporaryPassword() {

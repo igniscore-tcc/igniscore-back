@@ -267,6 +267,10 @@ type Mutation {
 
     userRegister(data: RegisterInput!): String!
 
+    changeTemporaryPassword(
+        data: ChangePasswordInput!
+    ): String!
+
     updateUser(
         email: String!,
         name: String!
@@ -325,6 +329,11 @@ input CreateCompanyInput {
 input RegisterInput {
     name: String!
     email: String!
+}
+
+input ChangePasswordInput {
+    newPassword: String!
+    confirmPassword: String!
 }
 
 input ClientRegisterInput {

@@ -1,6 +1,7 @@
 package com.igniscore.api.controller;
 
 import com.igniscore.api.dto.auth.RegisterDTO;
+import com.igniscore.api.dto.user.ChangePasswordDTO;
 import com.igniscore.api.dto.user.MeDTO;
 import com.igniscore.api.dto.user.UserRegisterDTO;
 import com.igniscore.api.model.User;
@@ -163,5 +164,10 @@ public class UserController {
     @MutationMapping
         public String userRegister(@Argument UserRegisterDTO data) {
         return service.userRegister(data);
+    }
+
+    @MutationMapping
+    public String changeTemporaryPassword(@Argument ChangePasswordDTO data) {
+        return service.changeTemporaryPassword(data);
     }
 }
