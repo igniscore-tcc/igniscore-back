@@ -270,6 +270,8 @@ type Mutation {
 
     updateEmployee(data: UserUpdateDTO!): String!
 
+    deleteEmployee(id: Int!): String!
+
     changeTemporaryPassword(
         data: ChangePasswordInput!
     ): String!

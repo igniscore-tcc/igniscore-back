@@ -175,6 +175,11 @@ public class UserController {
     }
 
     @MutationMapping
+    public String deleteEmployee(@Argument Integer id) {
+        return service.deleteEmployee(id);
+    }
+
+    @MutationMapping
     public String changeTemporaryPassword(@Argument ChangePasswordDTO data) {
         return service.changeTemporaryPassword(data);
     }

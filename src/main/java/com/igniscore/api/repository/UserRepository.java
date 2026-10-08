@@ -47,5 +47,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      * @param pageable pagination and sorting information
      * @return paginated list of users belonging to the company
      */
-    Page<User> findByCompany(Company company, Pageable pageable);
+    Page<User> findByCompanyAndDeletedAtIsNull(Company company, Pageable pageable);
 }
