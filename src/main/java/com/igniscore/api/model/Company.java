@@ -1,5 +1,6 @@
 package com.igniscore.api.model;
 
+import com.igniscore.api.dto.company.CreateCompanyDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -124,4 +125,12 @@ public class Company implements Serializable {
     @Column(name = "subscription_status")
     private SubscriptionStatus subscriptionStatus;
 
+    public Company(CreateCompanyDTO dto) {
+        this.name = dto.getName();
+        this.cnpj = dto.getCnpj();
+        this.ie = dto.getIe();
+        this.ufIe = dto.getUfIe();
+        this.email = dto.getEmail();
+        this.phone = dto.getPhone();
+    }
 }

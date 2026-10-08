@@ -65,18 +65,11 @@ public class CompanyService {
 
         User user = this.authUserService.getUserOrThrow();
 
-        Company company = new Company();
-
         if (dto.getCnpj() == null || dto.getCnpj().isBlank()) {
             throw new IllegalArgumentException("CNPJ is required");
         }
 
-        company.setName(dto.getName());
-        company.setCnpj(dto.getCnpj());
-        company.setIe(dto.getIe());
-        company.setUfIe(dto.getUfIe());
-        company.setEmail(dto.getEmail());
-        company.setPhone(dto.getPhone());
+        Company company = new Company(dto);
 
         Company savedCompany = repository.save(company);
 
