@@ -4,6 +4,7 @@ import com.igniscore.api.dto.auth.LoginResponseDTO;
 import com.igniscore.api.dto.auth.RegisterDTO;
 import com.igniscore.api.dto.user.ChangePasswordDTO;
 import com.igniscore.api.dto.user.UserRegisterDTO;
+import com.igniscore.api.dto.user.UserUpdateDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.model.UserRole;
@@ -284,6 +285,60 @@ public class UserService {
         repository.save(user);
 
         return "Password changed successfully.";
+    }
+
+    @Transactional
+    public String updateEmployee(UserUpdateDTO data) {
+
+        User employee = validateEmployeeForUpdate(data.getId());
+
+        User existingUser = repository.findByEmail(data.getEmail());
+
+        if (existingUser != null &&
+                !existingUser.getId().equals(employee.getId())) {
+            return "Unable to update employee.";
+        }
+
+        assert employee != null;
+        employee.setName(data.getName());
+        employee.setEmail(data.getEmail());
+
+        repository.save(employee);
+
+        return "Employee updated successfully.";
+    }
+
+    private User validateEmployeeForUpdate(Integer employeeId) {
+
+        User owner = authUserService.getUserOrThrow();
+
+        if (owner.getRole() != UserRole.OWNER) {
+            return null;
+        }
+
+        Company company = owner.getCompany();
+
+        if (company == null) {
+            return null;
+        }
+
+        User employee = repository.findById(employeeId)
+                .orElse(null);
+
+        if (employee == null) {
+            return null;
+        }
+
+        if (employee.getCompany() == null ||
+                !employee.getCompany().getId().equals(company.getId())) {
+            return null;
+        }
+
+        if (employee.getRole() != UserRole.EMPLOYEE) {
+            return null;
+        }
+
+        return employee;
     }
 
     private String generateTemporaryPassword() {
