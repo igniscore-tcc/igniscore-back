@@ -61,21 +61,38 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid @NonNull AutDTO data) {
+
         User user = this.repository.findByEmail(data.email());
-        if (user != null && !user.isEmailVerified()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", "Email not verified. Please verify your account."));
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid email or password."));
         }
 
-        var usernamepassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
+        if (!user.isEmailVerified() && !user.isFirstLogin()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of(
+                            "error",
+                            "Email not verified. Please verify your account."
+                    ));
+        }
+
+        var usernamepassword =
+                new UsernamePasswordAuthenticationToken(
+                        data.email(),
+                        data.password()
+                );
+
         var auth = this.authenticationManager.authenticate(usernamepassword);
 
         var principal = auth.getPrincipal();
+
         if (!(principal instanceof User authenticatedUser)) {
             throw new RuntimeException("User authentication failed");
         }
 
         var token = jwtService.generateJwt(authenticatedUser);
+
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
@@ -95,6 +112,7 @@ public class AuthController {
         newUser.setRole(data.role());
         newUser.setActive(false);
         newUser.setEmailVerified(false);
+        newUser.setFirstLogin(false);
 
         User savedUser = this.repository.save(newUser);
 

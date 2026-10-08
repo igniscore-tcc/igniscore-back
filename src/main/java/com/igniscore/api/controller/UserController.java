@@ -1,7 +1,9 @@
 package com.igniscore.api.controller;
 
 import com.igniscore.api.dto.auth.RegisterDTO;
+import com.igniscore.api.dto.user.ChangePasswordDTO;
 import com.igniscore.api.dto.user.MeDTO;
+import com.igniscore.api.dto.user.UserRegisterDTO;
 import com.igniscore.api.model.User;
 import com.igniscore.api.model.UserRole;
 import com.igniscore.api.service.UserService;
@@ -100,6 +102,7 @@ public class UserController {
                 user.getEmail(),
                 role,
                 user.isOnboarding(),
+                user.isFirstLogin(),
                 companyId
         );
     }
@@ -130,6 +133,7 @@ public class UserController {
                 updatedUser.getEmail(),
                 role,
                 updatedUser.isOnboarding(),
+                updatedUser.isFirstLogin(),
                 companyId
         );
     }
@@ -157,5 +161,15 @@ public class UserController {
     @MutationMapping
     public String createEmployee(@Argument RegisterDTO data) {
         return service.store(data);
+    }
+
+    @MutationMapping
+        public String userRegister(@Argument UserRegisterDTO data) {
+        return service.userRegister(data);
+    }
+
+    @MutationMapping
+    public String changeTemporaryPassword(@Argument ChangePasswordDTO data) {
+        return service.changeTemporaryPassword(data);
     }
 }

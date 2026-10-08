@@ -2,6 +2,8 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.auth.LoginResponseDTO;
 import com.igniscore.api.dto.auth.RegisterDTO;
+import com.igniscore.api.dto.user.ChangePasswordDTO;
+import com.igniscore.api.dto.user.UserRegisterDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.model.UserRole;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
 /**
@@ -214,5 +217,85 @@ public class UserService {
         user.setOnboarding(true);
 
         return repository.save(user);
+    }
+
+    @Transactional
+    public String userRegister(UserRegisterDTO data) {
+
+        User owner = authUserService.getUserOrThrow();
+
+        if(owner.getRole() != UserRole.OWNER && owner.getCompany() != null) {
+            return "It is not possible to create a user";
+        }
+
+        String temporaryPassword = generateTemporaryPassword();
+
+        String encryptedPassword = new BCryptPasswordEncoder().encode(temporaryPassword);
+
+        User user = new User(
+                data.getName(),
+                data.getEmail(),
+                encryptedPassword,
+                UserRole.EMPLOYEE,
+                owner.getCompany());
+
+        user.setFirstLogin(true);
+
+        repository.save(user);
+
+        emailService.sendTemporaryPassword(
+                user.getEmail(),
+                user.getName(),
+                temporaryPassword
+        );
+
+        return "User successfully registered";
+
+    }
+
+    @Transactional
+    public String changeTemporaryPassword(ChangePasswordDTO data) {
+
+        User user = authUserService.getUserOrThrow();
+
+        if (!user.isFirstLogin()) {
+            return "Changing the temporary password is not necessary.";
+        }
+
+        if (data.getNewPassword() == null || data.getConfirmPassword() == null) {
+            return "The new password and the confirmation are mandatory.";
+        }
+
+        if (data.getNewPassword().length() < 8) {
+            return "The password must be at least 8 characters long.";
+        }
+
+        if (!data.getNewPassword().equals(data.getConfirmPassword())) {
+            return "The passwords do not match.";
+        }
+
+        String encryptedPassword =
+                new BCryptPasswordEncoder().encode(data.getNewPassword());
+
+        user.setPassword(encryptedPassword);
+        user.setFirstLogin(false);
+        user.setEmailVerified(true);
+
+        repository.save(user);
+
+        return "Password changed successfully.";
+    }
+
+    private String generateTemporaryPassword() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+
+        StringBuilder password = new StringBuilder(8);
+
+        for (int i = 0; i < 8; i++) {
+            password.append(characters.charAt(random.nextInt(characters.length())));
+        }
+
+        return password.toString();
     }
 }

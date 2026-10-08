@@ -250,6 +250,7 @@ type Me {
     email: String!
     role: UserRole!
     onboarding: Boolean!
+    firstLogin: Boolean!
     companyId: Int
 }
 
@@ -264,6 +265,12 @@ type Mutation {
     createCompany(input: CreateCompanyInput!): Company!
 
     createEmployee(data: RegisterInput!): String!
+
+    userRegister(data: RegisterInput!): String!
+
+    changeTemporaryPassword(
+        data: ChangePasswordInput!
+    ): String!
 
     updateUser(
         email: String!,
@@ -323,7 +330,11 @@ input CreateCompanyInput {
 input RegisterInput {
     name: String!
     email: String!
-    password: String!
+}
+
+input ChangePasswordInput {
+    newPassword: String!
+    confirmPassword: String!
 }
 
 input ClientRegisterInput {
