@@ -250,6 +250,7 @@ type Me {
     email: String!
     role: UserRole!
     onboarding: Boolean!
+    firstLogin: Boolean!
     companyId: Int
 }
 

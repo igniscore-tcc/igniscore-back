@@ -112,6 +112,7 @@ public class AuthController {
         newUser.setRole(data.role());
         newUser.setActive(false);
         newUser.setEmailVerified(false);
+        newUser.setFirstLogin(false);
 
         User savedUser = this.repository.save(newUser);
 

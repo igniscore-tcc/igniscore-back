@@ -102,6 +102,7 @@ public class UserController {
                 user.getEmail(),
                 role,
                 user.isOnboarding(),
+                user.isFirstLogin(),
                 companyId
         );
     }
@@ -132,6 +133,7 @@ public class UserController {
                 updatedUser.getEmail(),
                 role,
                 updatedUser.isOnboarding(),
+                updatedUser.isFirstLogin(),
                 companyId
         );
     }
