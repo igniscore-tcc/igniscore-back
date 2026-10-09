@@ -1,22 +1,23 @@
 package com.igniscore.api.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 
 /**
  * Entity representing an individual item within a sale.
  *
- * <p>A {@link SaleItem} stores product information associated
- * with a specific sale, including quantity, unit price,
- * and calculated total value.
+ * <p>Stores the product, quantity, unit price, and total value associated
+ * with a sale item. Quantity and unit price changes trigger automatic
+ * recalculation of the total.
  *
  * <p>Main responsibilities:
  * <ul>
  *     <li>Represent products included in a sale</li>
- *     <li>Maintain item pricing information</li>
- *     <li>Calculate total item value</li>
- *     <li>Validate quantity and pricing rules</li>
+ *     <li>Maintain quantity and pricing information</li>
+ *     <li>Calculate the total item value</li>
+ *     <li>Enforce quantity and unit price business rules</li>
  * </ul>
  *
  * <p>Persistence mapping:
@@ -26,6 +27,7 @@ import java.math.BigDecimal;
  *     <li>Associated with {@link Product}</li>
  * </ul>
  */
+@Getter
 @Entity
 @Table(name = "sale_items")
 public class SaleItem {
@@ -47,8 +49,7 @@ public class SaleItem {
     /**
      * Unit price applied to the product.
      *
-     * <p>Uses fixed decimal precision to ensure
-     * monetary accuracy.
+     * <p>Uses fixed decimal precision to preserve monetary accuracy.
      */
     @Column(
             name = "unit_price_sale_item",
@@ -59,12 +60,7 @@ public class SaleItem {
     private BigDecimal unitPrice;
 
     /**
-     * Total value of the item.
-     *
-     * <p>Calculated using:
-     * <pre>
-     * quantity * unitPrice
-     * </pre>
+     * Total value of the item, calculated as quantity multiplied by unit price.
      */
     @Column(
             name = "total_sale_item",
@@ -91,35 +87,22 @@ public class SaleItem {
     /**
      * Protected constructor required by JPA.
      */
-    protected SaleItem() {}
+    protected SaleItem() {
+    }
 
     /**
-     * Creates a new sale item instance.
-     *
-     * <p>The constructor validates:
-     * <ul>
-     *     <li>Quantity must be greater than zero</li>
-     *     <li>Unit price must be greater than zero</li>
-     * </ul>
-     *
-     * <p>The total value is automatically calculated.
+     * Creates a sale item and calculates its total value.
      *
      * @param product associated product
      * @param quantity product quantity
      * @param unitPrice product unit price
-     *
-     * @throws IllegalArgumentException when:
-     * <ul>
-     *     <li>Quantity is invalid</li>
-     *     <li>Unit price is invalid</li>
-     * </ul>
+     * @throws IllegalArgumentException if quantity or unit price is invalid
      */
     public SaleItem(
             Product product,
             Integer quantity,
             BigDecimal unitPrice
     ) {
-
         validateQuantity(quantity);
         validateUnitPrice(unitPrice);
 
@@ -131,64 +114,45 @@ public class SaleItem {
     }
 
     /**
-     * Updates the item quantity.
-     *
-     * <p>After updating the quantity,
-     * the total value is recalculated.
+     * Updates the item quantity and recalculates its total value.
      *
      * @param quantity new quantity
+     * @throws IllegalArgumentException if quantity is null or not positive
      */
     public void changeQuantity(Integer quantity) {
-
         validateQuantity(quantity);
 
         this.quantity = quantity;
-
         recalculateTotal();
     }
 
     /**
-     * Updates the unit price.
-     *
-     * <p>After updating the price,
-     * the total value is recalculated.
+     * Updates the unit price and recalculates the total item value.
      *
      * @param unitPrice new unit price
+     * @throws IllegalArgumentException if the price is null or not positive
      */
     public void changeUnitPrice(BigDecimal unitPrice) {
-
         validateUnitPrice(unitPrice);
 
         this.unitPrice = unitPrice;
-
         recalculateTotal();
     }
 
     /**
-     * Recalculates the total item value.
-     *
-     * <p>Calculation formula:
-     * <pre>
-     * total = unitPrice * quantity
-     * </pre>
+     * Recalculates the total using the current quantity and unit price.
      */
     private void recalculateTotal() {
-
-        this.total = this.unitPrice.multiply(
-                BigDecimal.valueOf(this.quantity)
-        );
+        this.total = unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
     /**
      * Validates the item quantity.
      *
      * @param quantity quantity to validate
-     *
-     * @throws IllegalArgumentException if quantity
-     * is null or less than or equal to zero
+     * @throws IllegalArgumentException if quantity is null or not positive
      */
     private void validateQuantity(Integer quantity) {
-
         if (quantity == null || quantity <= 0) {
             throw new IllegalArgumentException(
                     "Quantity must be greater than zero"
@@ -200,15 +164,11 @@ public class SaleItem {
      * Validates the unit price.
      *
      * @param unitPrice price to validate
-     *
-     * @throws IllegalArgumentException if price
-     * is null or less than or equal to zero
+     * @throws IllegalArgumentException if the price is null or not positive
      */
     private void validateUnitPrice(BigDecimal unitPrice) {
-
-        if (unitPrice == null ||
-                unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
-
+        if (unitPrice == null
+                || unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException(
                     "Unit price must be greater than zero"
             );
@@ -216,65 +176,10 @@ public class SaleItem {
     }
 
     /**
-     * Returns the sale item identifier.
+     * Associates this item with a sale.
      *
-     * @return sale item ID
-     */
-    public Integer getId() {
-        return id;
-    }
-
-    /**
-     * Returns the product quantity.
-     *
-     * @return quantity
-     */
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    /**
-     * Returns the unit price.
-     *
-     * @return unit price
-     */
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
-    }
-
-    /**
-     * Returns the total value.
-     *
-     * @return total amount
-     */
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    /**
-     * Returns the associated product.
-     *
-     * @return product entity
-     */
-    public Product getProduct() {
-        return product;
-    }
-
-    /**
-     * Returns the associated sale.
-     *
-     * @return sale entity
-     */
-    public Sale getSale() {
-        return sale;
-    }
-
-    /**
-     * Defines the associated sale.
-     *
-     * <p>This method has package-private visibility
-     * to restrict relationship management to
-     * domain-level operations.
+     * <p>Package-private visibility restricts relationship management
+     * to operations within the model package.
      *
      * @param sale associated sale
      */
