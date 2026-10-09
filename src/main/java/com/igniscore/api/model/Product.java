@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.igniscore.api.dto.product.ProductStoreDTO;
 import com.igniscore.api.dto.product.ProductUpdateDTO;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,37 +17,26 @@ import java.time.LocalDate;
 /**
  * JPA entity representing a product managed within the platform.
  *
- * <p>This entity models products owned by a specific {@link Company},
- * supporting multi-tenant data isolation where each company maintains
- * an independent product catalog.
+ * <p>Each product belongs to a specific company, supporting multi-tenant
+ * data isolation and independent product catalogs.
  *
- * <p>The entity stores operational and commercial product information,
- * including identification data, categorization, pricing, validity,
- * batch tracking, and activation status.
+ * <p>The entity stores product identification, classification, validity,
+ * batch tracking, pricing, and activation status.
  *
- * <p>Main responsibilities:
+ * <p>Products support logical deactivation through the status field,
+ * preserving historical records in the database.
+ *
+ * <p>Persistence details:
  * <ul>
- *     <li>Persist product domain data</li>
- *     <li>Represent product lifecycle state</li>
- *     <li>Maintain company ownership association</li>
- *     <li>Support logical deletion through status flag</li>
- * </ul>
- *
- * <p>Persistence notes:
- * <ul>
- *     <li>Mapped to table {@code products}</li>
- *     <li>Uses {@link GenerationType#IDENTITY} for primary key generation</li>
- *     <li>Company association is lazily loaded for performance optimization</li>
- *     <li>Price uses {@link BigDecimal} with fixed precision and scale</li>
- * </ul>
- *
- * <p>Serialization notes:
- * <ul>
- *     <li>Hibernate lazy-loading proxy properties are ignored during JSON serialization</li>
- *     <li>Company association is excluded from JSON output to avoid unnecessary exposure
- *     and serialization recursion issues</li>
+ *     <li>Mapped to the {@code products} table</li>
+ *     <li>Uses identity-based primary key generation</li>
+ *     <li>Loads the company association lazily</li>
+ *     <li>Stores monetary values with precision 10 and scale 2</li>
  * </ul>
  */
+@Getter
+@Setter
+@NoArgsConstructor
 @JsonIgnoreProperties({
         "hibernateLazyInitializer",
         "handler"
@@ -62,12 +54,14 @@ public class Product implements Serializable {
     /**
      * Primary key identifier of the product.
      */
-    @SuppressWarnings("unused")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pk_id_prod")
     private Integer id;
 
+    /**
+     * Sequential product number used for identification.
+     */
     @Column(name = "number_product")
     private Integer numberProduct;
 
@@ -78,9 +72,7 @@ public class Product implements Serializable {
     private String name;
 
     /**
-     * Product classification or category.
-     *
-     * <p>Persisted using the enum constant name.
+     * Product classification, persisted as an enum constant name.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "type_prod")
@@ -88,42 +80,27 @@ public class Product implements Serializable {
 
     /**
      * Product expiration or validity date.
-     *
-     * <p>Uses {@link LocalDate} because time-zone or time-of-day
-     * precision is not required for this domain attribute.
      */
     @Column(name = "validity_prod")
     private LocalDate validity;
 
     /**
-     * Batch or lot identifier used for traceability.
+     * Batch or lot identifier used for product traceability.
      */
     @Column(name = "lot_prod")
     private String lot;
 
     /**
-     * Monetary value of the product.
-     *
-     * <p>Stored using fixed decimal precision:
-     * <ul>
-     *     <li>Precision: 10</li>
-     *     <li>Scale: 2</li>
-     * </ul>
-     *
-     * <p>This configuration supports values up to 99,999,999.99.
+     * Monetary value of the product, stored with precision 10 and scale 2.
      */
     @Column(name = "price_prod", precision = 10, scale = 2)
     private BigDecimal price;
 
-
     /**
-     * Logical activation status of the product.
+     * Indicates whether the product is active.
      *
-     * <p>Used to implement soft deletion semantics:
-     * <ul>
-     *     <li>{@code true}  = active product</li>
-     *     <li>{@code false} = logically deleted/inactive product</li>
-     * </ul>
+     * <p>{@code true} represents an active product; {@code false}
+     * represents a deactivated product.
      */
     @Column(name = "status_prod")
     private Boolean status;
@@ -131,19 +108,21 @@ public class Product implements Serializable {
     /**
      * Company that owns the product.
      *
-     * <p>This association enforces multi-tenant ownership boundaries.
-     *
-     * <p>Configured with lazy loading to reduce unnecessary entity loading
-     * during standard product retrieval operations.
+     * <p>The association is lazily loaded and excluded from JSON
+     * serialization to avoid exposing the entity relationship directly.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_id_company")
     @JsonIgnore
     private Company company;
 
-    public Product() {
-    }
-
+    /**
+     * Creates a product from registration data and associates it with
+     * its owning company.
+     *
+     * @param dto product registration data
+     * @param company company that owns the product
+     */
     public Product(ProductStoreDTO dto, Company company) {
         this.name = dto.getName();
         this.type = dto.getType();
@@ -154,95 +133,34 @@ public class Product implements Serializable {
         this.status = true;
     }
 
+    /**
+     * Creates a copy of an existing product.
+     *
+     * <p>Copies the product's scalar fields without copying its company
+     * association. Useful for preserving a snapshot before modification.
+     *
+     * @param product product whose data will be copied
+     */
     public Product(Product product) {
         this.id = product.id;
+        this.numberProduct = product.numberProduct;
         this.name = product.name;
         this.type = product.type;
         this.validity = product.validity;
         this.lot = product.lot;
         this.price = product.price;
         this.status = product.status;
-        this.numberProduct = product.numberProduct;
+        this.company = product.getCompany();
     }
 
-    // --- Getters ---
-
-    public Integer getId() {
-        return id;
-    }
-
-    public Company getCompany() {
-        return company;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public String getLot() {
-        return lot;
-    }
-
-    public LocalDate getValidity() {
-        return validity;
-    }
-
-    public ProductType getType() {
-        return type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public Integer getNumberProduct() {
-        return numberProduct;
-    }
-
-    // --- Setters ---
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setType(ProductType type) {
-        this.type = type;
-    }
-
-    public void setValidity(LocalDate validity) {
-        this.validity = validity;
-    }
-
-    public void setLot(String lot) {
-        this.lot = lot;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public void setCompany(Company company) {
-        this.company = company;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
-
-    public void setNumberProduct(Integer numberProduct) {
-        this.numberProduct = numberProduct;
-    }
-
+    /**
+     * Applies non-null values from an update DTO to the current product.
+     *
+     * <p>Fields omitted from the request remain unchanged.
+     *
+     * @param dto product update data
+     */
     public void update(ProductUpdateDTO dto) {
-
         if (dto.getName() != null) {
             this.name = dto.getName();
         }
@@ -264,6 +182,9 @@ public class Product implements Serializable {
         }
     }
 
+    /**
+     * Deactivates the product without physically deleting its database record.
+     */
     public void deactivate() {
         this.status = false;
     }

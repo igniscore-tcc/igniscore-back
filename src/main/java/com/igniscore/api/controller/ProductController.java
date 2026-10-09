@@ -5,7 +5,7 @@ import com.igniscore.api.dto.product.ProductStoreDTO;
 import com.igniscore.api.dto.product.ProductUpdateDTO;
 import com.igniscore.api.model.Product;
 import com.igniscore.api.service.ProductService;
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,85 +18,63 @@ import org.springframework.stereotype.Controller;
 /**
  * GraphQL controller responsible for handling product-related operations.
  *
- * <p>This controller acts as the API layer between GraphQL requests and the
- * {@link ProductService}, exposing mutations and queries for product management.
- *
- * <p>It supports:
- * <ul>
- *     <li>Product creation</li>
- *     <li>Product update (partial update via DTO)</li>
- *     <li>Product soft deletion</li>
- *     <li>Paginated product listing</li>
- * </ul>
- *
- * <p>All operations are scoped to the authenticated user's company through the service layer.
+ * <p>Delegates product creation, updates, retrieval, and logical deletion
+ * to {@link ProductService}. Access to product data is scoped to the
+ * authenticated user's company by the service layer.
  */
 @Controller
-@SuppressWarnings("unused")
+@RequiredArgsConstructor
 public class ProductController {
+
+    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_SIZE = 10;
 
     private final ProductService service;
 
     /**
-     * Constructor-based dependency injection.
+     * Creates a new product.
      *
-     * @param service product business service
-     */
-    public ProductController(ProductService service) {
-        this.service = service;
-    }
-
-    /**
-     * GraphQL mutation responsible for creating a new product.
-     *
-     * <p>Delegates creation logic to {@link ProductService#store(ProductStoreDTO)}.
-     *
-     * @param input DTO containing product creation data
-     * @return persisted {@link Product} entity
+     * @param input DTO containing product registration data
+     * @return created product
      */
     @MutationMapping
-    @SuppressWarnings("unused")
-    public Product storeProduct(@Argument @Valid ProductStoreDTO input) {
+    public Product storeProduct(@Argument ProductStoreDTO input) {
         return service.store(input);
     }
 
     /**
-     * GraphQL mutation responsible for updating an existing product.
+     * Updates an existing product using the provided non-null fields.
      *
-     * <p>Supports partial updates based on non-null fields in {@link ProductUpdateDTO}.
+     * <p>Only users with the OWNER or ADMIN role can perform this operation.
      *
-     * @param input DTO containing update data and product identifier
-     * @return updated {@link Product} entity
+     * @param input DTO containing the product identifier and update data
+     * @return updated product
      */
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
     @MutationMapping
-    @SuppressWarnings("unused")
-    public Product updateProduct(@Argument @Valid ProductUpdateDTO input) {
+    public Product updateProduct(@Argument ProductUpdateDTO input) {
         return service.update(input);
     }
 
     /**
-     * GraphQL query responsible for retrieving paginated products.
+     * Retrieves a paginated list of active products belonging to the
+     * authenticated user's company.
      *
-     * <p>Supports optional pagination parameters. Defaults:
-     * <ul>
-     *     <li>page = 0</li>
-     *     <li>size = 10</li>
-     * </ul>
+     * <p>Default pagination values are page 0 and 10 items per page.
+     * Results are sorted by product identifier in ascending order.
      *
-     * <p>Only products belonging to the authenticated user's company are returned,
-     * and only active products (status = true) are included.
-     *
-     * @param page page index (zero-based)
-     * @param size number of items per page
-     * @return list of {@link Product} entities for the requested page
+     * @param page zero-based page index, or {@code null} for the default
+     * @param size number of items per page, or {@code null} for the default
+     * @return paginated product results
      */
     @QueryMapping
-    public ProductQueryDTO products(@Argument Integer page, @Argument Integer size) {
-
+    public ProductQueryDTO products(
+            @Argument Integer page,
+            @Argument Integer size
+    ) {
         Pageable pageable = PageRequest.of(
-                page != null ? page : 0,
-                size != null ? size : 10,
+                page != null ? page : DEFAULT_PAGE,
+                size != null ? size : DEFAULT_SIZE,
                 Sort.by(Sort.Direction.ASC, "id")
         );
 
@@ -104,17 +82,15 @@ public class ProductController {
     }
 
     /**
-     * GraphQL mutation responsible for performing a soft delete on a product.
+     * Logically deletes a product by marking it as inactive.
      *
-     * <p>The product is not physically removed from the database. Instead,
-     * its status is set to inactive.
+     * <p>Only users with the OWNER or ADMIN role can perform this operation.
      *
-     * @param id product identifier
-     * @return updated {@link Product} entity marked as inactive
+     * @param id identifier of the product to deactivate
+     * @return product marked as inactive
      */
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
     @MutationMapping
-    @SuppressWarnings("unused")
     public Product deleteProduct(@Argument Integer id) {
         return service.delete(id);
     }
