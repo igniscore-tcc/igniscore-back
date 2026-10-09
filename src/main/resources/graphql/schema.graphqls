@@ -251,6 +251,7 @@ type Me {
     role: UserRole!
     onboarding: Boolean!
     firstLogin: Boolean!
+    plan: String!
     companyId: Int
 }
 
@@ -265,8 +266,6 @@ type Mutation {
     createCompany(input: CreateCompanyInput!): Company!
 
     createEmployee(data: RegisterInput!): String!
-
-    userRegister(data: RegisterInput!): String!
 
     updateEmployee(data: UserUpdateDTO!): String!
 

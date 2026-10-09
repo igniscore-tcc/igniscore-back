@@ -34,20 +34,9 @@ public record ProductResponseDTO(
                 product.getLot(),
                 product.getPrice(),
                 product.getStatus(),
-                product.getCompany() != null ? new CompanyResponseDTO(product.getCompany()) : null
+                product.getCompany() != null
+                        ? new CompanyResponseDTO(product.getCompany())
+                        : null
         );
     }
 }
-
-/*
-type ProductOutput {
-    id: ID!
-    numberProduct: Int
-    name: String!
-    type: String!
-    validity: Date!
-    lot: String!
-    price: BigDecimal!
-    company: Company
-}
- */

@@ -8,251 +8,125 @@ import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.ClientRepository;
+import com.igniscore.api.service.subscription.RequiresSubscriptionAccess;
 import com.igniscore.api.utils.AuditUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.CacheEvict;
 
 import java.sql.Timestamp;
 import java.util.List;
 
 /**
- * Service layer responsible for managing {@link Client} entities.
+ * Service responsible for managing clients within the authenticated company.
  *
- * <p>Encapsulates business logic, transactional boundaries, and
- * multi-tenant data isolation rules. All operations are scoped to the
- * {@link Company} associated with the authenticated user.
- *
- * <p><strong>Core responsibilities:</strong>
- * <ul>
- *     <li>Create, update, retrieve, and delete {@link Client} entities</li>
- *     <li>Enforce tenant isolation at the service layer</li>
- *     <li>Apply validation and partial update semantics</li>
- * </ul>
- *
- * <p><strong>Multi-tenancy model:</strong>
- * <ul>
- *     <li>Each {@link Client} is owned by a {@link Company}</li>
- *     <li>All queries are constrained by company context</li>
- *     <li>Cross-tenant access is prevented via repository filtering</li>
- * </ul>
- *
- * <p><strong>Transaction model:</strong>
- * <ul>
- *     <li>Write operations are executed within transactional boundaries</li>
- *     <li>Read operations are marked as {@code readOnly = true} for optimization</li>
- * </ul>
- *
- * <p><strong>Failure behavior:</strong>
- * <ul>
- *     <li>Throws {@link AccessDeniedException} when authentication is invalid</li>
- *     <li>Throws {@link EntityNotFoundException} when a client is not found
- *         within the current tenant scope</li>
- *     <li>Throws {@link IllegalArgumentException} for invalid input state</li>
- * </ul>
+ * <p>Enforces tenant isolation, transactional boundaries, audit logging,
+ * caching and soft deletion.
  */
+@RequiresSubscriptionAccess
 @Service
+@RequiredArgsConstructor
 public class ClientService {
+
+    private static final String ENTITY_NAME = "Client";
 
     private final ClientRepository repository;
     private final AuthenticatedUserService authUserService;
     private final AuditUtils audit;
-
-    @PersistenceContext
-    @SuppressWarnings("unused")
     private final EntityManager entityManager;
 
     /**
-     * Constructs the service with required dependencies.
+     * Creates a client associated with the authenticated company.
      *
-     * @param repository persistence layer for {@link Client}
-     * @param authUserService service for retrieving authenticated user context
-     */
-    public ClientService(
-            ClientRepository repository,
-            AuthenticatedUserService authUserService,
-            AuditUtils audit,
-            EntityManager entityManager
-    ) {
-        this.repository = repository;
-        this.authUserService = authUserService;
-        this.audit = audit;
-        this.entityManager = entityManager;
-    }
-
-    /**
-     * Creates and persists a new {@link Client} associated with the
-     * authenticated user's company.
-     *
-     * <p><strong>Execution flow:</strong>
-     * <ol>
-     *     <li>Resolve authenticated user's company</li>
-     *     <li>Validate DTO-level business constraints</li>
-     *     <li>Map DTO to entity</li>
-     *     <li>Persist entity and refresh from database</li>
-     * </ol>
-     *
-     * @param dto input payload for client creation
-     * @return persisted {@link Client} with database-synchronized state
-     * @throws AccessDeniedException if no authenticated user is available
-     * @throws IllegalArgumentException if CPF/CNPJ constraint is violated
+     * @param dto client registration data
+     * @return persisted client
      */
     @Transactional
     @CacheEvict(value = "clients", allEntries = true)
     public Client store(ClientRegisterDTO dto) {
-
         User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
 
         Client client = new Client(dto, company);
-
         Client saved = repository.save(client);
 
-
-        audit.newAudit(
-                user,
-                company,
-                "Client",
-                "Create",
-                null,
-                saved
-        );
-
-
-        // Ensures entity state reflects database-side changes (e.g., triggers, defaults)
         entityManager.refresh(saved);
+
+        auditClient(user, company, "Create", null, saved);
 
         return saved;
     }
 
     /**
-     * Updates an existing {@link Client} using partial update semantics.
+     * Updates an existing client using partial update semantics.
+     * Null fields are ignored.
      *
-     * <p>Only non-null fields in the DTO are applied to the entity.
-     * Fields omitted in the request remain unchanged.
-     *
-     * @param dto input payload containing update data and target identifier
-     * @return updated {@link Client}
-     * @throws AccessDeniedException if authentication is invalid
-     * @throws EntityNotFoundException if the client does not exist within the tenant scope
+     * @param dto client update data
+     * @return updated client
      */
     @Transactional
     @CacheEvict(value = "clients", allEntries = true)
     public Client update(ClientUpdateDTO dto) {
-
         User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
-        Client client = getClientOrThrow(dto.getId(), company);
 
+        Client client = getClientOrThrow(dto.getId(), company);
         Client oldData = new Client(client);
 
         client.update(dto);
 
-        audit.newAudit(
-                user,
-                company,
-                "Client",
-                "Update",
-                oldData,
-                client
-        );
+        auditClient(user, company, "Update", oldData, client);
 
         return client;
     }
 
     /**
-     * Retrieves a {@link Client} by identifier within the current tenant scope.
+     * Retrieves a client by ID within the authenticated company.
      *
      * @param id client identifier
-     * @return matching {@link Client}
-     * @throws AccessDeniedException if authentication is invalid
-     * @throws EntityNotFoundException if not found within the company scope
+     * @return client response
      */
     @Transactional(readOnly = true)
     public ClientResponseDTO findById(Integer id) {
         Company company = authUserService.getCompanyOrThrow();
 
-        Client client = getClientOrThrow(id, company);
-
-
-        return new ClientResponseDTO(client);
+        return new ClientResponseDTO(getClientOrThrow(id, company));
     }
 
     /**
-     * Deletes a {@link Client} within the current tenant scope.
+     * Soft-deletes a client within the authenticated company.
      *
      * @param id client identifier
-     * @return confirmation message
-     * @throws AccessDeniedException if authentication is invalid
-     * @throws EntityNotFoundException if not found within the company scope
+     * @return deletion confirmation
      */
     @Transactional
     @CacheEvict(value = "clients", allEntries = true)
     public String delete(Integer id) {
-
         User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
 
         Client client = getClientOrThrow(id, company);
 
-        audit.newAudit(
-                user,
-                company,
-                "Client",
-                "Delete",
-                client,
-                null
-        );
-
+        Client oldData = new Client(client);
         client.setDeletedAt(new Timestamp(System.currentTimeMillis()));
-        repository.save(client);
+
+        auditClient(user, company, "Delete", oldData, client);
 
         return "Client successfully deleted.";
     }
 
     /**
-     * Resolves a client by identifier and company, enforcing tenant isolation.
+     * Retrieves a paginated list of active clients belonging to the
+     * authenticated company.
      *
-     * @param id client identifier
-     * @param company tenant context
-     * @return resolved {@link Client}
-     * @throws EntityNotFoundException if no matching client is found
-     */
-    private Client getClientOrThrow(Integer id, Company company) {
-        return repository.findByIdAndCompanyAndDeletedAtIsNull(id, company)
-                .orElseThrow(() -> new EntityNotFoundException("Client not found"));
-    }
-
-    /**
-     * Retrieves paginated {@link Client} records visible to the authenticated tenant.
-     *
-     * <p>This operation applies pagination constraints through Spring Data's
-     * {@link Pageable} abstraction and returns both the current page content
-     * and pagination metadata wrapped inside {@link ClientQueryDTO}.
-     *
-     * <p><strong>Returned metadata:</strong>
-     * <ul>
-     *     <li>Total number of pages</li>
-     *     <li>Total number of registered clients</li>
-     *     <li>Current page content</li>
-     * </ul>
-     *
-     * <p><strong>Execution flow:</strong>
-     * <ol>
-     *     <li>Create pagination configuration using page number and size</li>
-     *     <li>Execute paginated repository query</li>
-     *     <li>Extract content and pagination metadata</li>
-     *     <li>Build response DTO</li>
-     * </ol>
-     *
-     * @return paginated client response containing records and metadata
+     * @param pageable pagination configuration
+     * @return paginated client response
      */
     @Cacheable(
             value = "clients",
@@ -263,9 +137,13 @@ public class ClientService {
     public ClientQueryDTO findAll(Pageable pageable) {
         Company company = authUserService.getCompanyOrThrow();
 
-        Page<Client> page = repository.findByCompanyAndDeletedAtIsNull(company, pageable);
+        Page<Client> page = repository.findByCompanyAndDeletedAtIsNull(
+                company,
+                pageable
+        );
 
-        List<ClientResponseDTO> clients = page.getContent().stream()
+        List<ClientResponseDTO> clients = page.getContent()
+                .stream()
                 .map(ClientResponseDTO::new)
                 .toList();
 
@@ -273,6 +151,48 @@ public class ClientService {
                 clients,
                 page.getTotalPages(),
                 page.getTotalElements()
+        );
+    }
+
+    /**
+     * Resolves an active client within the specified company.
+     *
+     * @param id client identifier
+     * @param company tenant context
+     * @return matching client
+     * @throws EntityNotFoundException if the client does not exist
+     *                                  within the company
+     */
+    private Client getClientOrThrow(Integer id, Company company) {
+        return repository.findByIdAndCompanyAndDeletedAtIsNull(id, company)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Client not found")
+                );
+    }
+
+    /**
+     * Records a client operation in the audit log.
+     *
+     * @param user authenticated user
+     * @param company associated company
+     * @param action operation performed
+     * @param oldData previous client state, if applicable
+     * @param newData resulting client state, if applicable
+     */
+    private void auditClient(
+            User user,
+            Company company,
+            String action,
+            Client oldData,
+            Client newData
+    ) {
+        audit.newAudit(
+                user,
+                company,
+                ENTITY_NAME,
+                action,
+                oldData,
+                newData
         );
     }
 }

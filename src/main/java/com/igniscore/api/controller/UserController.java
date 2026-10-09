@@ -3,10 +3,10 @@ package com.igniscore.api.controller;
 import com.igniscore.api.dto.auth.RegisterDTO;
 import com.igniscore.api.dto.user.ChangePasswordDTO;
 import com.igniscore.api.dto.user.MeDTO;
-import com.igniscore.api.dto.user.UserRegisterDTO;
 import com.igniscore.api.dto.user.UserUpdateDTO;
-import com.igniscore.api.model.User;
-import com.igniscore.api.model.UserRole;
+import com.igniscore.api.model.*;
+import com.igniscore.api.service.AuthenticatedUserService;
+import com.igniscore.api.service.SubscriptionService;
 import com.igniscore.api.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -46,14 +46,18 @@ public class UserController {
      * Service layer dependency for user operations.
      */
     private final UserService service;
+    private final SubscriptionService subscriptionService;
+    private final AuthenticatedUserService authenticatedUserService;
 
     /**
      * Constructor-based dependency injection.
      *
      * @param service user service instance
      */
-    public UserController(UserService service) {
+    public UserController(UserService service, SubscriptionService subscriptionService, AuthenticatedUserService authenticatedUserService) {
         this.service = service;
+        this.subscriptionService = subscriptionService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     /**
@@ -83,6 +87,7 @@ public class UserController {
     public MeDTO me(Authentication authentication) {
 
         User user = (User) authentication.getPrincipal();
+        Company company = authenticatedUserService.getCompanyOrThrow();
 
         UserRole role = UserRole.valueOf(
                 Objects.requireNonNull(authentication.getAuthorities()
@@ -96,6 +101,8 @@ public class UserController {
                 ? (Integer) authentication.getDetails()
                 : null;
 
+        String plan = subscriptionService.getMySubscription(company);
+
         assert user != null;
         return new MeDTO(
                 user.getId(),
@@ -104,6 +111,7 @@ public class UserController {
                 role,
                 user.isOnboarding(),
                 user.isFirstLogin(),
+                plan,
                 companyId
         );
     }
@@ -128,6 +136,11 @@ public class UserController {
                 ? (Integer) authentication.getDetails()
                 : null;
 
+        Company company = authenticatedUserService.getCompanyOrThrow();
+        String plan = subscriptionService.getMySubscription(company);
+
+
+
         return new MeDTO(
                 updatedUser.getId(),
                 updatedUser.getName(),
@@ -135,6 +148,7 @@ public class UserController {
                 role,
                 updatedUser.isOnboarding(),
                 updatedUser.isFirstLogin(),
+                plan,
                 companyId
         );
     }
@@ -162,11 +176,6 @@ public class UserController {
     @MutationMapping
     public String createEmployee(@Argument RegisterDTO data) {
         return service.store(data);
-    }
-
-    @MutationMapping
-        public String userRegister(@Argument UserRegisterDTO data) {
-        return service.userRegister(data);
     }
 
     @MutationMapping

@@ -6,10 +6,10 @@ import com.igniscore.api.dto.sale.SaleResponseDTO;
 import com.igniscore.api.model.Sale;
 import com.igniscore.api.model.SaleStatus;
 import com.igniscore.api.service.SaleService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -36,21 +36,13 @@ import java.util.List;
  * are handled by the service layer.
  */
 @Controller
+@RequiredArgsConstructor
 public class SaleController {
 
     /**
      * Service responsible for sales business operations.
      */
     private final SaleService service;
-
-    /**
-     * Creates a new controller instance.
-     *
-     * @param service sales service dependency
-     */
-    public SaleController(SaleService service) {
-        this.service = service;
-    }
 
     /**
      * GraphQL mutation responsible for creating a new sale.
@@ -64,7 +56,6 @@ public class SaleController {
      */
     @MutationMapping
     public Sale storeSale(@Argument CreateSaleDTO input) {
-
         return service.store(input);
     }
 
@@ -79,19 +70,17 @@ public class SaleController {
      *     <li>size = 10</li>
      * </ul>
      *
-     * <p>Results are sorted by ID in ascending order.
+     * <p>Results are sorted by ID in descending order.
      *
      * @param page requested page number
      * @param size number of records per page
-     * @return list of sales for the requested page
+     * @return paginated sales data
      */
     @QueryMapping
-    @EntityGraph(attributePaths = {"client", "items"})
     public SaleQueryDTO sales(
             @Argument Integer page,
             @Argument Integer size
     ) {
-
         Pageable pageable = PageRequest.of(
                 page != null ? page : 0,
                 size != null ? size : 10,
@@ -108,7 +97,6 @@ public class SaleController {
             @Argument LocalDate startDate,
             @Argument LocalDate endDate
     ) {
-
         Pageable pageable = PageRequest.of(
                 page != null ? page : 0,
                 size != null ? size : 10,

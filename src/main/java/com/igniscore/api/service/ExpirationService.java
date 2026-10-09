@@ -5,6 +5,7 @@ import com.igniscore.api.dto.expiration.ExpirationPageDTO;
 import com.igniscore.api.dto.expiration.ExpirationProjectionDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.repository.ExpirationRepository;
+import com.igniscore.api.service.subscription.RequiresSubscriptionAccess;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.util.List;
 
+@RequiresSubscriptionAccess
 @Service
 public class ExpirationService {
 

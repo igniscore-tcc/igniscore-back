@@ -9,6 +9,10 @@ import com.igniscore.api.repository.ClientRepository;
 import com.igniscore.api.repository.ExpirationRepository;
 import com.igniscore.api.repository.ProductRepository;
 import com.igniscore.api.repository.SaleRepository;
+import com.igniscore.api.service.subscription.RequiresSubscriptionAccess;
+import com.igniscore.api.utils.AuditUtils;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -20,8 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,87 +41,32 @@ import java.util.stream.Collectors;
  *     <li>Validate company ownership of clients and products</li>
  *     <li>Manage transactional consistency during sale creation</li>
  *     <li>Retrieve paginated sales data</li>
+ *     <li>Record sale operations in the audit log</li>
  * </ul>
  *
  * <p>This service operates in a multi-tenant context,
  * ensuring users only access resources associated
  * with their company.
  */
+@RequiresSubscriptionAccess
 @Service
+@RequiredArgsConstructor
 public class SaleService {
 
-    /**
-     * Repository responsible for sale persistence operations.
-     */
+    private static final String ENTITY_NAME = "Sale";
+
     private final SaleRepository repository;
-
-    /**
-     * Repository responsible for client persistence operations.
-     */
     private final ClientRepository clientRepository;
-
-    /**
-     * Repository responsible for product persistence operations.
-     */
     private final ProductRepository productRepository;
-
     private final ExpirationRepository expirationRepository;
-
-    /**
-     * Service responsible for retrieving the authenticated user context.
-     */
     private final AuthenticatedUserService authUserService;
-
-    /**
-     * Creates a new instance of the sale service.
-     *
-     * @param repository sale repository
-     * @param authUserService authenticated user service
-     * @param clientRepository client repository
-     * @param productRepository product repository
-     */
-    public SaleService(
-            SaleRepository repository,
-            AuthenticatedUserService authUserService,
-            ClientRepository clientRepository,
-            ProductRepository productRepository,
-            ExpirationRepository expirationRepository
-    ) {
-        this.repository = repository;
-        this.authUserService = authUserService;
-        this.clientRepository = clientRepository;
-        this.productRepository = productRepository;
-        this.expirationRepository = expirationRepository;
-    }
+    private final AuditUtils audit;
 
     /**
      * Creates and persists a new sale.
      *
-     * <p>The operation performs multiple validations:
-     * <ul>
-     *     <li>Authenticated company existence</li>
-     *     <li>Client existence</li>
-     *     <li>Client ownership validation</li>
-     *     <li>Product existence</li>
-     *     <li>Product ownership validation</li>
-     * </ul>
-     *
-     * <p>All sale items are associated with the generated sale
-     * before persistence.
-     *
-     * <p>This method runs inside a transaction to guarantee
-     * data consistency.
-     *
      * @param dto payload containing sale information
      * @return persisted sale entity
-     *
-     * @throws RuntimeException when:
-     * <ul>
-     *     <li>Client is not found</li>
-     *     <li>Client does not belong to the authenticated company</li>
-     *     <li>Product is not found</li>
-     *     <li>Product does not belong to the authenticated company</li>
-     * </ul>
      */
     @Transactional
     @Caching(evict = {
@@ -123,14 +74,10 @@ public class SaleService {
             @CacheEvict(value = "salesPerPeriod", allEntries = true)
     })
     public Sale store(CreateSaleDTO dto) {
-
+        User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
 
-        Client client =
-                getClientForCompany(
-                        dto.getClientId(),
-                        company
-                );
+        Client client = getClientForCompany(dto.getClientId(), company);
 
         Sale sale = createSale(
                 company,
@@ -140,46 +87,34 @@ public class SaleService {
                 dto.getPaymentMethod()
         );
 
-        Map<Integer, Product> products =
-                loadAndValidateProducts(dto.getItems());
+        Map<Integer, Product> products = loadAndValidateProducts(dto.getItems());
 
-        validateProductsOwnership(
-                products,
-                company
-        );
+        validateProductsOwnership(products, company);
+        addItemsToSale(sale, dto.getItems(), products);
 
-        addItemsToSale(
-                sale,
-                dto.getItems(),
-                products
-        );
-
-        BigDecimal discount = dto.getDiscount();
-        if (discount == null) {
-            discount = BigDecimal.ZERO;
-        }
+        BigDecimal discount = dto.getDiscount() != null
+                ? dto.getDiscount()
+                : BigDecimal.ZERO;
 
         sale.applyDiscount(discount);
 
-        repository.save(sale);
+        Sale saved = repository.save(sale);
 
-        var expiration = new Expiration(sale, ExpirationStatus.NORMAL, company);
+        Expiration expiration = new Expiration(
+                saved,
+                ExpirationStatus.NORMAL,
+                company
+        );
 
         expirationRepository.save(expiration);
 
-        /*
-         * Persists the sale and all associated items.
-         */
-        return sale;
+        auditSale(user, company, "Create", null, saved);
+
+        return saved;
     }
 
     /**
-     * Retrieves paginated sales belonging
-     * to the authenticated company.
-     *
-     * <p>This method is read-only transactional
-     * to improve performance and avoid unnecessary
-     * persistence context synchronization.
+     * Retrieves paginated sales belonging to the authenticated company.
      *
      * @param pageable pagination configuration
      * @return paginated sales result
@@ -191,12 +126,17 @@ public class SaleService {
     )
     @Transactional(readOnly = true)
     public SaleQueryDTO findAll(Pageable pageable) {
-
         Company company = authUserService.getCompanyOrThrow();
 
-        Page<Sale> page = repository.findByCompanyAndDeletedAtIsNull(company, true, pageable);
+        Page<Sale> page = repository.findByCompanyAndDeletedAtIsNull(
+                company,
+                pageable
+        );
 
-        List<SaleResponseDTO> sales = page.getContent().stream().map(SaleResponseDTO::new).toList();
+        List<SaleResponseDTO> sales = page.getContent()
+                .stream()
+                .map(SaleResponseDTO::new)
+                .toList();
 
         return new SaleQueryDTO(
                 sales,
@@ -205,6 +145,14 @@ public class SaleService {
         );
     }
 
+    /**
+     * Retrieves sales for the specified date range.
+     *
+     * @param startDate beginning of the period
+     * @param endDate end of the period
+     * @param pageable pagination configuration
+     * @return page of sales within the requested period
+     */
     @Cacheable(
             value = "salesPerPeriod",
             key = "@cacheKeyService.salesPerPeriodKey(#startDate, #endDate, #pageable)",
@@ -226,6 +174,13 @@ public class SaleService {
         );
     }
 
+    /**
+     * Updates the status of a sale belonging to the authenticated company.
+     *
+     * @param saleId identifier of the sale
+     * @param status new sale status
+     * @return updated sale response
+     */
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "sales", allEntries = true),
@@ -235,74 +190,79 @@ public class SaleService {
             Integer saleId,
             SaleStatus status
     ) {
+        User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
 
-        Sale sale = repository.findById(saleId)
-                .orElseThrow(() ->
-                        new RuntimeException("Sale not found")
-                );
-
-        if (!sale.getCompany().getId().equals(company.getId())) {
-            throw new RuntimeException(
-                    "Sale does not belong to the company"
-            );
-        }
+        Sale sale = getSaleForCompany(saleId, company);
+        Map<String, Object> oldData = saleSnapshot(sale);
 
         sale.setStatus(status);
 
-        Sale updatedSale = repository.save(sale);
+        Sale saved = repository.save(sale);
 
-        return new SaleResponseDTO(updatedSale);
+        auditSale(user, company, "Update", oldData, saleSnapshot(saved));
+
+        return new SaleResponseDTO(saved);
     }
 
+    /**
+     * Logically deletes a sale belonging to the authenticated company.
+     *
+     * @param saleId identifier of the sale
+     * @return true when the sale is marked as deleted
+     */
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "sales", allEntries = true),
             @CacheEvict(value = "salesPerPeriod", allEntries = true)
     })
     public Boolean deleteSale(Integer saleId) {
-
+        User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
 
-        Sale sale = repository.findById(saleId)
-                .orElseThrow(() ->
-                        new RuntimeException("Sale not found")
-                );
+        Sale sale = getSaleForCompany(saleId, company);
+        Map<String, Object> oldData = saleSnapshot(sale);
 
-        if (!sale.getCompany().getId().equals(company.getId())) {
-            throw new RuntimeException(
+        sale.setDeletedAt(LocalDateTime.now());
+
+        Sale saved = repository.save(sale);
+
+        auditSale(user, company, "Delete", oldData, saleSnapshot(saved));
+
+        return true;
+    }
+
+    private Sale getSaleForCompany(Integer saleId, Company company) {
+        Sale sale = repository.findById(saleId)
+                .orElseThrow(() -> new EntityNotFoundException("Sale not found"));
+
+        if (sale.getCompany() == null
+                || !sale.getCompany().getId().equals(company.getId())) {
+            throw new EntityNotFoundException(
                     "Sale does not belong to the company"
             );
         }
 
-        sale.setDeletedAt(LocalDateTime.now());
-
-        repository.save(sale);
-
-        return true;
+        return sale;
     }
 
     private Map<Integer, Product> loadAndValidateProducts(
             List<CreateSaleItemDTO> items
     ) {
-
         List<Integer> productIds = items.stream()
                 .map(CreateSaleItemDTO::getProductId)
                 .distinct()
                 .toList();
 
-        Map<Integer, Product> products =
-                productRepository.findAllById(productIds)
-                        .stream()
-                        .collect(
-                                Collectors.toMap(
-                                        Product::getId,
-                                        Function.identity()
-                                )
-                        );
+        Map<Integer, Product> products = productRepository.findAllById(productIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        Product::getId,
+                        Function.identity()
+                ));
 
         if (products.size() != productIds.size()) {
-            throw new RuntimeException(
+            throw new EntityNotFoundException(
                     "One or more products were not found."
             );
         }
@@ -314,11 +274,10 @@ public class SaleService {
             Map<Integer, Product> products,
             Company company
     ) {
-
         for (Product product : products.values()) {
-
-            if (!product.getCompany().getId().equals(company.getId())) {
-                throw new RuntimeException(
+            if (product.getCompany() == null
+                    || !product.getCompany().getId().equals(company.getId())) {
+                throw new EntityNotFoundException(
                         "The product does not belong to the company."
                 );
             }
@@ -329,13 +288,12 @@ public class SaleService {
             Integer clientId,
             Company company
     ) {
-
         Client client = clientRepository.findById(clientId)
-                .orElseThrow(() ->
-                        new RuntimeException("Client not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
-        if (!client.getCompany().getId().equals(company.getId())) {
-            throw new RuntimeException(
+        if (client.getCompany() == null
+                || !client.getCompany().getId().equals(company.getId())) {
+            throw new EntityNotFoundException(
                     "Client does not belong to the company"
             );
         }
@@ -348,11 +306,8 @@ public class SaleService {
             List<CreateSaleItemDTO> items,
             Map<Integer, Product> products
     ) {
-
         for (CreateSaleItemDTO itemDTO : items) {
-
-            Product product =
-                    products.get(itemDTO.getProductId());
+            Product product = products.get(itemDTO.getProductId());
 
             SaleItem item = new SaleItem(
                     product,
@@ -379,8 +334,97 @@ public class SaleService {
                 type,
                 document,
                 today.plusYears(1),
-                company, client,
+                company,
+                client,
                 paymentMethod
         );
+    }
+
+    private Map<String, Object> saleSnapshot(Sale sale) {
+        if (sale == null) {
+            return null;
+        }
+
+        Map<String, Object> snapshot = new LinkedHashMap<>();
+
+        snapshot.put("id", sale.getId());
+        snapshot.put("numberSale", sale.getNumberSale());
+        snapshot.put("quantityItems", sale.getQuantityItems());
+        snapshot.put("discount", sale.getDiscount());
+        snapshot.put("total", sale.getTotal());
+        snapshot.put("date", sale.getDate());
+        snapshot.put("paymentMethod", sale.getPaymentMethod());
+        snapshot.put("status", sale.getStatus());
+        snapshot.put("type", sale.getType());
+        snapshot.put("document", sale.getDocument());
+        snapshot.put("dueDate", sale.getDueDate());
+        snapshot.put("clientId", sale.getClient() != null
+                ? sale.getClient().getId()
+                : null);
+
+        return snapshot;
+    }
+
+    /**
+     * Records a sale operation in the audit log.
+     *
+     * @param user authenticated user
+     * @param company associated company
+     * @param action operation performed
+     * @param oldData previous sale state, if applicable
+     * @param newData resulting sale state, if applicable
+     */
+    private void auditSale(
+            User user,
+            Company company,
+            String action,
+            Object oldData,
+            Object newData
+    ) {
+        if (oldData instanceof Map<?, ?> oldMap
+                && newData instanceof Map<?, ?> newMap) {
+            Map<String, Object> oldSnapshot = castSnapshot(oldMap);
+            Map<String, Object> newSnapshot = castSnapshot(newMap);
+
+            Map<String, Object> oldChanges = new LinkedHashMap<>();
+            Map<String, Object> newChanges = new LinkedHashMap<>();
+
+            for (String key : newSnapshot.keySet()) {
+                Object oldValue = oldSnapshot.get(key);
+                Object newValue = newSnapshot.get(key);
+
+                if (!Objects.equals(oldValue, newValue)) {
+                    oldChanges.put(key, oldValue);
+                    newChanges.put(key, newValue);
+                }
+            }
+
+            audit.newAudit(
+                    user,
+                    company,
+                    ENTITY_NAME,
+                    action,
+                    oldChanges,
+                    newChanges
+            );
+            return;
+        }
+
+        audit.newAudit(
+                user,
+                company,
+                ENTITY_NAME,
+                action,
+                oldData,
+                newData instanceof Sale sale ? saleSnapshot(sale) : newData
+        );
+    }
+
+    private Map<String, Object> castSnapshot(Map<?, ?> source) {
+        Map<String, Object> snapshot = new LinkedHashMap<>();
+
+        source.forEach((key, value) -> snapshot.put(String.valueOf(key), value));
+
+        return snapshot;
     }
 }

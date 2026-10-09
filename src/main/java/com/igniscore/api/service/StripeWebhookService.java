@@ -232,10 +232,6 @@ public class StripeWebhookService {
                     stripeSubscriptionId
             );
 
-            entity.setStatus(
-                    mapStatus(stripeStatus)
-            );
-
             entity.setCancelAtPeriodEnd(
                     cancelAtPeriodEnd
             );
@@ -267,6 +263,13 @@ public class StripeWebhookService {
             entity.setCreatedAt(now);
 
             entity.setUpdatedAt(now);
+
+            SubscriptionStatus status = mapStatus(stripeStatus);
+
+            entity.setStatus(status);
+            entity.setPastDueSince(
+                    status == SubscriptionStatus.PAST_DUE ? now : null
+            );
 
             subscriptionRepository.save(entity);
 
@@ -374,47 +377,42 @@ public class StripeWebhookService {
                             "trial_end"
                     );
 
-            subscription.setStatus(
-                    mapStatus(stripeStatus)
+            LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+
+            SubscriptionStatus previousStatus = subscription.getStatus();
+            SubscriptionStatus newStatus = mapStatus(stripeStatus);
+
+            subscription.setStatus(newStatus);
+            subscription.setPastDueSince(
+                    resolvePastDueSince(
+                            previousStatus,
+                            newStatus,
+                            subscription.getPastDueSince(),
+                            now
+                    )
             );
 
-            subscription.setCancelAtPeriodEnd(
-                    cancelAtPeriodEnd
-            );
+            subscription.setCancelAtPeriodEnd(cancelAtPeriodEnd);
 
             subscription.setCurrentPeriodStart(
-                    toLocalDateTime(
-                            currentPeriodStart
-                    )
+                    toLocalDateTime(currentPeriodStart)
             );
 
             subscription.setCurrentPeriodEnd(
-                    toLocalDateTime(
-                            currentPeriodEnd
-                    )
+                    toLocalDateTime(currentPeriodEnd)
             );
 
             subscription.setTrialStart(
-                    toLocalDateTime(
-                            trialStart
-                    )
+                    toLocalDateTime(trialStart)
             );
 
             subscription.setTrialEnd(
-                    toLocalDateTime(
-                            trialEnd
-                    )
+                    toLocalDateTime(trialEnd)
             );
 
-            subscription.setUpdatedAt(
-                    LocalDateTime.now(
-                            ZoneOffset.UTC
-                    )
-            );
+            subscription.setUpdatedAt(now);
 
-            subscriptionRepository.save(
-                    subscription
-            );
+            subscriptionRepository.save(subscription);
 
             log.info(
                     "Subscription updated successfully: {}",
@@ -471,6 +469,8 @@ public class StripeWebhookService {
             subscription.setStatus(
                     SubscriptionStatus.CANCELED
             );
+
+            subscription.setPastDueSince(null);
 
             subscription.setCanceledAt(
                     LocalDateTime.now(
@@ -585,5 +585,22 @@ public class StripeWebhookService {
                 Instant.ofEpochSecond(timestamp),
                 ZoneOffset.UTC
         );
+    }
+
+    private LocalDateTime resolvePastDueSince(
+            SubscriptionStatus previousStatus,
+            SubscriptionStatus newStatus,
+            LocalDateTime existingPastDueSince,
+            LocalDateTime now
+    ) {
+        if (newStatus != SubscriptionStatus.PAST_DUE) {
+            return null;
+        }
+
+        if (existingPastDueSince != null) {
+            return existingPastDueSince;
+        }
+
+        return now;
     }
 }

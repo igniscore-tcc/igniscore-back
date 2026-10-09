@@ -5,88 +5,77 @@ import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.CompanyRepository;
 import com.igniscore.api.repository.UserRepository;
+import com.igniscore.api.utils.AuditUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Service responsible for managing {@link Company} entities.
- *
- * <p>This class provides operations for:
- * <ul>
- *     <li>Retrieving companies</li>
- *     <li>Creating new companies</li>
- * </ul>
- *
- * <p>Design notes:
- * <ul>
- *     <li>Acts as an abstraction layer over {@link CompanyRepository}</li>
- *     <li>Encapsulates basic business logic for company management</li>
- * </ul>
+ * Service responsible for managing company entities.
  */
 @Service
+@RequiredArgsConstructor
 public class CompanyService {
 
     private final CompanyRepository repository;
     private final AuthenticatedUserService authUserService;
     private final UserRepository userRepository;
+    private final AuditUtils audit;
 
     /**
-     * Constructor-based dependency injection.
+     * Retrieves all companies.
      *
-     * @param repository company persistence repository
+     * @return list of companies
      */
-    public CompanyService(CompanyRepository repository, AuthenticatedUserService authUserService, UserRepository userRepository) {
-        this.repository = repository;
-        this.authUserService = authUserService;
-        this.userRepository = userRepository;
-    }
-
-    /**
-     * Retrieves all companies from the database.
-     *
-     * @return list of all companies
-     */
+    @Transactional(readOnly = true)
     public List<Company> findAll() {
         return repository.findAll();
     }
 
     /**
-     * Creates and persists a new company.
+     * Creates a company and associates it with the authenticated user.
      *
-     * <p>This method constructs a {@link Company} entity from input parameters
-     * and saves it to the database.
-     *
-     *
-     * @return persisted company entity
+     * @param dto company registration data
+     * @return persisted company
      */
+    @Transactional
     public Company storeCompany(CreateCompanyDTO dto) {
-
-        User user = this.authUserService.getUserOrThrow();
-
-        Company company = new Company();
+        User user = authUserService.getUserOrThrow();
 
         if (dto.getCnpj() == null || dto.getCnpj().isBlank()) {
             throw new IllegalArgumentException("CNPJ is required");
         }
 
-        company.setName(dto.getName());
-        company.setCnpj(dto.getCnpj());
-        company.setIe(dto.getIe());
-        company.setUfIe(dto.getUfIe());
-        company.setEmail(dto.getEmail());
-        company.setPhone(dto.getPhone());
-
+        Company company = new Company(dto);
         Company savedCompany = repository.save(company);
 
         user.setCompany(savedCompany);
         userRepository.save(user);
 
+        audit.newAudit(
+                user,
+                savedCompany,
+                "Company",
+                "Create",
+                null,
+                savedCompany
+        );
+
         return savedCompany;
     }
 
+    /**
+     * Retrieves the authenticated user's company.
+     *
+     * @return optional containing the company, if found
+     */
+    @Transactional(readOnly = true)
     public Optional<Company> myCompany() {
-        return repository.findById(authUserService.getCompanyOrThrow().getId());
+        Integer companyId = authUserService.getCompanyOrThrow().getId();
+
+        return repository.findById(companyId);
     }
 }
