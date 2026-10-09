@@ -24,4 +24,7 @@ public interface SubscriptionRepository
             Integer companyId,
             List<SubscriptionStatus> statuses
     );
+
+
+    List<Subscription> findByCompany_IdOrderByUpdatedAtDesc(Integer companyId);
 }

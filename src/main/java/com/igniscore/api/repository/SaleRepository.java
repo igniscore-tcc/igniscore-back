@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDate;
 
 public interface SaleRepository extends JpaRepository<Sale, Integer> {
-    Page<Sale> findByCompanyAndDeletedAtIsNull(Company company, boolean b, Pageable pageable);
+    Page<Sale> findByCompanyAndDeletedAtIsNull(Company company, Pageable pageable);
     Page<Sale> findByCompanyAndDateBetweenAndDeletedAtIsNull(
             Company company,
             LocalDate startDate,

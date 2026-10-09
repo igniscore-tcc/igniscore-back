@@ -13,6 +13,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * JPA entity representing a product managed within the platform.
@@ -105,6 +106,9 @@ public class Product implements Serializable {
     @Column(name = "status_prod")
     private Boolean status;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     /**
      * Company that owns the product.
      *
@@ -150,6 +154,7 @@ public class Product implements Serializable {
         this.lot = product.lot;
         this.price = product.price;
         this.status = product.status;
+        this.deletedAt = product.getDeletedAt();
         this.company = product.getCompany();
     }
 
@@ -186,6 +191,6 @@ public class Product implements Serializable {
      * Deactivates the product without physically deleting its database record.
      */
     public void deactivate() {
-        this.status = false;
+        this.deletedAt = LocalDateTime.now();
     }
 }

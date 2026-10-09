@@ -9,6 +9,7 @@ import com.igniscore.api.repository.ClientRepository;
 import com.igniscore.api.repository.ExpirationRepository;
 import com.igniscore.api.repository.ProductRepository;
 import com.igniscore.api.repository.SaleRepository;
+import com.igniscore.api.service.subscription.RequiresSubscriptionAccess;
 import com.igniscore.api.utils.AuditUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
  * ensuring users only access resources associated
  * with their company.
  */
+@RequiresSubscriptionAccess
 @Service
 @RequiredArgsConstructor
 public class SaleService {
@@ -128,7 +130,6 @@ public class SaleService {
 
         Page<Sale> page = repository.findByCompanyAndDeletedAtIsNull(
                 company,
-                true,
                 pageable
         );
 

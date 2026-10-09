@@ -67,4 +67,6 @@ public interface ClientRepository extends JpaRepository<Client, Integer> {
             Integer id,
             Company company
     );
+
+    long countByCompanyAndDeletedAtIsNull(Company company);
 }

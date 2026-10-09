@@ -9,6 +9,7 @@ import com.igniscore.api.model.UserRole;
 import com.igniscore.api.model.VerificationToken;
 import com.igniscore.api.repository.UserRepository;
 import com.igniscore.api.repository.VerificationTokenRepository;
+import com.igniscore.api.service.subscription.RequiresSubscriptionAccess;
 import com.igniscore.api.utils.CompanyUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -53,6 +54,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @RequiresSubscriptionAccess
     @Transactional
     public User updateUserCompany(String companyCnpj) {
         User user = authUserService.getUserOrThrow();
@@ -64,11 +66,13 @@ public class UserService {
         return repository.save(user);
     }
 
+    @RequiresSubscriptionAccess
     public User findUserId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found."));
     }
 
+    @RequiresSubscriptionAccess
     @Transactional
     public User update(String email, String name) {
         User user = repository.findByEmail(email);
@@ -82,6 +86,7 @@ public class UserService {
         return repository.save(user);
     }
 
+    @RequiresSubscriptionAccess
     public Page<User> findUsersByCompany(Pageable pageable) {
         User authenticatedUser = authUserService.getUserOrThrow();
         Company company = requireCompany(authenticatedUser);
@@ -89,6 +94,7 @@ public class UserService {
         return repository.findByCompanyAndDeletedAtIsNull(company, pageable);
     }
 
+    @RequiresSubscriptionAccess
     @Transactional
     public String store(RegisterDTO data) {
         User owner = authUserService.getUserOrThrow();
@@ -133,6 +139,7 @@ public class UserService {
         return "Funcionário criado com sucesso. Um e-mail de verificação foi enviado para o funcionário.";
     }
 
+    @RequiresSubscriptionAccess
     @Transactional
     public User completeOnboarding(Integer userId) {
         User user = repository.findById(userId)
@@ -143,6 +150,7 @@ public class UserService {
         return repository.save(user);
     }
 
+    @RequiresSubscriptionAccess
     @Transactional
     public String changeTemporaryPassword(ChangePasswordDTO data) {
         User user = authUserService.getUserOrThrow();
@@ -175,6 +183,7 @@ public class UserService {
         return "Password changed successfully.";
     }
 
+    @RequiresSubscriptionAccess
     @Transactional
     public String updateEmployee(UserUpdateDTO data) {
         User employee = validateEmployee(data.getId());
@@ -198,6 +207,7 @@ public class UserService {
         return "Employee updated successfully.";
     }
 
+    @RequiresSubscriptionAccess
     @Transactional
     public String deleteEmployee(Integer employeeId) {
         User employee = validateEmployee(employeeId);

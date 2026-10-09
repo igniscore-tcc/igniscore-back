@@ -8,6 +8,7 @@ import com.igniscore.api.model.Company;
 import com.igniscore.api.model.Product;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.ProductRepository;
+import com.igniscore.api.service.subscription.RequiresSubscriptionAccess;
 import com.igniscore.api.utils.AuditUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -42,6 +43,7 @@ import java.util.List;
  * <p>All operations rely on the authenticated context provided by
  * {@link AuthenticatedUserService}.
  */
+@RequiresSubscriptionAccess
 @Service
 @RequiredArgsConstructor
 public class ProductService {

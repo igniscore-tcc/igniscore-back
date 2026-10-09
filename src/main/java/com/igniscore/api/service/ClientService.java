@@ -8,6 +8,7 @@ import com.igniscore.api.model.Client;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.repository.ClientRepository;
+import com.igniscore.api.service.subscription.RequiresSubscriptionAccess;
 import com.igniscore.api.utils.AuditUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,6 +29,7 @@ import java.util.List;
  * <p>Enforces tenant isolation, transactional boundaries, audit logging,
  * caching and soft deletion.
  */
+@RequiresSubscriptionAccess
 @Service
 @RequiredArgsConstructor
 public class ClientService {

@@ -66,4 +66,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
      */
     @EntityGraph(attributePaths = {"company"})
     Optional<Product> findByIdAndStatusTrue(Integer id);
+
+    long countByCompanyAndDeletedAtIsNull(Company company);
 }
