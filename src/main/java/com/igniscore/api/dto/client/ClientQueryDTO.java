@@ -26,68 +26,15 @@ import java.util.List;
  *     <li>REST pagination responses</li>
  *     <li>Frontend table/grid rendering</li>
  * </ul>
+ *
+ * @param clients      Current page content.
+ * @param totalPages   Total number of pages available for the query.
+ * @param totalClients Total number of registered clients matching the query.
  */
-public class ClientQueryDTO implements Serializable {
+public record ClientQueryDTO(List<ClientResponseDTO> clients, int totalPages,
+                             long totalClients) implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Current page content.
-     */
-    private final List<ClientResponseDTO> clients;
-
-    /**
-     * Total number of pages available for the query.
-     */
-    private final int totalPages;
-
-    /**
-     * Total number of registered clients matching the query.
-     */
-    private final long totalClients;
-
-    /**
-     * Constructs a paginated client response DTO.
-     *
-     * @param clients current page content
-     * @param totalPages total available pages
-     * @param totalClients total number of matching clients
-     */
-    public ClientQueryDTO(
-            List<ClientResponseDTO> clients,
-            int totalPages,
-            long totalClients
-    ) {
-        this.clients = clients;
-        this.totalPages = totalPages;
-        this.totalClients = totalClients;
-    }
-
-    /**
-     * Returns the current page client list.
-     *
-     * @return paginated clients
-     */
-    public List<ClientResponseDTO> getClients() {
-        return clients;
-    }
-
-    /**
-     * Returns the total number of pages.
-     *
-     * @return total pages available
-     */
-    public int getTotalPages() {
-        return totalPages;
-    }
-
-    /**
-     * Returns the total number of clients.
-     *
-     * @return total client count
-     */
-    public long getTotalClients() {
-        return totalClients;
-    }
 }
