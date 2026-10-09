@@ -1,5 +1,6 @@
 package com.igniscore.api.repository;
 
+import com.igniscore.api.model.Company;
 import com.igniscore.api.model.Subscription;
 import com.igniscore.api.model.SubscriptionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +28,6 @@ public interface SubscriptionRepository
 
 
     List<Subscription> findByCompany_IdOrderByUpdatedAtDesc(Integer companyId);
+
+    Subscription findFirstByCompanyOrderByCreatedAtDesc(Company company);
 }

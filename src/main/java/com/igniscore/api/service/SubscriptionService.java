@@ -2,16 +2,16 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.stripe.StripeRequestDTO;
 import com.igniscore.api.dto.stripe.StripeResponseDTO;
-import com.igniscore.api.model.Company;
-import com.igniscore.api.model.PlanPrice;
-import com.igniscore.api.model.SubscriptionStatus;
+import com.igniscore.api.model.*;
 import com.igniscore.api.repository.PlanPriceRepository;
+import com.igniscore.api.repository.PlanRepository;
 import com.igniscore.api.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +21,7 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final AuthenticatedUserService authenticatedUserService;
     private final StripeService stripeService;
+    private final PlanRepository planRepository;
 
     @Transactional
     public StripeResponseDTO createCheckout(
@@ -51,6 +52,27 @@ public class SubscriptionService {
                 company,
                 planPrice
         );
+    }
+
+    @Transactional(readOnly = true)
+    public String getMySubscription(Company company) {
+
+        Subscription subscription = subscriptionRepository.findFirstByCompanyOrderByCreatedAtDesc(company);
+
+        /*
+        PlanPrice planPrice = planPriceRepository.findByID(subscription.getPlanPrice().getId());
+
+        Plan plan = planRepository.findByCode(planPrice.getPlan().getCode()).orElseThrow(() ->
+                new IllegalArgumentException(
+                        "Plan price not found"
+                )
+        );;
+         */
+
+
+        String plan = subscription.getPlanPrice().getPlan().getCode();
+        return plan;
+
     }
 
     private void validateRequest(
