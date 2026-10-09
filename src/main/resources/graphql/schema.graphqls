@@ -266,8 +266,6 @@ type Mutation {
 
     createEmployee(data: RegisterInput!): String!
 
-    userRegister(data: RegisterInput!): String!
-
     updateEmployee(data: UserUpdateDTO!): String!
 
     deleteEmployee(id: Int!): String!

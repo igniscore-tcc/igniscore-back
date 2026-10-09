@@ -2,7 +2,6 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.auth.RegisterDTO;
 import com.igniscore.api.dto.user.ChangePasswordDTO;
-import com.igniscore.api.dto.user.UserRegisterDTO;
 import com.igniscore.api.dto.user.UserUpdateDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
@@ -17,79 +16,46 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-/**
- * Service responsible for managing {@link User} entities.
- *
- * <p>This class handles user-related operations such as:
- * <ul>
- *     <li>Updating user-company associations</li>
- *     <li>Retrieving users by identifier</li>
- *     <li>Updating user profile data</li>
- * </ul>
- *
- * <p>Design considerations:
- * <ul>
- *     <li>All persistence operations are delegated to {@link UserRepository}</li>
- *     <li>Company validation is centralized via {@link CompanyUtils}</li>
- * </ul>
- */
 @Service
 public class UserService {
+
+    private static final int VERIFICATION_CODE_EXPIRATION_MINUTES = 15;
+    private static final int MIN_PASSWORD_LENGTH = 8;
 
     private final UserRepository repository;
     private final CompanyUtils companyUtils;
     private final AuthenticatedUserService authUserService;
-    private final JwtService jwtService;
     private final EmailService emailService;
     private final VerificationTokenRepository verificationTokenRepository;
     private final TokenGeneratorService tokenGenerator;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    /**
-     * Constructor-based dependency injection (preferred over field injection).
-     *
-     * @param repository   user persistence repository
-     * @param companyUtils utility for company validation and retrieval
-     */
-    public UserService(UserRepository repository,
-                       CompanyUtils companyUtils,
-                       AuthenticatedUserService authUserService,
-                       JwtService jwtService,
-                       EmailService emailService,
-                       VerificationTokenRepository verificationTokenRepository,
-                       TokenGeneratorService tokenGenerator) {
+    public UserService(
+            UserRepository repository,
+            CompanyUtils companyUtils,
+            AuthenticatedUserService authUserService,
+            EmailService emailService,
+            VerificationTokenRepository verificationTokenRepository,
+            TokenGeneratorService tokenGenerator,
+            BCryptPasswordEncoder passwordEncoder
+    ) {
         this.repository = repository;
         this.companyUtils = companyUtils;
         this.authUserService = authUserService;
-        this.jwtService = jwtService;
         this.emailService = emailService;
         this.verificationTokenRepository = verificationTokenRepository;
         this.tokenGenerator = tokenGenerator;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    /**
-     * Updates the company associated with a user.
-     *
-     * <p>Flow:
-     * <ol>
-     *     <li>Retrieve user by ID</li>
-     *     <li>Validate target company exists</li>
-     *     <li>Update association</li>
-     *     <li>Persist changes</li>
-     * </ol>
-     *
-     * @param companyCnpj   target company identifier
-     * @return updated user
-     *
-     * @throws RuntimeException if user or company is not found
-     */
+    @Transactional
     public User updateUserCompany(String companyCnpj) {
-        User user = this.authUserService.getUserOrThrow();
-
+        User user = authUserService.getUserOrThrow();
         Company company = companyUtils.existsCompany(companyCnpj);
 
         user.setCompany(company);
@@ -98,34 +64,11 @@ public class UserService {
         return repository.save(user);
     }
 
-    /**
-     * Retrieves a user by its identifier.
-     *
-     * @param id user identifier
-     * @return user entity
-     *
-     * @throws RuntimeException if user is not found
-     */
     public User findUserId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found."));
     }
 
-    /**
-     * Updates user profile information.
-     *
-     * <p>This method assumes email is used as a unique identifier.
-     *
-     * <p>Important:
-     * This operation runs inside a transactional context,
-     * so changes are automatically persisted without explicitly calling save().
-     *
-     * @param email user's email (identifier)
-     * @param name  new name
-     * @return updated user entity
-     *
-     * @throws RuntimeException if user is not found
-     */
     @Transactional
     public User update(String email, String name) {
         User user = repository.findByEmail(email);
@@ -135,32 +78,19 @@ public class UserService {
         }
 
         user.setName(name);
-        user.setEmail(email);
 
-        return user;
+        return repository.save(user);
     }
 
-    /**
-     * Retrieves all users belonging to the authenticated user's company.
-     *
-     * @param pageable pagination and sorting information
-     * @return paginated list of users belonging to the company
-     */
     public Page<User> findUsersByCompany(Pageable pageable) {
         User authenticatedUser = authUserService.getUserOrThrow();
-
-        Company company = authenticatedUser.getCompany();
-
-        if (company == null) {
-            throw new RuntimeException("User is not associated with a company.");
-        }
+        Company company = requireCompany(authenticatedUser);
 
         return repository.findByCompanyAndDeletedAtIsNull(company, pageable);
     }
 
     @Transactional
     public String store(RegisterDTO data) {
-
         User owner = authUserService.getUserOrThrow();
 
         if (owner.getRole() != UserRole.OWNER) {
@@ -177,33 +107,28 @@ public class UserService {
             return "Erro ao criar conta.";
         }
 
-        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
+        User employee = new User();
+        employee.setName(data.name());
+        employee.setEmail(data.email());
+        employee.setPassword(passwordEncoder.encode(data.password()));
+        employee.setRole(UserRole.EMPLOYEE);
+        employee.setActive(true);
+        employee.setEmailVerified(false);
+        employee.setCompany(company);
 
-        User newUser = new User();
-        newUser.setName(data.name());
-        newUser.setEmail(data.email());
-        newUser.setPassword(encryptedPassword);
-        newUser.setRole(UserRole.EMPLOYEE);
-        newUser.setActive(true);
-        newUser.setEmailVerified(false);
-        newUser.setCompany(company);
-
-        User savedUser = repository.save(newUser);
+        User savedEmployee = repository.save(employee);
 
         String code = tokenGenerator.generateVerificationCode();
 
         VerificationToken verificationToken = new VerificationToken(
                 code,
-                savedUser,
-                LocalDateTime.now().plusMinutes(15)
+                savedEmployee,
+                LocalDateTime.now().plusMinutes(VERIFICATION_CODE_EXPIRATION_MINUTES)
         );
 
         verificationTokenRepository.save(verificationToken);
 
-        emailService.sendVerificationCode(
-                savedUser.getEmail(),
-                code
-        );
+        emailService.sendVerificationCode(savedEmployee.getEmail(), code);
 
         return "Funcionário criado com sucesso. Um e-mail de verificação foi enviado para o funcionário.";
     }
@@ -219,64 +144,29 @@ public class UserService {
     }
 
     @Transactional
-    public String userRegister(UserRegisterDTO data) {
-
-        User owner = authUserService.getUserOrThrow();
-
-        if(owner.getRole() != UserRole.OWNER && owner.getCompany() != null) {
-            return "It is not possible to create a user";
-        }
-
-        String temporaryPassword = generateTemporaryPassword();
-
-        String encryptedPassword = new BCryptPasswordEncoder().encode(temporaryPassword);
-
-        User user = new User(
-                data.getName(),
-                data.getEmail(),
-                encryptedPassword,
-                UserRole.EMPLOYEE,
-                owner.getCompany());
-
-        user.setFirstLogin(true);
-
-        repository.save(user);
-
-        emailService.sendTemporaryPassword(
-                user.getEmail(),
-                user.getName(),
-                temporaryPassword
-        );
-
-        return "User successfully registered";
-
-    }
-
-    @Transactional
     public String changeTemporaryPassword(ChangePasswordDTO data) {
-
         User user = authUserService.getUserOrThrow();
 
         if (!user.isFirstLogin()) {
             return "Changing the temporary password is not necessary.";
         }
 
-        if (data.getNewPassword() == null || data.getConfirmPassword() == null) {
+        String newPassword = data.getNewPassword();
+        String confirmPassword = data.getConfirmPassword();
+
+        if (newPassword == null || confirmPassword == null) {
             return "The new password and the confirmation are mandatory.";
         }
 
-        if (data.getNewPassword().length() < 8) {
+        if (newPassword.length() < MIN_PASSWORD_LENGTH) {
             return "The password must be at least 8 characters long.";
         }
 
-        if (!data.getNewPassword().equals(data.getConfirmPassword())) {
+        if (!newPassword.equals(confirmPassword)) {
             return "The passwords do not match.";
         }
 
-        String encryptedPassword =
-                new BCryptPasswordEncoder().encode(data.getNewPassword());
-
-        user.setPassword(encryptedPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         user.setFirstLogin(false);
         user.setEmailVerified(true);
 
@@ -287,17 +177,19 @@ public class UserService {
 
     @Transactional
     public String updateEmployee(UserUpdateDTO data) {
-
         User employee = validateEmployee(data.getId());
+
+        if (employee == null) {
+            return "Unable to update employee.";
+        }
 
         User existingUser = repository.findByEmail(data.getEmail());
 
         if (existingUser != null &&
-                !existingUser.getId().equals(employee.getId())) {
+                !Objects.equals(existingUser.getId(), employee.getId())) {
             return "Unable to update employee.";
         }
 
-        assert employee != null;
         employee.setName(data.getName());
         employee.setEmail(data.getEmail());
 
@@ -308,7 +200,6 @@ public class UserService {
 
     @Transactional
     public String deleteEmployee(Integer employeeId) {
-
         User employee = validateEmployee(employeeId);
 
         if (employee == null) {
@@ -323,28 +214,23 @@ public class UserService {
     }
 
     private User validateEmployee(Integer employeeId) {
-
         User owner = authUserService.getUserOrThrow();
 
-        if (owner.getRole() != UserRole.OWNER) {
+        if (owner.getRole() != UserRole.OWNER || owner.getCompany() == null) {
             return null;
         }
 
-        Company company = owner.getCompany();
+        User employee = repository.findById(employeeId).orElse(null);
 
-        if (company == null) {
+        if (employee == null || employee.getDeletedAt() != null) {
             return null;
         }
 
-        User employee = repository.findById(employeeId)
-                .orElse(null);
+        Company ownerCompany = owner.getCompany();
+        Company employeeCompany = employee.getCompany();
 
-        if (employee == null) {
-            return null;
-        }
-
-        if (employee.getCompany() == null ||
-                !employee.getCompany().getId().equals(company.getId())) {
+        if (employeeCompany == null ||
+                !Objects.equals(employeeCompany.getId(), ownerCompany.getId())) {
             return null;
         }
 
@@ -355,16 +241,13 @@ public class UserService {
         return employee;
     }
 
-    private String generateTemporaryPassword() {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        SecureRandom random = new SecureRandom();
+    private Company requireCompany(User user) {
+        Company company = user.getCompany();
 
-        StringBuilder password = new StringBuilder(8);
-
-        for (int i = 0; i < 8; i++) {
-            password.append(characters.charAt(random.nextInt(characters.length())));
+        if (company == null) {
+            throw new RuntimeException("User is not associated with a company.");
         }
 
-        return password.toString();
+        return company;
     }
 }
