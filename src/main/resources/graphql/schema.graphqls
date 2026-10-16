@@ -200,6 +200,8 @@ type Query {
     me: Me!
 
     myCompany:Company!
+
+    mySubscription: SubscriptionDTO
 }
 
 type ClientQuery {
@@ -260,6 +262,18 @@ type StripeResponse {
     message: String!
     sessionId: String
     sessionUrl: String
+}
+
+type SubscriptionDTO {
+    id: ID!
+    status: String!
+    cancelAtPeriodEnd: Boolean!
+    currentPeriodStart: String
+    currentPeriodEnd: String
+    planName: String
+    amount: Float
+    currency: String
+    interval: String
 }
 
 type Mutation {

@@ -2,6 +2,7 @@ package com.igniscore.api.service;
 
 import com.igniscore.api.dto.stripe.StripeRequestDTO;
 import com.igniscore.api.dto.stripe.StripeResponseDTO;
+import com.igniscore.api.dto.subscription.SubscriptionDTO;
 import com.igniscore.api.model.*;
 import com.igniscore.api.repository.PlanPriceRepository;
 import com.igniscore.api.repository.PlanRepository;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +55,7 @@ public class SubscriptionService {
     }
 
     @Transactional(readOnly = true)
-    public String getMySubscription(Company company) {
+    public String getMyPlan(Company company) {
 
         Subscription subscription = subscriptionRepository
                 .findFirstByCompanyOrderByCreatedAtDesc(company);
@@ -63,6 +63,18 @@ public class SubscriptionService {
         return subscription != null
                 ? subscription.getPlanPrice().getPlan().getCode()
                 : "NOT";
+    }
+
+    @Transactional(readOnly = true)
+    public SubscriptionDTO getMySubscription() {
+        var company = authenticatedUserService.getCompanyOrThrow();
+
+        return subscriptionRepository
+                .findByCompany_IdOrderByUpdatedAtDesc(company.getId())
+                .stream()
+                .findFirst()
+                .map(SubscriptionDTO::from)
+                .orElse(null);
     }
 
     private void validateRequest(

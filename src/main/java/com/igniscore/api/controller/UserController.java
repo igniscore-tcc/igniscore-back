@@ -101,7 +101,7 @@ public class UserController {
                 ? (Integer) authentication.getDetails()
                 : null;
 
-        String plan = subscriptionService.getMySubscription(company);
+        String plan = subscriptionService.getMyPlan(company);
 
         assert user != null;
         return new MeDTO(
@@ -137,7 +137,7 @@ public class UserController {
                 : null;
 
         Company company = authenticatedUserService.getCompanyOrThrow();
-        String plan = subscriptionService.getMySubscription(company);
+        String plan = subscriptionService.getMyPlan(company);
 
 
 
