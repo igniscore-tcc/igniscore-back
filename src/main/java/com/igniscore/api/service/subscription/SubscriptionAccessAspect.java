@@ -15,7 +15,6 @@ public class SubscriptionAccessAspect {
 
     @Around("@annotation(com.igniscore.api.service.subscription.RequiresSubscriptionAccess) || @within(com.igniscore.api.service.subscription.RequiresSubscriptionAccess)")
     public Object checkSubscriptionAccess(ProceedingJoinPoint joinPoint) throws Throwable {
-        System.out.println("AOP: verificando assinatura");
 
         subscriptionAccessService.requireBusinessAccess();
 

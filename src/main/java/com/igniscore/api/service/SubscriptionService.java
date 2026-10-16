@@ -57,22 +57,12 @@ public class SubscriptionService {
     @Transactional(readOnly = true)
     public String getMySubscription(Company company) {
 
-        Subscription subscription = subscriptionRepository.findFirstByCompanyOrderByCreatedAtDesc(company);
+        Subscription subscription = subscriptionRepository
+                .findFirstByCompanyOrderByCreatedAtDesc(company);
 
-        /*
-        PlanPrice planPrice = planPriceRepository.findByID(subscription.getPlanPrice().getId());
-
-        Plan plan = planRepository.findByCode(planPrice.getPlan().getCode()).orElseThrow(() ->
-                new IllegalArgumentException(
-                        "Plan price not found"
-                )
-        );;
-         */
-
-
-        String plan = subscription.getPlanPrice().getPlan().getCode();
-        return plan;
-
+        return subscription != null
+                ? subscription.getPlanPrice().getPlan().getCode()
+                : "NOT";
     }
 
     private void validateRequest(
