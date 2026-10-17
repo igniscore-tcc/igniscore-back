@@ -2,6 +2,8 @@ package com.igniscore.api.dto.sale;
 
 import com.igniscore.api.model.SaleType;
 import com.igniscore.api.model.SaleDocument;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,15 +32,27 @@ import java.util.List;
  * }
  * </pre>
  */
+@Setter
+@Getter
 public class CreateSaleDTO {
 
     /**
      * Identifier of the client associated with the sale.
+     * -- GETTER --
+     *  Returns the client identifier.
+     * -- SETTER --
+     *  Sets the client identifier.
+     *
      */
     private Integer clientId;
 
     /**
      * Payment method selected for the sale.
+     * -- GETTER --
+     *  Returns the selected payment method.
+     * -- SETTER --
+     *  Sets the payment method.
+     *
      */
     private SaleType paymentMethod;
 
@@ -50,84 +64,12 @@ public class CreateSaleDTO {
 
     /**
      * List of items included in the sale.
+     * -- GETTER --
+     *  Returns the list of sale items
+     * -- SETTER --
+     *  Sets the list of sale items.
+     *
      */
     private List<CreateSaleItemDTO> items;
 
-    /**
-     * Returns the client identifier.
-     *
-     * @return client id
-     */
-    public Integer getClientId() {
-        return clientId;
-    }
-
-    /**
-     * Returns the selected payment method.
-     *
-     * @return payment method
-     */
-    public SaleType getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    /**
-     * Returns the list of sale items.
-     *
-     * @return list of sale items
-     */
-    public List<CreateSaleItemDTO> getItems() {
-        return items;
-    }
-
-    public BigDecimal getDiscount() {
-        return discount;
-    }
-
-    public SaleDocument getType() {
-        return type;
-    }
-
-    public String getDocument() {
-        return document;
-    }
-
-    /**
-     * Sets the client identifier.
-     *
-     * @param clientId client id
-     */
-    public void setClientId(Integer clientId) {
-        this.clientId = clientId;
-    }
-
-    /**
-     * Sets the payment method.
-     *
-     * @param paymentMethod payment method
-     */
-    public void setPaymentMethod(SaleType paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    /**
-     * Sets the list of sale items.
-     *
-     * @param items sale items
-     */
-    public void setItems(List<CreateSaleItemDTO> items) {
-        this.items = items;
-    }
-
-    public void setDiscount(BigDecimal discount) {
-        this.discount = discount;
-    }
-
-    public void setType(SaleDocument type) {
-        this.type = type;
-    }
-
-    public void setDocument(String document) {
-        this.document = document;
-    }
 }

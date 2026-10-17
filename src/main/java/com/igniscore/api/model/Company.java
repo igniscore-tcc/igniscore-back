@@ -2,6 +2,9 @@ package com.igniscore.api.model;
 
 import com.igniscore.api.dto.company.CreateCompanyDTO;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -37,6 +40,9 @@ import java.io.Serializable;
  *     <li>UF stores the federative unit associated with the IE registration</li>
  * </ul>
  */
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 @Entity
 @Table(name = "companies")
 public class Company implements Serializable {
@@ -119,9 +125,6 @@ public class Company implements Serializable {
     @Column(name = "subscription_status")
     private SubscriptionStatus subscriptionStatus;
 
-    public Company() {
-    }
-
     public Company(CreateCompanyDTO dto) {
         this.name = dto.getName();
         this.cnpj = dto.getCnpj();
@@ -129,97 +132,5 @@ public class Company implements Serializable {
         this.ufIe = dto.getUfIe();
         this.email = dto.getEmail();
         this.phone = dto.getPhone();
-    }
-
-    // --- Getters ---
-
-    public Integer getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getCnpj() {
-        return cnpj;
-    }
-
-    public String getIe() {
-        return ie;
-    }
-
-    public String getUfIe() {
-        return ufIe;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public String getStripeCustomerId() {
-        return stripeCustomerId;
-    }
-
-    public String getStripeSubscriptionId() {
-        return stripeSubscriptionId;
-    }
-
-    public String getStripeCheckoutSessionId() {
-        return stripeCheckoutSessionId;
-    }
-
-    public SubscriptionStatus getSubscriptionStatus() {
-        return subscriptionStatus;
-    }
-
-    // --- Setters ---
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setCnpj(String cnpj) {
-        this.cnpj = cnpj;
-    }
-
-    public void setIe(String ie) {
-        this.ie = ie;
-    }
-
-    public void setUfIe(String ufIe) {
-        this.ufIe = ufIe;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public void setStripeCustomerId(String stripeCustomerId) {
-        this.stripeCustomerId = stripeCustomerId;
-    }
-
-    public void setStripeSubscriptionId(String stripeSubscriptionId) {
-        this.stripeSubscriptionId = stripeSubscriptionId;
-    }
-
-    public void setStripeCheckoutSessionId(String stripeCheckoutSessionId) {
-        this.stripeCheckoutSessionId = stripeCheckoutSessionId;
-    }
-
-    public void setSubscriptionStatus(SubscriptionStatus subscriptionStatus) {
-        this.subscriptionStatus = subscriptionStatus;
     }
 }

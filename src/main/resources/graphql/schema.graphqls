@@ -200,6 +200,8 @@ type Query {
     me: Me!
 
     myCompany:Company!
+
+    mySubscription: SubscriptionDTO
 }
 
 type ClientQuery {
@@ -251,6 +253,7 @@ type Me {
     role: UserRole!
     onboarding: Boolean!
     firstLogin: Boolean!
+    plan: String!
     companyId: Int
 }
 
@@ -261,12 +264,22 @@ type StripeResponse {
     sessionUrl: String
 }
 
+type SubscriptionDTO {
+    id: ID!
+    status: String!
+    cancelAtPeriodEnd: Boolean!
+    currentPeriodStart: String
+    currentPeriodEnd: String
+    planName: String
+    amount: Float
+    currency: String
+    interval: String
+}
+
 type Mutation {
     createCompany(input: CreateCompanyInput!): Company!
 
     createEmployee(data: RegisterInput!): String!
-
-    userRegister(data: RegisterInput!): String!
 
     updateEmployee(data: UserUpdateDTO!): String!
 

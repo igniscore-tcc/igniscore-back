@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 public record SaleItemResponseDTO(
-        Integer id ,
+        Integer id,
         Integer quantity,
         BigDecimal unitPrice,
         BigDecimal total,
@@ -24,17 +24,9 @@ public record SaleItemResponseDTO(
                 item.getQuantity(),
                 item.getUnitPrice(),
                 item.getTotal(),
-                item.getProduct() != null ? new ProductResponseDTO(item.getProduct()) : null
+                item.getProduct() != null
+                        ? new ProductResponseDTO(item.getProduct())
+                        : null
         );
     }
 }
-
-/*
-type SaleItem {
-    id: ID!
-    quantity: Int!
-    unitPrice: BigDecimal!
-    total: BigDecimal!
-    product: Product!
-}
- */

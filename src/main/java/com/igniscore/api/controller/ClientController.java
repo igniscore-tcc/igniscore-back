@@ -6,7 +6,7 @@ import com.igniscore.api.dto.client.ClientResponseDTO;
 import com.igniscore.api.dto.client.ClientUpdateDTO;
 import com.igniscore.api.model.Client;
 import com.igniscore.api.service.ClientService;
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,109 +18,57 @@ import org.springframework.stereotype.Controller;
 
 /**
  * GraphQL controller responsible for handling queries and mutations
- * related to {@link Client} entities.
+ * related to client entities.
  *
- * <p>This layer acts as a thin transport adapter between the GraphQL API
- * and the service layer. It delegates all business logic to {@link ClientService}
- * and does not contain domain logic.
- *
- * <p><strong>Responsibilities:</strong>
- * <ul>
- *     <li>Expose GraphQL query and mutation endpoints</li>
- *     <li>Map GraphQL arguments to DTOs</li>
- *     <li>Delegate execution to the service layer</li>
- * </ul>
- *
- * <p><strong>Design notes:</strong>
- * <ul>
- *     <li>Follows a thin-controller pattern</li>
- *     <li>Relies on service layer for validation, authorization, and persistence</li>
- *     <li>Supports pagination via {@link Pageable} abstraction</li>
- * </ul>
+ * <p>Delegates business operations to {@link ClientService}.
  */
 @Controller
-@SuppressWarnings("unused")
+@RequiredArgsConstructor
 public class ClientController {
 
-    /**
-     * Service responsible for client-related business operations.
-     */
+    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_SIZE = 10;
+
     private final ClientService service;
 
     /**
-     * Constructs the controller with required dependencies.
+     * Creates a new client.
      *
-     * @param service service layer handling client operations
-     */
-    @SuppressWarnings("unused")
-    public ClientController(ClientService service) {
-        this.service = service;
-    }
-
-    /**
-     * GraphQL mutation that creates a new {@link Client}.
-     *
-     * <p>The input payload is mapped to {@link ClientRegisterDTO} and
-     * forwarded to the service layer for validation and persistence.
-     *
-     * @param input client creation payload
-     * @return the persisted {@link Client}
+     * @param input client registration data
+     * @return created client
      */
     @MutationMapping
-    @SuppressWarnings("unused")
-    public Client storeClient(@Argument @Valid ClientRegisterDTO input) {
+    public Client storeClient(@Argument ClientRegisterDTO input) {
         return service.store(input);
     }
 
     /**
-     * GraphQL mutation that updates an existing {@link Client}.
+     * Updates an existing client.
      *
-     * <p>Supports partial updates. Only fields provided in the input
-     * are applied to the target entity.
-     *
-     * @param input client update payload including identifier
-     * @return the updated {@link Client}
+     * @param input client update data
+     * @return updated client
      */
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
     @MutationMapping
-    @SuppressWarnings("unused")
-    public Client updateClient(@Argument @Valid ClientUpdateDTO input) {
+    public Client updateClient(@Argument ClientUpdateDTO input) {
         return service.update(input);
     }
 
     /**
-     * Retrieves a paginated list of {@link Client} entities belonging to the
-     * authenticated tenant context.
-     *
-     * <p>This query applies deterministic ordering using the client identifier
-     * in ascending order to guarantee stable pagination behavior across requests.
-     * The response includes both the current page content and pagination metadata
-     * wrapped inside {@link ClientQueryDTO}.
-     *
-     * <p><strong>Returned metadata:</strong>
-     * <ul>
-     *     <li>Total number of pages</li>
-     *     <li>Total number of registered clients</li>
-     *     <li>Current page content</li>
-     * </ul>
-     *
-     * <p><strong>Pagination defaults:</strong>
-     * <ul>
-     *     <li>{@code page = 0}</li>
-     *     <li>{@code size = 10}</li>
-     * </ul>
+     * Retrieves a paginated list of clients.
      *
      * @param page zero-based page index
      * @param size maximum number of records per page
-     * @return paginated client response with metadata
+     * @return paginated client response
      */
     @QueryMapping
-    @SuppressWarnings("unused")
-    public ClientQueryDTO clients(@Argument Integer page, @Argument Integer size) {
-
+    public ClientQueryDTO clients(
+            @Argument Integer page,
+            @Argument Integer size
+    ) {
         Pageable pageable = PageRequest.of(
-                page != null ? page : 0,
-                size != null ? size : 10,
+                page != null ? page : DEFAULT_PAGE,
+                size != null ? size : DEFAULT_SIZE,
                 Sort.by(Sort.Direction.ASC, "id")
         );
 
@@ -128,31 +76,25 @@ public class ClientController {
     }
 
     /**
-     * GraphQL query that retrieves a {@link Client} by its identifier.
-     *
-     * <p>The result is scoped to the authenticated user's company.
+     * Retrieves a client by identifier.
      *
      * @param id client identifier
-     * @return matching {@link Client}
+     * @return client response
      */
     @QueryMapping
-    @SuppressWarnings("unused")
-    public ClientResponseDTO client(@Argument Integer id){
+    public ClientResponseDTO client(@Argument Integer id) {
         return service.findById(id);
     }
 
     /**
-     * GraphQL mutation that deletes a {@link Client} by its identifier.
-     *
-     * <p>The operation is restricted to the current tenant scope.
+     * Soft-deletes a client.
      *
      * @param id client identifier
      * @return operation result message
      */
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
     @MutationMapping
-    @SuppressWarnings("unused")
-    public String deleteClient(@Argument Integer id){
+    public String deleteClient(@Argument Integer id) {
         return service.delete(id);
     }
 }

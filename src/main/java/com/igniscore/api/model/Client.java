@@ -1,13 +1,16 @@
 package com.igniscore.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.igniscore.api.dto.client.ClientRegisterDTO;
 import com.igniscore.api.dto.client.ClientUpdateDTO;
 import jakarta.persistence.*;
-import jakarta.persistence.Column;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -34,6 +37,10 @@ import java.util.List;
  *     <li>Enforced via composite unique constraint (company + number)</li>
  * </ul>
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonIgnoreProperties({
         "hibernateLazyInitializer",
         "handler"
@@ -146,9 +153,12 @@ public class Client implements Serializable {
     @Column(name = "deleted_at")
     private Timestamp deletedAt;
 
-    public Client() {
-    }
-
+    /**
+     * Constructs a client from registration data.
+     *
+     * @param dto client registration data
+     * @param company associated company
+     */
     public Client(ClientRegisterDTO dto, Company company) {
         this.name = dto.getName();
         this.legal = dto.getLegal();
@@ -162,6 +172,11 @@ public class Client implements Serializable {
         this.company = company;
     }
 
+    /**
+     * Copy constructor.
+     *
+     * @param client client to copy
+     */
     @SuppressWarnings("CopyConstructorMissesField")
     public Client(Client client) {
         this.id = client.id;
@@ -176,120 +191,11 @@ public class Client implements Serializable {
         this.cpf = client.cpf;
     }
 
-
-
-    // --- Getters ---
-
-    public Integer getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getLegal() {
-        return legal;
-    }
-
-    public String getCnpj() {
-        return cnpj;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public Integer getNumber() {
-        return number;
-    }
-
-    public String getIe() {
-        return ie;
-    }
-
-    public String getUfIe() {
-        return uf_ie;
-    }
-
-    public String getObs() {
-        return obs;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public Company getCompany() {
-        return company;
-    }
-
-    public List<Address> getAddresses() {
-        return addresses;
-    }
-
-    public Timestamp getDeletedAt() {
-        return deletedAt;
-    }
-
-    // --- Setters ---
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setLegal(String legal) {
-        this.legal = legal;
-    }
-
-    public void setCnpj(String cnpj) {
-        this.cnpj = cnpj;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public void setIe(String ie) {
-        this.ie = ie;
-    }
-
-    public void setUfIe(String uf_ie) {
-        this.uf_ie = uf_ie;
-    }
-
-    public void setObs(String obs) {
-        this.obs = obs;
-    }
-
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
-
-    public void setCompany(Company company) {
-        this.company = company;
-    }
-
-    public void setAddresses(List<Address> addresses) {
-        this.addresses = addresses;
-    }
-
-    public void setDeletedAt(Timestamp deletedAt) {
-        this.deletedAt = deletedAt;
-    }
-
+    /**
+     * Updates the client fields with non-null values from the DTO.
+     *
+     * @param dto client update data
+     */
     public void update(ClientUpdateDTO dto) {
         if (dto.getName() != null) this.name = dto.getName();
         if (dto.getLegal() != null) this.legal = dto.getLegal();

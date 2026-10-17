@@ -9,5 +9,6 @@ public record MeDTO(
         UserRole role,
         Boolean onboarding,
         Boolean firstLogin,
+        String plan,
         Integer companyId
 ) {}

@@ -36,7 +36,7 @@ public record ClientResponseDTO(
                 client.getEmail(),
                 client.getPhone(),
                 client.getIe(),
-                client.getUfIe(),
+                client.getUf_ie(),
                 client.getObs(),
                 client.getCpf(),
                 client.getCompany() != null ? new CompanyResponseDTO(client.getCompany()) : null,

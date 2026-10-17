@@ -57,4 +57,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             u.id ASC
         """)
     Page<User> findByCompanyAndDeletedAtIsNull(Company company, Pageable pageable);
+
+    long countByCompanyAndDeletedAtIsNull(Company company);
 }

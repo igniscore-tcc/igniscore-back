@@ -62,6 +62,9 @@ public class Subscription {
     @Column(name = "trial_end")
     private LocalDateTime trialEnd;
 
+    @Column(name = "past_due_since")
+    private LocalDateTime pastDueSince;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

@@ -1,10 +1,10 @@
 package com.igniscore.api.dto.sale;
 
 import com.igniscore.api.dto.client.ClientResponseDTO;
-import com.igniscore.api.model.SaleType;
 import com.igniscore.api.model.Sale;
 import com.igniscore.api.model.SaleDocument;
 import com.igniscore.api.model.SaleStatus;
+import com.igniscore.api.model.SaleType;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,19 +14,19 @@ import java.util.Collections;
 import java.util.List;
 
 public record SaleResponseDTO(
-    Integer id,
-    Integer numberSale,
-    Integer quantityItems,
-    BigDecimal discount,
-    BigDecimal total,
-    LocalDate date,
-    SaleType paymentMethod,
-    SaleStatus status,
-    SaleDocument type,
-    String document,
-    LocalDate dueDate,
-    ClientResponseDTO client,
-    List<SaleItemResponseDTO> items
+        Integer id,
+        Integer numberSale,
+        Integer quantityItems,
+        BigDecimal discount,
+        BigDecimal total,
+        LocalDate date,
+        SaleType paymentMethod,
+        SaleStatus status,
+        SaleDocument type,
+        String document,
+        LocalDate dueDate,
+        ClientResponseDTO client,
+        List<SaleItemResponseDTO> items
 ) implements Serializable {
 
     @Serial
@@ -45,26 +45,14 @@ public record SaleResponseDTO(
                 sale.getType(),
                 sale.getDocument(),
                 sale.getDueDate(),
-                sale.getClient() != null ? new ClientResponseDTO(sale.getClient()) : null,
+                sale.getClient() != null
+                        ? new ClientResponseDTO(sale.getClient())
+                        : null,
                 sale.getItems() != null
-                        ? sale.getItems().stream().map(SaleItemResponseDTO::new).toList()
+                        ? sale.getItems().stream()
+                        .map(SaleItemResponseDTO::new)
+                        .toList()
                         : Collections.emptyList()
         );
     }
 }
-
-/*
-type Sale {
-    id: ID!
-    numberSale: Int!
-    quantityItems: Int!
-    discount: BigDecimal
-    total: BigDecimal!
-    date: Date!
-    paymentMethod: PaymentMethod!
-    status: SaleStatus!
-    dueDate: Date!
-    client: Client!
-    items: [SaleItem!]!
-}
- */

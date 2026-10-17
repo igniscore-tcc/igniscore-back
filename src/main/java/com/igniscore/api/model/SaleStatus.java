@@ -1,17 +1,10 @@
 package com.igniscore.api.model;
 
+import lombok.Getter;
+
+@Getter
 public enum SaleStatus
 {
-    PENDING("pending"),
-    PAID("paid");
-
-    private final String status;
-
-    SaleStatus(String status) {
-        this.status = status;
-    }
-
-    public String getStatus(){
-        return status;
-    }
+    PENDING,
+    PAID
 }

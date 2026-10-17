@@ -1,5 +1,8 @@
 package com.igniscore.api.dto.sale;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 
 /**
@@ -17,15 +20,23 @@ import java.math.BigDecimal;
  *     <li>Provide pricing and quantity information</li>
  * </ul>
  */
+@Setter
+@Getter
 public class CreateSaleItemDTO {
 
     /**
      * Identifier of the product associated with the sale item.
+     * -- GETTER --
+     *  Returns the product identifier.
+     * -- SETTER --
+     *  Defines the product identifier.
      */
     private Integer productId;
 
     /**
      * Quantity of the product being sold.
+     * -- GETTER --
+     *  Returns the quantity of items.
      */
     private Integer quantity;
 
@@ -34,60 +45,9 @@ public class CreateSaleItemDTO {
      *
      * <p>{@link BigDecimal} is used to preserve
      * monetary precision and avoid floating-point inaccuracies.
+     * -- GETTER --
+     *  Returns the unit price of the product.
      */
     private BigDecimal unitPrice;
 
-    /**
-     * Returns the product identifier.
-     *
-     * @return product ID
-     */
-    public Integer getProductId() {
-        return productId;
-    }
-
-    /**
-     * Returns the quantity of items.
-     *
-     * @return item quantity
-     */
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    /**
-     * Returns the unit price of the product.
-     *
-     * @return unit price
-     */
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
-    }
-
-    /**
-     * Defines the product identifier.
-     *
-     * @param productId product ID
-     */
-    public void setProductId(Integer productId) {
-        this.productId = productId;
-    }
-
-    /**
-     * Defines the quantity of items.
-     *
-     * @param quantity item quantity
-     */
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
-    /**
-     * Defines the unit price of the product.
-     *
-     * @param unitPrice product unit price
-     */
-    public void setUnitPrice(BigDecimal unitPrice) {
-        this.unitPrice = unitPrice;
-    }
 }

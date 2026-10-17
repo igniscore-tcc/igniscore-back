@@ -127,7 +127,7 @@ public class JwtService {
      */
     private Instant getExpirationDate() {
         return LocalDateTime.now()
-                .plusHours(2)
+                .plusDays(7)
                 .toInstant(ZoneOffset.of("-03:00"));
     }
 }
