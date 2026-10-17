@@ -51,6 +51,7 @@ public class ProductService {
     private final ProductRepository repository;
     private final AuthenticatedUserService authUserService;
     private final AuditUtils audit;
+    private final PlanLimitService planLimitService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -72,6 +73,8 @@ public class ProductService {
     public Product store(ProductStoreDTO dto) {
         User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
+
+        planLimitService.checkProductLimit();
 
         Product product = new Product(dto, company);
         Product saved = repository.save(product);

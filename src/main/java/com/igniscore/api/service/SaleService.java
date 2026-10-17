@@ -61,6 +61,7 @@ public class SaleService {
     private final ExpirationRepository expirationRepository;
     private final AuthenticatedUserService authUserService;
     private final AuditUtils audit;
+    private final PlanLimitService planLimitService;
 
     /**
      * Creates and persists a new sale.
@@ -76,6 +77,8 @@ public class SaleService {
     public Sale store(CreateSaleDTO dto) {
         User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
+
+        planLimitService.checkSaleLimit();
 
         Client client = getClientForCompany(dto.getClientId(), company);
 

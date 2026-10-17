@@ -40,6 +40,7 @@ public class ClientService {
     private final AuthenticatedUserService authUserService;
     private final AuditUtils audit;
     private final EntityManager entityManager;
+    private final PlanLimitService planLimitService;
 
     /**
      * Creates a client associated with the authenticated company.
@@ -52,6 +53,8 @@ public class ClientService {
     public Client store(ClientRegisterDTO dto) {
         User user = authUserService.getUserOrThrow();
         Company company = authUserService.getCompanyOrThrow();
+
+        planLimitService.checkClientLimit();
 
         Client client = new Client(dto, company);
         Client saved = repository.save(client);

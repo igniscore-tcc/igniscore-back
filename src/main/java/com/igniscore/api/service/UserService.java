@@ -12,6 +12,7 @@ import com.igniscore.api.repository.VerificationTokenRepository;
 import com.igniscore.api.service.subscription.RequiresSubscriptionAccess;
 import com.igniscore.api.utils.CompanyUtils;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,6 +23,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@AllArgsConstructor
 @Service
 public class UserService {
 
@@ -35,24 +37,7 @@ public class UserService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final TokenGeneratorService tokenGenerator;
     private final BCryptPasswordEncoder passwordEncoder;
-
-    public UserService(
-            UserRepository repository,
-            CompanyUtils companyUtils,
-            AuthenticatedUserService authUserService,
-            EmailService emailService,
-            VerificationTokenRepository verificationTokenRepository,
-            TokenGeneratorService tokenGenerator,
-            BCryptPasswordEncoder passwordEncoder
-    ) {
-        this.repository = repository;
-        this.companyUtils = companyUtils;
-        this.authUserService = authUserService;
-        this.emailService = emailService;
-        this.verificationTokenRepository = verificationTokenRepository;
-        this.tokenGenerator = tokenGenerator;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final PlanLimitService planLimitService;
 
     @RequiresSubscriptionAccess
     @Transactional
@@ -104,6 +89,8 @@ public class UserService {
         }
 
         Company company = owner.getCompany();
+
+        planLimitService.checkUserLimit();
 
         if (company == null) {
             return "O proprietário não possui uma empresa associada.";

@@ -16,4 +16,11 @@ public interface SaleRepository extends JpaRepository<Sale, Integer> {
             LocalDate endDate,
             Pageable pageable
     );
+
+    long countByCompanyAndDateBetweenAndDeletedAtIsNull(
+            Company company,
+            LocalDate startDate,
+            LocalDate endDate
+    );
+
 }

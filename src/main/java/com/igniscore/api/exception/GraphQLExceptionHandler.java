@@ -1,6 +1,6 @@
-
 package com.igniscore.api.exception;
 
+import com.igniscore.api.service.PlanLimitExceededException;
 import com.igniscore.api.service.subscription.SubscriptionAccessDeniedException;
 import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
@@ -14,6 +14,16 @@ public class GraphQLExceptionHandler {
     @GraphQlExceptionHandler
     public GraphQLError handleSubscriptionAccessDenied(
             SubscriptionAccessDeniedException ex,
+            DataFetchingEnvironment environment
+    ) {
+        return GraphqlErrorBuilder.newError(environment)
+                .message(ex.getMessage())
+                .build();
+    }
+
+    @GraphQlExceptionHandler
+    public GraphQLError handlePlanLimitExceeded(
+            PlanLimitExceededException ex,
             DataFetchingEnvironment environment
     ) {
         return GraphqlErrorBuilder.newError(environment)
