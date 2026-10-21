@@ -1,14 +1,12 @@
 package com.igniscore.api.service;
 
-import com.igniscore.api.dto.auth.RegisterDTO;
 import com.igniscore.api.dto.user.ChangePasswordDTO;
+import com.igniscore.api.dto.user.UserRegisterDTO;
 import com.igniscore.api.dto.user.UserUpdateDTO;
 import com.igniscore.api.model.Company;
 import com.igniscore.api.model.User;
 import com.igniscore.api.model.UserRole;
-import com.igniscore.api.model.VerificationToken;
 import com.igniscore.api.repository.UserRepository;
-import com.igniscore.api.repository.VerificationTokenRepository;
 import com.igniscore.api.service.subscription.RequiresSubscriptionAccess;
 import com.igniscore.api.utils.CompanyUtils;
 import jakarta.transaction.Transactional;
@@ -18,26 +16,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @AllArgsConstructor
 @Service
 public class UserService {
 
-    private static final int VERIFICATION_CODE_EXPIRATION_MINUTES = 15;
     private static final int MIN_PASSWORD_LENGTH = 8;
 
     private final UserRepository repository;
     private final CompanyUtils companyUtils;
     private final AuthenticatedUserService authUserService;
     private final EmailService emailService;
-    private final VerificationTokenRepository verificationTokenRepository;
-    private final TokenGeneratorService tokenGenerator;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final PlanLimitService planLimitService;
 
     @RequiresSubscriptionAccess
     @Transactional
@@ -81,48 +75,34 @@ public class UserService {
 
     @RequiresSubscriptionAccess
     @Transactional
-    public String store(RegisterDTO data) {
+    public String store(UserRegisterDTO data) {
         User owner = authUserService.getUserOrThrow();
 
-        if (owner.getRole() != UserRole.OWNER) {
-            return "Apenas o proprietário pode cadastrar funcionários.";
+        if(owner.getRole() != UserRole.OWNER && owner.getCompany() != null) {
+            return "It is not possible to create a user";
         }
 
-        Company company = owner.getCompany();
+        String temporaryPassword = generateTemporaryPassword();
 
-        planLimitService.checkUserLimit();
+        String encryptedPassword = new BCryptPasswordEncoder().encode(temporaryPassword);
 
-        if (company == null) {
-            return "O proprietário não possui uma empresa associada.";
-        }
+        User user = new User(
+                data.getName(),
+                data.getEmail(),
+                encryptedPassword,
+                UserRole.EMPLOYEE,
+                owner.getCompany());
 
-        if (repository.findByEmail(data.email()) != null) {
-            return "Erro ao criar conta.";
-        }
+        repository.save(user);
 
-        User employee = new User();
-        employee.setName(data.name());
-        employee.setEmail(data.email());
-        employee.setPassword(passwordEncoder.encode(data.password()));
-        employee.setRole(UserRole.EMPLOYEE);
-        employee.setEmailVerified(false);
-        employee.setCompany(company);
-
-        User savedEmployee = repository.save(employee);
-
-        String code = tokenGenerator.generateVerificationCode();
-
-        VerificationToken verificationToken = new VerificationToken(
-                code,
-                savedEmployee,
-                LocalDateTime.now().plusMinutes(VERIFICATION_CODE_EXPIRATION_MINUTES)
+        emailService.sendTemporaryPassword(
+                user.getEmail(),
+                user.getName(),
+                temporaryPassword
         );
 
-        verificationTokenRepository.save(verificationToken);
+        return "User successfully registered";
 
-        emailService.sendVerificationCode(savedEmployee.getEmail(), code);
-
-        return "Funcionário criado com sucesso. Um e-mail de verificação foi enviado para o funcionário.";
     }
 
     @RequiresSubscriptionAccess
@@ -245,5 +225,18 @@ public class UserService {
         }
 
         return company;
+    }
+
+    private String generateTemporaryPassword() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+
+        StringBuilder password = new StringBuilder(8);
+
+        for (int i = 0; i < 8; i++) {
+            password.append(characters.charAt(random.nextInt(characters.length())));
+        }
+
+        return password.toString();
     }
 }
