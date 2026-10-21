@@ -105,7 +105,6 @@ public class UserService {
         employee.setEmail(data.email());
         employee.setPassword(passwordEncoder.encode(data.password()));
         employee.setRole(UserRole.EMPLOYEE);
-        employee.setActive(true);
         employee.setEmailVerified(false);
         employee.setCompany(company);
 

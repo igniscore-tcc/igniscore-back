@@ -110,7 +110,6 @@ public class AuthController {
         newUser.setEmail(data.email());
         newUser.setPassword(encryptedPassword);
         newUser.setRole(data.role());
-        newUser.setActive(false);
         newUser.setEmailVerified(false);
         newUser.setFirstLogin(false);
 
@@ -197,7 +196,6 @@ public class AuthController {
         }
 
         User user = verificationToken.getUser();
-        user.setActive(true);
         user.setEmailVerified(true);
         repository.save(user);
 
