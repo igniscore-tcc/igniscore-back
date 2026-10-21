@@ -14,7 +14,7 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     public void sendRecoveryLink(String recipient, String token) {
-        String recoveryLink = "https://front-end-tcc-lovat.vercel.app/reset-password?token=" + token;
+        String recoveryLink = "https://app.ignisocre.com/reset-password?token=" + token;
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -22,7 +22,7 @@ public class EmailService {
 
             helper.setTo(recipient);
             helper.setSubject("Recuperação de Senha - Igniscore");
-            helper.setFrom("Igniscore <andersongamasilva08@gmail.com>");
+            helper.setFrom("Igniscore <suporteigniscore@gmail.com>");
 
             String htmlContent = buildHtmlTemplate(recoveryLink);
             helper.setText(htmlContent, true);
@@ -40,7 +40,7 @@ public class EmailService {
 
             helper.setTo(recipient);
             helper.setSubject("Verificação de E-mail - Igniscore");
-            helper.setFrom("Igniscore <andersongamasilva08@gmail.com>");
+            helper.setFrom("Igniscore <suporteigniscore@gmail.com");
 
             String htmlContent = buildVerificationHtmlTemplate(code);
             helper.setText(htmlContent, true);
@@ -58,7 +58,7 @@ public class EmailService {
 
             helper.setTo(recipient);
             helper.setSubject("Acesso ao Igniscore - Senha temporária");
-            helper.setFrom("Igniscore <andersongamasilva08@gmail.com>");
+            helper.setFrom("Igniscore <suporteigniscore@gmail.com>");
 
             String htmlContent = buildTemporaryPasswordHtmlTemplate(
                     name,
