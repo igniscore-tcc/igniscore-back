@@ -95,11 +95,13 @@ public class User implements UserDetails {
         this.id = id;
     }
 
-    public User(String name, String email, String password, UserRole role, Company company) {
+    public User(String name, String email, String password, UserRole role, Boolean emailVerified, Boolean firstLogin, Company company) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.emailVerified = emailVerified;
+        this.firstLogin = firstLogin;
         this.company = company;
     }
 

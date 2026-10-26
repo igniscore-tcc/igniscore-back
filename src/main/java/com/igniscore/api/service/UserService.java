@@ -91,6 +91,8 @@ public class UserService {
                 data.getEmail(),
                 encryptedPassword,
                 UserRole.EMPLOYEE,
+                true,
+                true,
                 owner.getCompany());
 
         repository.save(user);
