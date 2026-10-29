@@ -14,7 +14,7 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     public void sendRecoveryLink(String recipient, String token) {
-        String recoveryLink = "https://app.ignisocre.com/reset-password?token=" + token;
+        String recoveryLink = "https://app.igniscore.com.br/reset-password?token=" + token;
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -40,7 +40,7 @@ public class EmailService {
 
             helper.setTo(recipient);
             helper.setSubject("Verificação de E-mail - Igniscore");
-            helper.setFrom("Igniscore <suporteigniscore@gmail.com");
+            helper.setFrom("Igniscore <suporteigniscore@gmail.com>");
 
             String htmlContent = buildVerificationHtmlTemplate(code);
             helper.setText(htmlContent, true);
