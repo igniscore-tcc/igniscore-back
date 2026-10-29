@@ -76,9 +76,6 @@ public class User implements UserDetails {
     @JoinColumn(name = "fk_id_company")
     private Company company;
 
-    @Column(nullable = false)
-    private boolean active = false;
-
     @Column(nullable = false, name = "email_verified")
     private boolean emailVerified = false;
 
@@ -98,11 +95,13 @@ public class User implements UserDetails {
         this.id = id;
     }
 
-    public User(String name, String email, String password, UserRole role, Company company) {
+    public User(String name, String email, String password, UserRole role, Boolean emailVerified, Boolean firstLogin, Company company) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.emailVerified = emailVerified;
+        this.firstLogin = firstLogin;
         this.company = company;
     }
 
@@ -140,10 +139,6 @@ public class User implements UserDetails {
 
     public Company getCompany() { return company; }
 
-    public boolean isActive() {
-        return active;
-    }
-
     public boolean isEmailVerified() {
         return emailVerified;
     }
@@ -163,10 +158,6 @@ public class User implements UserDetails {
     public void setRole(UserRole role) { this.role = role; }
 
     public void setCompany(Company company) { this.company = company; }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
